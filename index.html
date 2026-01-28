@@ -875,11 +875,16 @@
     }
 
     .footer-actions {
-      margin-top: 1rem;
+      margin-top: 0.75rem;
       display: flex;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.75rem;
     }
 
     @media (max-width: 640px) {
@@ -1152,25 +1157,28 @@
 
     <footer>
       <p>
-        Screener: <a href="https://orionterminal.com" target="_blank" rel="noopener">Orion Terminal</a> &bull;
-        Charts: <a href="https://www.binance.com" target="_blank" rel="noopener">Binance API</a> +
-        <a href="https://tradingview.github.io/lightweight-charts/" target="_blank" rel="noopener">Lightweight Charts</a> (Apache 2.0)
+        Data: <a href="https://orionterminal.com" target="_blank" rel="noopener">Orion Terminal</a> &bull;
+        <a href="https://www.binance.com" target="_blank" rel="noopener">Binance</a> &bull;
+        <a href="https://tradingview.github.io/lightweight-charts/" target="_blank" rel="noopener">Lightweight Charts</a> &bull;
+        <a href="https://github.com/mars-llm/orionterminal-spartan" target="_blank" rel="noopener">GitHub</a>
       </p>
-      <p style="margin-top: 0.5rem;">
-        <a href="mailto:marsmensch@pm.me">marsmensch@pm.me</a> &bull;
-        CORS via <a href="https://codetabs.com" target="_blank" rel="noopener">codetabs.com</a>
-      </p>
-      <p style="margin-top: 0.5rem;">
-        Data by <a href="https://orionterminal.com" target="_blank" rel="noopener">Orion Terminal</a>. Please use responsibly.
+      <p style="margin-top: 0.375rem;">
+        <a href="mailto:marsmensch@pm.me">marsmensch@pm.me</a> · Please use responsibly.
       </p>
       <div class="footer-actions">
-        <button class="btn-secondary" id="downloadFooterBtn">
+        <button class="btn-secondary" id="installPwaBtn" style="display: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>Install App</span>
+        </button>
+        <button class="btn-secondary btn-small" id="downloadFooterBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" x2="12" y1="15" y2="3"/>
           </svg>
-          <span>Download HTML</span>
+          <span>Download</span>
         </button>
       </div>
     </footer>
@@ -2817,6 +2825,33 @@
           console.warn('Service worker registration failed:', err);
         });
       }
+
+      // PWA Install prompt
+      var deferredPrompt = null;
+      var installBtn = document.getElementById('installPwaBtn');
+
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'inline-flex';
+      });
+
+      installBtn.addEventListener('click', function() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('App installed!');
+          }
+          deferredPrompt = null;
+          installBtn.style.display = 'none';
+        });
+      });
+
+      window.addEventListener('appinstalled', function() {
+        installBtn.style.display = 'none';
+        deferredPrompt = null;
+      });
     });
   </script>
 </body>
