@@ -192,12 +192,53 @@
       color: white;
     }
 
+    .profile-wrapper {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+    }
+
     .profile-btn .preset-badge {
       background: rgba(255,255,255,0.2);
       padding: 0.125rem 0.375rem;
       border-radius: 0.25rem;
       font-size: 0.625rem;
-      margin-left: 0.375rem;
+    }
+
+    .profile-btn .custom-badge {
+      background: rgba(6, 182, 212, 0.3);
+    }
+
+    .profile-delete-btn {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: var(--red);
+      color: white;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .profile-wrapper:hover .profile-delete-btn,
+    .profile-delete-btn:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      .profile-delete-btn {
+        opacity: 1;
+      }
     }
 
     .filter-grid {
@@ -1119,6 +1160,12 @@
 
       <div class="filters-footer">
         <button class="reset-link" id="resetBtn">Reset to defaults</button>
+        <button class="btn-secondary btn-small" id="savePresetBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>Save Preset</span>
+        </button>
       </div>
     </div>
 
@@ -1471,6 +1518,74 @@
     let activeProfileId = 'default';
     let picks = [];
     let isLoading = false;
+    let customProfiles = [];
+    const MAX_CUSTOM_PROFILES = 3;
+
+    // Load custom profiles from localStorage
+    function loadCustomProfiles() {
+      try {
+        var saved = localStorage.getItem('orion-screener-custom-profiles');
+        if (saved) {
+          customProfiles = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn('Failed to load custom profiles:', e);
+        customProfiles = [];
+      }
+    }
+
+    // Save custom profiles to localStorage
+    function saveCustomProfiles() {
+      try {
+        localStorage.setItem('orion-screener-custom-profiles', JSON.stringify(customProfiles));
+      } catch (e) {
+        console.warn('Failed to save custom profiles:', e);
+      }
+    }
+
+    // Get all profiles (builtin + custom)
+    function getAllProfiles() {
+      return BUILTIN_PROFILES.concat(customProfiles);
+    }
+
+    // Create a new custom profile from current filters
+    function createCustomProfile(name) {
+      if (customProfiles.length >= MAX_CUSTOM_PROFILES) {
+        showToast('Max ' + MAX_CUSTOM_PROFILES + ' custom presets');
+        return false;
+      }
+      if (!name || !name.trim()) {
+        showToast('Name required');
+        return false;
+      }
+      var id = 'custom-' + Date.now();
+      var profile = {
+        id: id,
+        name: name.trim().substring(0, 20),
+        filters: JSON.parse(JSON.stringify(currentFilters)),
+        isBuiltin: false,
+      };
+      customProfiles.push(profile);
+      saveCustomProfiles();
+      activeProfileId = id;
+      renderProfiles();
+      showToast('Preset saved');
+      return true;
+    }
+
+    // Delete a custom profile
+    function deleteCustomProfile(id) {
+      customProfiles = customProfiles.filter(function(p) { return p.id !== id; });
+      saveCustomProfiles();
+      if (activeProfileId === id) {
+        activeProfileId = 'default';
+        currentFilters = JSON.parse(JSON.stringify(DEFAULT_FILTERS));
+        updateFilterInputs();
+        updateEmptyStateHint();
+      }
+      renderProfiles();
+      showToast('Preset deleted');
+    }
 
     // Chart preview settings
     const CHART_SIZES = {
@@ -1888,7 +2003,10 @@
       const container = document.getElementById('profiles');
       container.textContent = '';
 
-      BUILTIN_PROFILES.forEach(function(profile) {
+      getAllProfiles().forEach(function(profile) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'profile-wrapper';
+
         const btn = document.createElement('button');
         btn.className = 'profile-btn' + (profile.id === activeProfileId ? ' active' : '');
         btn.textContent = profile.name;
@@ -1898,14 +2016,42 @@
           badge.className = 'preset-badge';
           badge.textContent = 'PRESET';
           btn.appendChild(badge);
+        } else {
+          const badge = document.createElement('span');
+          badge.className = 'preset-badge custom-badge';
+          badge.textContent = 'CUSTOM';
+          btn.appendChild(badge);
         }
 
         btn.addEventListener('click', function() {
           selectProfile(profile.id);
         });
 
-        container.appendChild(btn);
+        wrapper.appendChild(btn);
+
+        // Add delete button for custom profiles
+        if (!profile.isBuiltin) {
+          const delBtn = document.createElement('button');
+          delBtn.className = 'profile-delete-btn';
+          delBtn.textContent = '\u00D7';
+          delBtn.title = 'Delete preset';
+          delBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (confirm('Delete "' + profile.name + '"?')) {
+              deleteCustomProfile(profile.id);
+            }
+          });
+          wrapper.appendChild(delBtn);
+        }
+
+        container.appendChild(wrapper);
       });
+
+      // Update save button state
+      var saveBtn = document.getElementById('savePresetBtn');
+      if (saveBtn) {
+        saveBtn.disabled = customProfiles.length >= MAX_CUSTOM_PROFILES;
+      }
     }
 
     function renderPicks() {
@@ -2168,7 +2314,7 @@
     }
 
     function selectProfile(profileId) {
-      const profile = BUILTIN_PROFILES.find(function(p) {
+      const profile = getAllProfiles().find(function(p) {
         return p.id === profileId;
       });
       if (!profile) return;
@@ -2202,7 +2348,7 @@
       };
 
       // Check if current filters match any profile
-      var matchingProfile = BUILTIN_PROFILES.find(function(p) {
+      var matchingProfile = getAllProfiles().find(function(p) {
         var f = p.filters;
         return (
           f.minVolume === currentFilters.minVolume &&
@@ -2708,6 +2854,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Load saved settings
       loadSettings();
+      loadCustomProfiles();
       updateChartPreviewSize();
 
       renderProfiles();
@@ -2722,6 +2869,12 @@
       document.getElementById('downloadFooterBtn').addEventListener('click', downloadStandaloneHtml);
       document.getElementById('aboutBtn').addEventListener('click', openAboutModal);
       document.getElementById('resetBtn').addEventListener('click', resetFilters);
+      document.getElementById('savePresetBtn').addEventListener('click', function() {
+        var name = prompt('Preset name (max 20 chars):');
+        if (name !== null) {
+          createCustomProfile(name);
+        }
+      });
 
       // Filter input listeners
       ['minVolume', 'maxVolume', 'minVolatility', 'minTicks', 'maxResults', 'excludeSymbols'].forEach(function(id) {
