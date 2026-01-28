@@ -2053,42 +2053,23 @@
             }
           });
 
-          // Chart button click (works on all devices)
-          function handleChartBtnClick(e) {
+          // Chart button click
+          chartBtnEl.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             if (chartSettings.enabled) {
               showChartPreview(sym, cardEl);
             }
-          }
-          chartBtnEl.addEventListener('click', handleChartBtnClick);
-          chartBtnEl.addEventListener('touchend', handleChartBtnClick);
-
-          // Tap card to show chart (touch devices)
-          function handleCardTap(e) {
-            if (!chartSettings.enabled) return;
-            // Don't trigger if tapping action buttons or links
-            var target = e.target;
-            if (target.closest('.action-btn') || target.closest('a') || target.closest('.actions')) {
-              return;
-            }
-            e.preventDefault();
-            showChartPreview(sym, cardEl);
-          }
-
-          // Use touchend for reliable mobile tap detection
-          cardEl.addEventListener('touchend', function(e) {
-            // Only handle single touch
-            if (e.changedTouches && e.changedTouches.length === 1) {
-              handleCardTap(e);
-            }
           });
 
-          // Fallback click for devices that don't fire touchend properly
+          // Mobile: tap card to show chart (click only, not touchend to avoid scroll issues)
           cardEl.addEventListener('click', function(e) {
-            if (isTouchDevice()) {
-              handleCardTap(e);
+            if (!isTouchDevice() || !chartSettings.enabled) return;
+            // Don't trigger if tapping buttons or links
+            if (e.target.closest('.action-btn') || e.target.closest('a')) {
+              return;
             }
+            showChartPreview(sym, cardEl);
           });
         })(pick.symbol, card, chartBtn);
 
