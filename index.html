@@ -977,10 +977,30 @@
       .pick-card {
         padding: 0.75rem;
         gap: 0.5rem;
+        cursor: pointer;
+        -webkit-tap-highlight-color: rgba(6, 182, 212, 0.2);
+        touch-action: manipulation;
+      }
+
+      .pick-card:active {
+        background: var(--bg-secondary);
       }
 
       .symbol-info .metrics {
         font-size: 0.7rem;
+      }
+
+      /* Ensure actions don't block card taps */
+      .actions {
+        pointer-events: auto;
+      }
+
+      .action-btn {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   </style>
@@ -1755,7 +1775,14 @@
     // =============================================================================
 
     function isMobileDevice() {
-      return window.innerWidth <= 640 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      return window.matchMedia('(max-width: 640px)').matches ||
+             window.matchMedia('(pointer: coarse)').matches ||
+             'ontouchstart' in window ||
+             navigator.maxTouchPoints > 0;
+    }
+
+    function isTouchDevice() {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     }
 
     function formatVolume(volume) {
@@ -2006,31 +2033,51 @@
         (function(sym, cardEl, chartBtnEl) {
           // Desktop: hover to show
           cardEl.addEventListener('mouseenter', function() {
-            if (!isMobileDevice()) {
+            if (!isTouchDevice()) {
               handleCardMouseEnter(sym, cardEl);
             }
           });
           cardEl.addEventListener('mouseleave', function() {
-            if (!isMobileDevice()) {
+            if (!isTouchDevice()) {
               handleCardMouseLeave();
             }
           });
 
-          // Mobile: tap chart button to show
-          chartBtnEl.addEventListener('click', function(e) {
+          // Chart button click (works on all devices)
+          function handleChartBtnClick(e) {
+            e.preventDefault();
             e.stopPropagation();
             if (chartSettings.enabled) {
               showChartPreview(sym, cardEl);
             }
+          }
+          chartBtnEl.addEventListener('click', handleChartBtnClick);
+          chartBtnEl.addEventListener('touchend', handleChartBtnClick);
+
+          // Tap card to show chart (touch devices)
+          function handleCardTap(e) {
+            if (!chartSettings.enabled) return;
+            // Don't trigger if tapping action buttons or links
+            var target = e.target;
+            if (target.closest('.action-btn') || target.closest('a') || target.closest('.actions')) {
+              return;
+            }
+            e.preventDefault();
+            showChartPreview(sym, cardEl);
+          }
+
+          // Use touchend for reliable mobile tap detection
+          cardEl.addEventListener('touchend', function(e) {
+            // Only handle single touch
+            if (e.changedTouches && e.changedTouches.length === 1) {
+              handleCardTap(e);
+            }
           });
 
-          // Also allow tapping the card itself on mobile
+          // Fallback click for devices that don't fire touchend properly
           cardEl.addEventListener('click', function(e) {
-            if (isMobileDevice() && chartSettings.enabled) {
-              // Don't trigger if clicking action buttons
-              if (!e.target.closest('.action-btn') && !e.target.closest('a')) {
-                showChartPreview(sym, cardEl);
-              }
+            if (isTouchDevice()) {
+              handleCardTap(e);
             }
           });
         })(pick.symbol, card, chartBtn);
