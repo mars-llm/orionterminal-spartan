@@ -2041,6 +2041,22 @@
 
         // Chart preview handlers
         (function(sym, cardEl, chartBtnEl) {
+          var touchStartY = 0;
+          var didScroll = false;
+
+          // Track touch to detect scrolling vs tapping
+          cardEl.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            didScroll = false;
+          }, { passive: true });
+
+          cardEl.addEventListener('touchmove', function(e) {
+            var moveY = Math.abs(e.touches[0].clientY - touchStartY);
+            if (moveY > 10) {
+              didScroll = true;
+            }
+          }, { passive: true });
+
           // Desktop: hover to show
           cardEl.addEventListener('mouseenter', function() {
             if (!isTouchDevice()) {
@@ -2057,14 +2073,16 @@
           chartBtnEl.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            if (didScroll) return;
             if (chartSettings.enabled) {
               showChartPreview(sym, cardEl);
             }
           });
 
-          // Mobile: tap card to show chart (click only, not touchend to avoid scroll issues)
+          // Mobile: tap card to show chart
           cardEl.addEventListener('click', function(e) {
             if (!isTouchDevice() || !chartSettings.enabled) return;
+            if (didScroll) return; // Ignore if user was scrolling
             // Don't trigger if tapping buttons or links
             if (e.target.closest('.action-btn') || e.target.closest('a')) {
               return;
