@@ -2,9 +2,9 @@
 
 A single-file market scanner for Binance Futures. Finds high-activity setups and shows instant chart previews with S/R levels.
 
-![Spartan Orion Screener](doc/screenshot.png)
+![Spartan Orion Screener](docs/screenshot.png)
 
-**[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/doc/index.html)
+**[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/docs/index.html)
 
 ---
 
@@ -12,8 +12,8 @@ A single-file market scanner for Binance Futures. Finds high-activity setups and
 
 <table>
   <tr>
-    <td><img src="doc/screenshot.png" alt="Desktop dark mode overview" width="460"></td>
-    <td><img src="doc/screenshot-light.png" alt="Desktop light mode expanded chart" width="460"></td>
+    <td><img src="docs/screenshot.png" alt="Desktop dark mode overview" width="460"></td>
+    <td><img src="docs/screenshot-light.png" alt="Desktop light mode expanded chart" width="460"></td>
   </tr>
 </table>
 
