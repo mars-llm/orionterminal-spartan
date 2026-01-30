@@ -3,6 +3,8 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './favicon-16.png',
+  './favicon-32.png',
   './icon-192.png',
   './icon-512.png'
 ];

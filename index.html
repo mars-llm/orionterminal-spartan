@@ -4,9 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
-  <meta name="description" content="Free market scanner for Binance Futures. Find high-volume, high-volatility trading setups with instant chart previews and auto S/R levels. No signup required.">
+  <meta name="description" content="Binance Futures screener for high-activity setups with instant chart previews, auto S/R levels, and relative performance vs BTC. Free, no signup required.">
   <meta name="keywords" content="binance futures, crypto screener, market scanner, trading tools, cryptocurrency, technical analysis, support resistance, volatility scanner">
   <meta name="author" content="marsmensch">
+  <meta name="robots" content="index, follow">
+  <meta name="application-name" content="Spartan Orion Screener">
+  <meta name="apple-mobile-web-app-title" content="Spartan Orion Screener">
   <link rel="canonical" href="https://mars-llm.github.io/orionterminal-spartan/">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -14,16 +17,36 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://mars-llm.github.io/orionterminal-spartan/">
+  <meta property="og:site_name" content="Spartan Orion Screener">
+  <meta property="og:locale" content="en_US">
   <meta property="og:title" content="Spartan Orion Screener — Free Binance Futures Scanner">
-  <meta property="og:description" content="Scan Binance Futures for high-activity setups. Instant chart previews with S/R levels. No signup, runs in browser.">
-  <meta property="og:image" content="https://mars-llm.github.io/orionterminal-spartan/screenshot.png">
+  <meta property="og:description" content="Scan Binance Futures for high-activity setups with instant previews, auto S/R, and BTC-relative performance. No signup, runs in browser.">
+  <meta property="og:image" content="https://mars-llm.github.io/orionterminal-spartan/social-card.png">
+  <meta property="og:image:alt" content="Spartan Orion Screener dashboard showing market scans and chart previews">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="750">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://mars-llm.github.io/orionterminal-spartan/">
   <meta name="twitter:title" content="Spartan Orion Screener — Free Binance Futures Scanner">
-  <meta name="twitter:description" content="Scan Binance Futures for high-activity setups. Instant chart previews with S/R levels. No signup, runs in browser.">
-  <meta name="twitter:image" content="https://mars-llm.github.io/orionterminal-spartan/screenshot.png">
+  <meta name="twitter:description" content="Scan Binance Futures for high-activity setups with instant previews, auto S/R, and BTC-relative performance. No signup, runs in browser.">
+  <meta name="twitter:image" content="https://mars-llm.github.io/orionterminal-spartan/social-card.png">
+  <meta name="twitter:image:alt" content="Spartan Orion Screener dashboard showing market scans and chart previews">
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Spartan Orion Screener",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "url": "https://mars-llm.github.io/orionterminal-spartan/",
+      "description": "Binance Futures screener for high-activity setups with instant chart previews, auto S/R levels, and BTC-relative performance.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "creator": { "@type": "Person", "name": "marsmensch" }
+    }
+  </script>
 
   <!-- Lightweight Charts for custom charting -->
   <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"
@@ -1776,6 +1799,63 @@
       letter-spacing: 0.03em;
     }
 
+    .seo-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      background: var(--glass-bg);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+      animation: riseIn 0.7s ease both;
+      animation-delay: 0.06s;
+    }
+
+    .seo-section h2 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+      color: var(--text-primary);
+    }
+
+    .seo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .seo-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 0.85rem;
+      padding: 0.95rem;
+    }
+
+    .seo-card h3 {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+      color: var(--text-primary);
+    }
+
+    .seo-card p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .seo-card ul {
+      margin-top: 0.4rem;
+      padding-left: 1rem;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      line-height: 1.4;
+    }
+
     footer {
       text-align: center;
       margin-top: 3rem;
@@ -2289,10 +2369,11 @@
             </div>
             <div>
               <h4>Export & Share</h4>
-              <p>Copy a watchlist or take the screener offline with one click.</p>
+              <p>Copy a watchlist or download the HTML for local use.</p>
               <ul>
                 <li>Copy Watchlist formats for TradingView.</li>
                 <li>Download HTML or install the PWA.</li>
+                <li>Live data still needs an internet connection.</li>
               </ul>
             </div>
           </div>
@@ -2350,6 +2431,36 @@
       </div>
       <div class="results-list" id="resultsList"></div>
     </div>
+
+    <section class="seo-section" aria-label="About Spartan Orion Screener">
+      <h2>Built for Fast Futures Scans</h2>
+      <div class="seo-grid">
+        <div class="seo-card">
+          <h3>High-Activity Scanner</h3>
+          <p>Spartan Orion Screener surfaces Binance Futures pairs with high volume, volatility, and trade activity so you can spot momentum quickly.</p>
+          <ul>
+            <li>Instant previews + auto S/R levels.</li>
+            <li>Preset filters for different styles.</li>
+          </ul>
+        </div>
+        <div class="seo-card">
+          <h3>BTC-Relative Signal</h3>
+          <p>Each asset includes a BTC Δ metric: the asset’s 24h % change minus BTC’s 24h % change.</p>
+          <ul>
+            <li>Positive = outperformed BTC.</li>
+            <li>Negative = underperformed BTC.</li>
+          </ul>
+        </div>
+        <div class="seo-card">
+          <h3>Runs in Browser</h3>
+          <p>Use it on GitHub Pages or download the HTML for local use. Live data requires an internet connection.</p>
+          <ul>
+            <li>No signup or API keys.</li>
+            <li>Optional proxy fallback for CORS.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
     <footer>
       <p>
@@ -2857,10 +2968,11 @@
       },
     ];
 
-    let currentFilters = { ...DEFAULT_FILTERS };
+    let currentFilters = JSON.parse(JSON.stringify(DEFAULT_FILTERS));
     let activeProfileId = 'default';
     let picks = [];
     let isLoading = false;
+    // Stores BTC 24h % change for BTC-relative comparisons (BTC Δ).
     let latestBtcChange24h = null;
     let customProfiles = [];
     const MAX_CUSTOM_PROFILES = 3;

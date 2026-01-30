@@ -1,7 +1,7 @@
 {
   "name": "Spartan Orion Screener",
   "short_name": "Spartan Orion",
-  "description": "Single-file market screener for high-activity Binance Futures setups.",
+  "description": "Single-file Binance Futures screener with instant previews, auto S/R, and BTC-relative performance.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

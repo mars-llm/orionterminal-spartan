@@ -21,7 +21,9 @@ A single-file market scanner for Binance Futures. Finds high-activity setups and
 
 - **One-click scan** — no signup, no API keys, no install
 - **Instant chart previews** — hover any row to see a 1m chart
-- **Auto S/R levels** — previous 15m and 1h candle high/low
+- **Expanded chart view** — VolUSD histogram, MA, and S/R overlays
+- **BTC Δ signal** — asset 24h % minus BTC 24h %
+- **Auto S/R levels** — 15m, 1h, 4h, and 1d candle high/low
 - **Filter presets** — Default, High Volume Majors, Low Cap Gems, Scalping
 - **PWA support** — install as an app on desktop or mobile
 - **Downloadable HTML** — run locally, with live data when connected
@@ -32,7 +34,7 @@ A single-file market scanner for Binance Futures. Finds high-activity setups and
 2. Click **Scan Market**
 3. Hover results to preview charts
 
-No server required.
+No server required. Live data still needs an internet connection.
 
 ## Filter Presets
 
