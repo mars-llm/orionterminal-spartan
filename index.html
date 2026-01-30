@@ -2800,6 +2800,7 @@
     const DIRECT_API_BLOCK_TTL = 12 * 60 * 60 * 1000;
     const SCAN_RETRY_BASE_DELAY_MS = 1500;
     const SCAN_RETRY_MAX_DELAY_MS = 10000;
+    const SCAN_TIMEOUT_MS = 15000;
 
     function isGithubPages() {
       return window.location.hostname.endsWith('github.io');
@@ -3916,12 +3917,21 @@
 
     async function fetchScreenerWithRetry() {
       var attempt = 0;
+      var deadline = Date.now() + SCAN_TIMEOUT_MS;
       while (true) {
+        if (Date.now() >= deadline) {
+          throw new Error('Scan timed out. Please retry.');
+        }
         try {
           return await fetchScreener();
         } catch (err) {
           attempt += 1;
           var delay = Math.min(SCAN_RETRY_BASE_DELAY_MS * Math.pow(1.5, attempt - 1), SCAN_RETRY_MAX_DELAY_MS);
+          var remaining = deadline - Date.now();
+          if (remaining <= 0) {
+            throw new Error('Scan timed out. Please retry.');
+          }
+          delay = Math.min(delay, remaining);
           console.warn('Fetch failed, retrying in ' + Math.round(delay) + 'ms');
           await sleep(delay);
         }
@@ -3949,6 +3959,9 @@
         picks = await fetchScreenerWithRetry();
         renderPicks();
         showToast('Found ' + picks.length + ' picks');
+      } catch (err) {
+        console.error('Scan failed:', err);
+        showToast(err.message || 'Scan failed', 'error');
       } finally {
         isLoading = false;
         btn.disabled = false;
