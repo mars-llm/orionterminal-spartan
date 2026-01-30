@@ -2903,6 +2903,10 @@
     const THEME_STORAGE_KEY = 'orion-screener-theme';
     const CHART_STYLE_STORAGE_KEY = 'orion-screener-chart-style';
 
+    function isGithubPages() {
+      return window.location.hostname.endsWith('github.io');
+    }
+
     // Try direct first (works if served from localhost), then fall back to proxies
     function getApiUrl(proxyIndex) {
       if (proxyIndex === -1) return ORION_API;
@@ -3069,7 +3073,7 @@
       showSR1h: false,
       showSR4h: false,
       showSR1d: false,
-      allowProxyFallback: window.location.protocol === 'file:',
+      allowProxyFallback: true,
     };
 
     const VOLUSD_SETTINGS = {
@@ -3217,6 +3221,10 @@
         if (saved) {
           var parsed = JSON.parse(saved);
           chartSettings = { ...chartSettings, ...parsed };
+        }
+        if (isGithubPages() && !chartSettings.allowProxyFallback) {
+          chartSettings.allowProxyFallback = true;
+          saveSettings();
         }
       } catch (e) {
         console.warn('Failed to load settings:', e);
