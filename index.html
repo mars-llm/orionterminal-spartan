@@ -8,6 +8,8 @@
   <meta name="keywords" content="binance futures, crypto screener, market scanner, trading tools, cryptocurrency, technical analysis, support resistance, volatility scanner">
   <meta name="author" content="marsmensch">
   <link rel="canonical" href="https://mars-llm.github.io/orionterminal-spartan/">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
@@ -28,68 +30,104 @@
     integrity="sha384-rcCMiCptH4kTlEbg0euOTUKWe72TESbrjElatnG+9BfbmUIV268UK/Pro5biJdGm"
     crossorigin="anonymous"></script>
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b101a">
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+
     :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-tertiary: #334155;
-      --border: #475569;
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --cyan: #06b6d4;
-      --cyan-hover: #22d3ee;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #eab308;
-      --chart-bg: #131722;
-      --chart-text: #94a3b8;
-      --chart-grid: rgba(71, 85, 105, 0.2);
-      --chart-border: rgba(71, 85, 105, 0.5);
-      --candle-up: #22c55e;
-      --candle-down: #ef4444;
+      --font-display: 'Orbitron', 'Exo 2', sans-serif;
+      --font-body: 'Exo 2', 'Segoe UI', sans-serif;
+      --bg-primary: #0b101a;
+      --bg-secondary: #101828;
+      --bg-tertiary: #182338;
+      --bg-elevated: #1f2c45;
+      --border: rgba(148, 163, 184, 0.18);
+      --border-strong: rgba(148, 163, 184, 0.35);
+      --text-primary: #f8fafc;
+      --text-secondary: #c7d2e5;
+      --text-muted: #9aa7be;
+      --accent: #f5b041;
+      --accent-hover: #ffd07a;
+      --accent-2: #2dd4bf;
+      --accent-2-hover: #5eead4;
+      --cyan: var(--accent);
+      --cyan-hover: var(--accent-hover);
+      --green: #34d399;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --chart-bg: #0d1422;
+      --chart-text: #9fb0c9;
+      --chart-grid: rgba(148, 163, 184, 0.2);
+      --chart-border: rgba(148, 163, 184, 0.35);
+      --candle-up: #34d399;
+      --candle-down: #f87171;
       --sr-15m-color: #f59e0b;
-      --sr-1h-color: #8b5cf6;
-      --sr-4h-color: #38bdf8;
-      --sr-1d-color: #ec4899;
-      --volusd-bar-up: #f1f5f9;
-      --volusd-bar-down: #f1f5f9;
-      --volusd-ma-up: #ef4444;
-      --volusd-ma-down: #ef4444;
-      --volusd-extreme: #ef4444;
+      --sr-1h-color: #22d3ee;
+      --sr-4h-color: #60a5fa;
+      --sr-1d-color: #fb7185;
+      --volusd-bar-up: #9aa7be;
+      --volusd-bar-down: #6b7a94;
+      --volusd-ma-up: #2dd4bf;
+      --volusd-ma-down: #2dd4bf;
+      --volusd-extreme: #f5b041;
+      --shadow-soft: 0 10px 30px rgba(2, 6, 23, 0.45);
+      --shadow-strong: 0 25px 60px rgba(2, 6, 23, 0.55);
+      --glow-accent: 0 0 25px rgba(245, 176, 65, 0.35);
+      --glow-cool: 0 0 20px rgba(45, 212, 191, 0.25);
+      --glass-bg: rgba(15, 23, 42, 0.72);
+      --glass-border: rgba(148, 163, 184, 0.25);
+      --surface-muted: rgba(15, 23, 42, 0.55);
+      --surface-card: rgba(15, 23, 42, 0.6);
+      --surface-raised: rgba(15, 23, 42, 0.7);
+      --surface-input: rgba(15, 23, 42, 0.65);
       color-scheme: dark;
     }
 
     :root[data-theme="light"] {
-      --bg-primary: #f8fafc;
+      --bg-primary: #f6f8fc;
       --bg-secondary: #ffffff;
-      --bg-tertiary: #e2e8f0;
-      --border: #cbd5e1;
+      --bg-tertiary: #eef2f7;
+      --bg-elevated: #e6ebf4;
+      --border: rgba(148, 163, 184, 0.4);
+      --border-strong: rgba(148, 163, 184, 0.6);
       --text-primary: #0f172a;
       --text-secondary: #334155;
-      --text-muted: #64748b;
-      --cyan: #0891b2;
-      --cyan-hover: #0ea5b7;
+      --text-muted: #475569;
+      --accent: #b45309;
+      --accent-hover: #c0560a;
+      --accent-2: #0e7490;
+      --accent-2-hover: #0f7a99;
+      --cyan: var(--accent);
+      --cyan-hover: var(--accent-hover);
       --green: #16a34a;
       --red: #dc2626;
       --yellow: #ca8a04;
       --chart-bg: #ffffff;
-      --chart-text: #475569;
+      --chart-text: #334155;
       --chart-grid: rgba(148, 163, 184, 0.4);
-      --chart-border: rgba(148, 163, 184, 0.6);
+      --chart-border: rgba(148, 163, 184, 0.5);
       --candle-up: #16a34a;
       --candle-down: #dc2626;
       --sr-15m-color: #d97706;
-      --sr-1h-color: #7c3aed;
-      --sr-4h-color: #0284c7;
-      --sr-1d-color: #db2777;
-      --volusd-bar-up: #0f172a;
-      --volusd-bar-down: #0f172a;
-      --volusd-ma-up: #ef4444;
-      --volusd-ma-down: #ef4444;
-      --volusd-extreme: #ef4444;
+      --sr-1h-color: #0891b2;
+      --sr-4h-color: #2563eb;
+      --sr-1d-color: #e11d48;
+      --volusd-bar-up: #334155;
+      --volusd-bar-down: #475569;
+      --volusd-ma-up: #0e7490;
+      --volusd-ma-down: #0e7490;
+      --volusd-extreme: #b45309;
+      --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.12);
+      --shadow-strong: 0 20px 45px rgba(15, 23, 42, 0.18);
+      --glow-accent: 0 0 18px rgba(217, 119, 6, 0.2);
+      --glow-cool: 0 0 18px rgba(8, 145, 178, 0.2);
+      --glass-bg: rgba(255, 255, 255, 0.82);
+      --glass-border: rgba(148, 163, 184, 0.45);
+      --surface-muted: rgba(255, 255, 255, 0.7);
+      --surface-card: rgba(255, 255, 255, 0.85);
+      --surface-raised: rgba(255, 255, 255, 0.92);
+      --surface-input: rgba(255, 255, 255, 0.95);
       color-scheme: light;
     }
 
@@ -99,65 +137,332 @@
       padding: 0;
     }
 
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      background: var(--bg-primary);
+      font-family: var(--font-body);
+      background: radial-gradient(circle at 15% 10%, rgba(245, 176, 65, 0.16), transparent 45%),
+        radial-gradient(circle at 80% 0%, rgba(45, 212, 191, 0.14), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.12), transparent 45%),
+        linear-gradient(135deg, #0b101a 0%, #0b1220 45%, #0a111c 100%);
       color: var(--text-primary);
       min-height: 100vh;
-      padding: 2rem;
+      line-height: 1.5;
+      padding: 1.85rem 1.6rem 2.75rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.28;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: -10% 0 0;
+      background: radial-gradient(circle at 10% 20%, rgba(245, 176, 65, 0.22), transparent 55%),
+        radial-gradient(circle at 70% 10%, rgba(45, 212, 191, 0.18), transparent 50%),
+        radial-gradient(circle at 80% 75%, rgba(96, 165, 250, 0.12), transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    :root[data-theme="light"] body {
+      background: radial-gradient(circle at 15% 10%, rgba(217, 119, 6, 0.18), transparent 45%),
+        radial-gradient(circle at 80% 0%, rgba(8, 145, 178, 0.16), transparent 40%),
+        linear-gradient(135deg, #f6f8fc 0%, #eef3fb 50%, #f8fafc 100%);
+    }
+
+    :root[data-theme="light"] body::before {
+      opacity: 0.38;
+    }
+
+    :root[data-theme="light"] body::after {
+      opacity: 0.65;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1080px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
+    header.hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+      align-items: start;
+      margin-bottom: 1.2rem;
+      animation: riseIn 0.7s ease both;
     }
 
-    header h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+    .hero-left h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2vw, 2.1rem);
+      letter-spacing: 0.03em;
+      margin-bottom: 0.6rem;
     }
 
-    header p {
+    .hero-left p {
       color: var(--text-secondary);
-      font-size: 0.875rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(245, 176, 65, 0.35);
+      background: rgba(245, 176, 65, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+    }
+
+    .badge-outline {
+      background: transparent;
+      border-color: var(--glass-border);
+      color: var(--text-secondary);
+    }
+
+    .hero-live {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.15);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.6rem;
+    }
+
+    .hero-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .hero-right .hero-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .meta-pill {
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: 0.63rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+    }
+
+    .hero-card {
+      position: relative;
+      padding: 0.9rem 1.05rem;
+      border-radius: 1.1rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(140deg, rgba(245, 176, 65, 0.2), rgba(45, 212, 191, 0.12), transparent 65%);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .hero-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card-title {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+      color: var(--text-primary);
+    }
+
+    .hero-steps {
+      list-style: none;
+      display: grid;
+      gap: 0.45rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .hero-steps li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.6rem;
+      align-items: start;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .hero-step-text {
+      display: block;
+    }
+
+    .hero-steps strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .hero-steps span {
+      width: 22px;
+      height: 22px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      background: var(--surface-card);
+      border: 1px solid var(--glass-border);
+      color: var(--accent);
+      box-shadow: var(--glow-accent);
+    }
+
+    .hero-card-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 12px rgba(45, 212, 191, 0.45);
     }
 
     .controls {
       display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+      gap: 0.65rem;
+      margin-bottom: 1.1rem;
       flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+      animation: riseIn 0.7s ease both;
+      animation-delay: 0.05s;
+    }
+
+    .controls-group {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .controls-group.controls-primary {
+      flex: 1 1 auto;
+    }
+
+    .controls-group.controls-secondary {
+      justify-content: flex-end;
     }
 
     .help-panel {
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(34, 197, 94, 0.08));
-      border: 1px solid rgba(6, 182, 212, 0.35);
-      border-radius: 1rem;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
+      position: fixed;
+      inset: 0;
+      padding: 2.5rem 1.5rem;
       display: none;
-      position: relative;
-      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 12, 20, 0.6);
+      backdrop-filter: blur(6px);
+      z-index: 1800;
     }
 
     .help-panel.visible {
-      display: block;
+      display: flex;
     }
 
-    .help-panel::after {
+    :root[data-theme="light"] .help-panel {
+      background: rgba(15, 23, 42, 0.35);
+    }
+
+    .help-panel-inner {
+      width: min(980px, 94vw);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.1rem;
+      padding: 1.6rem;
+      position: relative;
+      overflow-x: hidden;
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(18px);
+      animation: riseIn 0.7s ease both;
+    }
+
+    .help-panel-inner::after {
       content: '';
       position: absolute;
       right: -60px;
       top: -60px;
-      width: 160px;
-      height: 160px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.25), transparent 60%);
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.3), transparent 65%);
       pointer-events: none;
     }
 
@@ -170,8 +475,11 @@
     }
 
     .help-header h3 {
+      font-family: var(--font-display);
       font-size: 1rem;
       font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .help-header p {
@@ -179,42 +487,112 @@
       color: var(--text-secondary);
     }
 
+    .help-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1.25rem;
+    }
+
+    .help-summary {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 0.95rem;
+      padding: 1rem;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+
+    .help-summary h4 {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+      color: var(--text-primary);
+    }
+
+    .help-summary p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .help-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+    }
+
+    .help-pill {
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      color: var(--text-muted);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .help-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .help-action-btn {
+      justify-content: center;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
     .help-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
     }
 
     .help-card {
-      background: var(--bg-secondary);
+      background: var(--surface-card);
       border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 0.85rem;
+      border-radius: 0.9rem;
+      padding: 1rem;
       display: flex;
-      gap: 0.75rem;
+      gap: 0.85rem;
       align-items: flex-start;
-      min-height: 120px;
+      min-height: 130px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
     }
 
     .help-icon {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 12px;
-      background: rgba(6, 182, 212, 0.18);
-      color: var(--cyan);
+      background: rgba(245, 176, 65, 0.18);
+      color: var(--accent);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(245, 176, 65, 0.2);
     }
 
     .help-card h4 {
-      font-size: 0.875rem;
-      margin-bottom: 0.35rem;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
     .help-card p {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: var(--text-secondary);
       line-height: 1.4;
     }
@@ -223,7 +601,7 @@
       margin-top: 0.35rem;
       padding-left: 1rem;
       color: var(--text-muted);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       line-height: 1.4;
     }
 
@@ -231,45 +609,65 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.625rem 1rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 500;
+      padding: 0.65rem 1.1rem;
+      border: 1px solid transparent;
+      border-radius: 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(245, 176, 65, 0.25);
     }
 
     .btn-primary {
-      background: var(--cyan);
-      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b101a;
+      box-shadow: var(--shadow-soft), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: var(--cyan-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-strong), var(--glow-accent);
     }
 
     .btn-primary:disabled {
       background: var(--bg-tertiary);
+      color: var(--text-muted);
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
+      background: var(--surface-card);
+      color: var(--text-secondary);
       border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
     }
 
     .btn-secondary:hover {
       background: var(--bg-secondary);
       color: var(--text-primary);
-      border-color: var(--cyan);
+      border-color: var(--accent-2);
+      box-shadow: var(--glow-cool);
     }
 
     .btn-secondary.active {
-      background: var(--cyan);
-      color: white;
-      border-color: var(--cyan);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-color: var(--accent);
+      box-shadow: var(--glow-accent);
+    }
+
+    :root[data-theme="light"] .btn-primary {
+      color: #f8fafc;
     }
 
     .btn-secondary svg {
@@ -282,11 +680,14 @@
     }
 
     .filters-panel {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      animation: riseIn 0.7s ease both;
     }
 
     .filters-header {
@@ -297,8 +698,11 @@
     }
 
     .filters-header h3 {
-      font-size: 0.875rem;
-      font-weight: 500;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
     }
 
     .close-btn {
@@ -308,10 +712,13 @@
       cursor: pointer;
       padding: 0.25rem;
       line-height: 0;
+      border-radius: 0.5rem;
+      transition: color 0.2s ease, background 0.2s ease;
     }
 
     .close-btn:hover {
       color: var(--text-primary);
+      background: rgba(148, 163, 184, 0.1);
     }
 
     .profiles {
@@ -324,23 +731,25 @@
     }
 
     .profile-btn {
-      padding: 0.375rem 0.75rem;
-      font-size: 0.75rem;
-      background: var(--bg-secondary);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.7rem;
+      background: var(--surface-card);
       color: var(--text-secondary);
       border: 1px solid var(--border);
-      border-radius: 0.375rem;
+      border-radius: 999px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .profile-btn:hover {
-      border-color: var(--cyan);
+      border-color: var(--accent-2);
       color: var(--text-primary);
     }
 
     .profile-btn.active {
-      background: var(--cyan);
-      border-color: var(--cyan);
-      color: white;
+      background: rgba(245, 176, 65, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .profile-wrapper {
@@ -350,14 +759,14 @@
     }
 
     .profile-btn .preset-badge {
-      background: var(--bg-tertiary);
-      padding: 0.125rem 0.375rem;
-      border-radius: 0.25rem;
-      font-size: 0.625rem;
+      background: rgba(148, 163, 184, 0.2);
+      padding: 0.125rem 0.4rem;
+      border-radius: 999px;
+      font-size: 0.55rem;
     }
 
     .profile-btn .custom-badge {
-      background: rgba(6, 182, 212, 0.3);
+      background: rgba(45, 212, 191, 0.25);
     }
 
     .profile-delete-btn {
@@ -400,24 +809,28 @@
 
     .filter-group label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
       margin-bottom: 0.375rem;
     }
 
     .filter-group input {
       width: 100%;
-      background: var(--bg-primary);
+      background: var(--surface-input);
       border: 1px solid var(--border);
-      border-radius: 0.375rem;
-      padding: 0.5rem 0.625rem;
+      border-radius: 0.6rem;
+      padding: 0.55rem 0.75rem;
       color: var(--text-primary);
-      font-size: 0.875rem;
+      font-size: 0.85rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .filter-group input:focus {
       outline: none;
-      border-color: var(--cyan);
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
     }
 
     .filter-group input::placeholder {
@@ -441,34 +854,43 @@
     }
 
     .reset-link {
-      color: var(--cyan);
+      color: var(--accent-2);
       font-size: 0.75rem;
       background: none;
       border: none;
       cursor: pointer;
+      padding: 0;
+      border-radius: 0;
     }
 
     .reset-link:hover {
-      color: var(--cyan-hover);
+      color: var(--accent-2-hover);
     }
 
     .error-box {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 0.5rem;
-      color: #fca5a5;
-      font-size: 0.875rem;
+      padding: 0.85rem 1rem;
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      border-radius: 0.85rem;
+      color: #fecaca;
+      font-size: 0.85rem;
       margin-bottom: 1rem;
+      box-shadow: 0 10px 30px rgba(248, 113, 113, 0.15);
     }
 
     .empty-state {
       text-align: center;
-      padding: 3rem 1rem;
+      padding: 3rem 1.5rem;
       color: var(--text-muted);
+      border-radius: 1.1rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      animation: riseIn 0.7s ease both;
     }
 
     .empty-state p {
@@ -484,29 +906,43 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
-      font-size: 0.75rem;
+      margin-bottom: 0.9rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.6rem 0.9rem;
+      border-radius: 0.85rem;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
     }
 
     .results-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.65rem;
+    }
+
+    #resultsContainer {
+      animation: riseIn 0.7s ease both;
     }
 
     .pick-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.875rem 1rem;
-      background: var(--bg-secondary);
-      border-radius: 0.5rem;
-      transition: background 0.2s;
+      padding: 1rem 1.1rem;
+      background: var(--surface-raised);
+      border-radius: 0.9rem;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      box-shadow: var(--shadow-soft);
     }
 
     .pick-card:hover {
-      background: var(--bg-tertiary);
+      border-color: rgba(45, 212, 191, 0.4);
+      box-shadow: var(--shadow-strong), var(--glow-cool);
+      transform: translateY(-2px);
     }
 
     .pick-left {
@@ -521,11 +957,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--bg-tertiary);
-      border-radius: 50%;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text-secondary);
+      background: rgba(245, 176, 65, 0.18);
+      border-radius: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      color: var(--accent);
+      border: 1px solid rgba(245, 176, 65, 0.4);
     }
 
     .symbol-info .symbol-row {
@@ -585,6 +1023,41 @@
       color: var(--red);
     }
 
+    .price-info .change-relative {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+      margin-top: 0.1rem;
+      letter-spacing: 0.02em;
+      opacity: 0.85;
+    }
+
+    .price-info .change-relative.positive {
+      color: var(--green);
+    }
+
+    .price-info .change-relative.negative {
+      color: var(--red);
+    }
+
+    .price-info .change-relative.disabled {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .price-info .change-relative.neutral {
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    .change-relative-icon {
+      width: 12px;
+      height: 12px;
+      stroke-width: 2;
+    }
+
     .actions {
       display: flex;
       gap: 0.5rem;
@@ -600,15 +1073,16 @@
       position: fixed;
       width: 320px;
       height: 220px;
-      background: var(--bg-secondary);
+      background: var(--surface-raised);
       border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border-radius: 0.85rem;
+      box-shadow: var(--shadow-strong);
       z-index: 1000;
       overflow: hidden;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.15s ease;
+      backdrop-filter: blur(18px);
     }
 
     .chart-preview.visible {
@@ -625,7 +1099,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.5rem 0.75rem;
-      background: var(--bg-tertiary);
+      background: var(--surface-card);
       border-bottom: 1px solid var(--border);
     }
 
@@ -658,7 +1132,7 @@
       height: 28px;
       border-radius: 0.45rem;
       border: 1px solid var(--border);
-      background: var(--bg-secondary);
+      background: var(--surface-card);
       color: var(--text-secondary);
       display: inline-flex;
       align-items: center;
@@ -669,19 +1143,29 @@
 
     .chart-preview-link:hover {
       color: var(--text-primary);
-      border-color: var(--cyan);
-      background: var(--bg-tertiary);
+      border-color: var(--accent-2);
+      background: var(--bg-secondary);
     }
 
     .chart-preview-link-icon {
       width: 16px;
       height: 16px;
       display: block;
+      color: inherit;
     }
 
-    :root:not([data-theme="light"]) .chart-preview-link[data-brand="tradingview"] .chart-preview-link-icon {
-      filter: invert(1) brightness(1.15);
+    .chart-preview-link-icon path,
+    .chart-preview-link-icon line,
+    .chart-preview-link-icon polyline,
+    .chart-preview-link-icon polygon {
+      stroke: currentColor;
     }
+
+    .chart-preview-link-icon rect {
+      fill: currentColor;
+      opacity: 0.18;
+    }
+
 
     .chart-preview.maximized .chart-preview-links {
       display: inline-flex;
@@ -689,7 +1173,7 @@
 
     .chart-preview-timeframe-select {
       display: none;
-      background: var(--bg-primary);
+      background: var(--surface-input);
       border: 1px solid var(--border);
       border-radius: 0.375rem;
       padding: 0.2rem 0.4rem;
@@ -715,10 +1199,33 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.35rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .chart-preview:not(.maximized) .chart-preview-maximize {
+      color: var(--accent-2);
     }
 
     .chart-preview-maximize:hover {
       color: var(--text-primary);
+    }
+
+    .chart-preview-maximize-label {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .chart-preview.maximized .chart-preview-maximize-label {
+      display: none;
+    }
+
+    .chart-preview-maximize-label.short {
+      display: none;
     }
 
     .chart-preview-close {
@@ -837,11 +1344,11 @@
       padding: 0.5rem;
       min-width: 2.5rem;
       min-height: 2.5rem;
-      background: var(--bg-secondary);
+      background: var(--surface-raised);
       border: 1px solid var(--border);
-      color: var(--text-primary);
+      color: var(--text-secondary);
       cursor: pointer;
-      border-radius: 0.25rem;
+      border-radius: 0.65rem;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
@@ -856,10 +1363,11 @@
     }
 
     .action-btn:hover {
-      background: var(--bg-tertiary);
+      background: var(--bg-secondary);
       color: var(--text-primary);
-      border-color: var(--cyan);
+      border-color: var(--accent-2);
       opacity: 1;
+      box-shadow: var(--glow-cool);
     }
 
     .action-btn.tv:hover {
@@ -876,7 +1384,7 @@
     }
 
     .copy-all-btn {
-      margin-left: auto;
+      margin-left: 0;
     }
 
     .spinner {
@@ -893,19 +1401,58 @@
       to { transform: rotate(360deg); }
     }
 
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.35);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(45, 212, 191, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(45, 212, 191, 0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      header.hero,
+      .controls,
+      .filters-panel,
+      .help-panel,
+      .help-panel-inner,
+      #resultsContainer,
+      .empty-state,
+      footer,
+      .pulse-dot {
+        animation: none !important;
+      }
+    }
+
     .toast {
       position: fixed;
       bottom: 2rem;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      padding: 0.75rem 1.25rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 0.75rem 1.35rem;
+      border-radius: 0.9rem;
+      font-size: 0.85rem;
       opacity: 0;
       transition: all 0.3s ease;
       z-index: 100;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
     }
 
     .toast.show {
@@ -922,7 +1469,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: linear-gradient(180deg, rgba(8, 12, 20, 0.72), rgba(8, 12, 20, 0.92));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -930,6 +1477,7 @@
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.2s, visibility 0.2s;
+      backdrop-filter: blur(6px);
     }
 
     .modal-overlay.visible {
@@ -937,17 +1485,22 @@
       visibility: visible;
     }
 
+    :root[data-theme="light"] .modal-overlay {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.55));
+    }
+
     .modal {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      width: 90%;
-      max-width: 520px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.1rem;
+      width: min(90vw, 620px);
       max-height: 85vh;
       overflow-y: auto;
       overflow-x: hidden;
       transform: translateY(20px);
       transition: transform 0.2s;
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(18px);
     }
 
     .modal-overlay.visible .modal {
@@ -958,13 +1511,17 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1.25rem;
+      padding: 1.1rem 1.4rem;
       border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(245, 176, 65, 0.16), rgba(45, 212, 191, 0.12));
     }
 
     .modal-header h2 {
-      font-size: 1rem;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
       font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
     .modal-close {
@@ -975,64 +1532,76 @@
       padding: 0.25rem;
       line-height: 0;
       transition: color 0.2s;
+      border-radius: 0.5rem;
     }
 
     .modal-close:hover {
       color: var(--text-primary);
+      background: rgba(148, 163, 184, 0.12);
     }
 
     .modal-body {
-      padding: 1.25rem;
+      padding: 1.5rem;
     }
 
-    .settings-grid {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .settings-collapsible {
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 0.85rem 1rem;
-      background: var(--bg-secondary);
-    }
-
-    .settings-collapsible summary.settings-section-title {
+    .settings-tabs {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      border: none;
-      text-transform: none;
-      letter-spacing: 0;
-      font-size: 0.85rem;
-      color: var(--text-primary);
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding: 0.35rem;
+      border-radius: 999px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
     }
 
-    .settings-collapsible summary.settings-section-title::-webkit-details-marker {
+    .settings-tab {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .settings-tab.active {
+      background: linear-gradient(135deg, rgba(245, 176, 65, 0.35), rgba(45, 212, 191, 0.25));
+      color: var(--text-primary);
+      border-color: rgba(245, 176, 65, 0.6);
+      box-shadow: var(--glow-accent);
+    }
+
+    .settings-panel {
       display: none;
     }
 
-    .settings-collapsible summary.settings-section-title::after {
-      content: '▾';
-      font-size: 0.75rem;
+    .settings-panel.active {
+      display: block;
+    }
+
+    .settings-subsection {
+      margin-bottom: 1rem;
+    }
+
+    .settings-subsection-title {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
       color: var(--text-muted);
-      transition: transform 0.2s ease;
-    }
-
-    .settings-collapsible[open] summary.settings-section-title::after {
-      transform: rotate(180deg);
-    }
-
-    .settings-collapsible .settings-content {
-      margin-top: 0.75rem;
+      margin-bottom: 0.6rem;
     }
 
     .settings-section {
       margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 0.95rem;
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
     }
 
     .settings-section:last-child {
@@ -1040,13 +1609,13 @@
     }
 
     .settings-section-title {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.18em;
       color: var(--text-muted);
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.6rem;
       border-bottom: 1px solid var(--border);
     }
 
@@ -1055,7 +1624,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.625rem 0;
+      padding: 0.7rem 0;
     }
 
     .setting-row + .setting-row {
@@ -1084,37 +1653,45 @@
       color: var(--text-muted);
     }
 
-    .settings-grid .settings-section {
-      margin-bottom: 0;
+    @media (min-width: 720px) {
+      .settings-tabs {
+        gap: 0.75rem;
+      }
     }
 
-    @media (min-width: 720px) {
-      .settings-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media (max-width: 900px) {
+      .hero-right {
+        justify-content: flex-start;
+      }
+
+      .hero-right .hero-card {
+        max-width: none;
       }
     }
 
     .setting-control select {
-      background: var(--bg-primary);
+      background: var(--surface-input);
       border: 1px solid var(--border);
-      border-radius: 0.375rem;
-      padding: 0.375rem 0.625rem;
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.75rem;
       color: var(--text-primary);
-      font-size: 0.8125rem;
+      font-size: 0.8rem;
       cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .setting-control select:focus {
       outline: none;
-      border-color: var(--cyan);
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
     }
 
     .setting-control input[type="color"] {
       width: 2.5rem;
       height: 2rem;
       border: 1px solid var(--border);
-      border-radius: 0.45rem;
-      background: var(--bg-secondary);
+      border-radius: 0.6rem;
+      background: var(--surface-input);
       padding: 2px;
       cursor: pointer;
     }
@@ -1146,9 +1723,10 @@
       position: absolute;
       cursor: pointer;
       inset: 0;
-      background: var(--bg-tertiary);
+      background: rgba(148, 163, 184, 0.2);
       border-radius: 24px;
       transition: background 0.2s;
+      border: 1px solid var(--border);
     }
 
     .toggle-slider::before {
@@ -1158,13 +1736,14 @@
       height: 18px;
       left: 3px;
       bottom: 3px;
-      background: white;
+      background: #f8fafc;
       border-radius: 50%;
       transition: transform 0.2s;
     }
 
     .toggle input:checked + .toggle-slider {
-      background: var(--cyan);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: rgba(245, 176, 65, 0.6);
     }
 
     .toggle input:checked + .toggle-slider::before {
@@ -1178,7 +1757,7 @@
 
     .coming-soon {
       font-size: 0.625rem;
-      background: var(--bg-tertiary);
+      background: rgba(148, 163, 184, 0.2);
       color: var(--text-muted);
       padding: 0.125rem 0.375rem;
       border-radius: 0.25rem;
@@ -1187,8 +1766,8 @@
 
     .experimental-badge {
       font-size: 0.6rem;
-      background: rgba(234, 179, 8, 0.2);
-      color: var(--yellow);
+      background: rgba(245, 176, 65, 0.2);
+      color: var(--accent);
       padding: 0.125rem 0.375rem;
       border-radius: 0.25rem;
       margin-left: 0.375rem;
@@ -1200,14 +1779,20 @@
     footer {
       text-align: center;
       margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border);
+      padding: 1.75rem 1.5rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      background: var(--glass-bg);
       color: var(--text-muted);
       font-size: 0.75rem;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+      animation: riseIn 0.7s ease both;
+      animation-delay: 0.08s;
     }
 
     footer a {
-      color: var(--cyan);
+      color: var(--accent-2);
       text-decoration: none;
     }
 
@@ -1230,17 +1815,59 @@
 
     @media (max-width: 640px) {
       body {
-        padding: 1rem;
+        padding: 1.25rem 1rem 2.5rem;
+      }
+
+      header.hero {
+        gap: 1.2rem;
+      }
+
+      .hero-card {
+        padding: 0.95rem;
       }
 
       .controls {
         flex-direction: column;
         align-items: stretch;
+        padding: 0.75rem;
       }
 
-      .controls button {
+      .controls-group {
         width: 100%;
+      }
+
+      .controls-group button {
+        flex: 1 1 calc(50% - 0.5rem);
         justify-content: center;
+      }
+
+      .controls-group.controls-primary button {
+        flex: 1 1 100%;
+      }
+
+      .controls-group.controls-secondary {
+        justify-content: center;
+      }
+
+      .help-panel {
+        padding: 1.5rem 1rem;
+      }
+
+      .help-panel-inner {
+        padding: 1.2rem;
+      }
+
+      .help-intro {
+        grid-template-columns: 1fr;
+      }
+
+      .help-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .help-action-btn {
+        flex: 1 1 calc(50% - 0.5rem);
       }
 
       .copy-all-btn {
@@ -1298,23 +1925,35 @@
       .chart-preview-close {
         display: inline-flex !important;
       }
+      
+      .chart-preview-maximize-label {
+        display: none;
+      }
+
+      .chart-preview-maximize-label.long {
+        display: none;
+      }
+
+      .chart-preview-maximize-label.short {
+        display: inline-flex;
+      }
 
       /* Add chart button to cards on mobile */
       .mobile-chart-btn {
         display: inline-flex !important;
       }
 
-      /* Compact header on mobile */
-      header h1 {
-        font-size: 1.35rem;
+      /* Compact hero on mobile */
+      .hero-left h1 {
+        font-size: 1.45rem;
       }
 
-      header p {
-        font-size: 0.8rem;
+      .hero-left p {
+        font-size: 0.85rem;
       }
 
-      header {
-        margin-bottom: 1.25rem;
+      header.hero {
+        margin-bottom: 1.2rem;
       }
 
       /* Tighter card spacing */
@@ -1326,7 +1965,7 @@
         padding: 0.75rem;
         gap: 0.5rem;
         cursor: pointer;
-        -webkit-tap-highlight-color: rgba(6, 182, 212, 0.2);
+        -webkit-tap-highlight-color: rgba(45, 212, 191, 0.25);
         touch-action: manipulation;
       }
 
@@ -1355,88 +1994,119 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Spartan Orion Screener</h1>
-      <p>Find high-activity trading setups on Binance Futures</p>
+    <header class="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="badge">Orion Terminal</span>
+          <span class="badge badge-outline">Binance Futures</span>
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span class="hero-live">Live market feed</span>
+        </div>
+        <h1>Spartan Orion Screener</h1>
+        <p>Find high-activity trading setups on Binance Futures in seconds with instant chart previews and auto S/R levels.</p>
+        <div class="hero-meta">
+          <span class="meta-pill">No signup</span>
+          <span class="meta-pill">Instant previews</span>
+          <span class="meta-pill">Local presets</span>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-card">
+          <div class="hero-card-title">Scan Playbook</div>
+          <ol class="hero-steps">
+            <li><span>1</span><div class="hero-step-text"><strong>Scan Market</strong> pulls the most active futures pairs.</div></li>
+            <li><span>2</span><div class="hero-step-text">Hover a row for a 1-minute momentum snapshot.</div></li>
+            <li><span>3</span><div class="hero-step-text">Copy a watchlist or jump to TradingView.</div></li>
+          </ol>
+          <div class="hero-card-footer">
+            <span class="status-dot" aria-hidden="true"></span>
+            Optimized for fast sessions and quick validation.
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="controls">
-      <button class="btn-primary" id="scanBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-          <path d="M3 3v5h5"/>
-          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-          <path d="M16 21h5v-5"/>
-        </svg>
-        <span>Scan Market</span>
-      </button>
+      <div class="controls-group controls-primary">
+        <button class="btn-primary" id="scanBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+            <path d="M16 21h5v-5"/>
+          </svg>
+          <span>Scan Market</span>
+        </button>
 
-      <button class="btn-secondary" id="filtersBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" x2="4" y1="21" y2="14"/>
-          <line x1="4" x2="4" y1="10" y2="3"/>
-          <line x1="12" x2="12" y1="21" y2="12"/>
-          <line x1="12" x2="12" y1="8" y2="3"/>
-          <line x1="20" x2="20" y1="21" y2="16"/>
-          <line x1="20" x2="20" y1="12" y2="3"/>
-          <line x1="2" x2="6" y1="14" y2="14"/>
-          <line x1="10" x2="14" y1="8" y2="8"/>
-          <line x1="18" x2="22" y1="16" y2="16"/>
-        </svg>
-        <span>Filters</span>
-      </button>
+        <button class="btn-secondary" id="filtersBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" x2="4" y1="21" y2="14"/>
+            <line x1="4" x2="4" y1="10" y2="3"/>
+            <line x1="12" x2="12" y1="21" y2="12"/>
+            <line x1="12" x2="12" y1="8" y2="3"/>
+            <line x1="20" x2="20" y1="21" y2="16"/>
+            <line x1="20" x2="20" y1="12" y2="3"/>
+            <line x1="2" x2="6" y1="14" y2="14"/>
+            <line x1="10" x2="14" y1="8" y2="8"/>
+            <line x1="18" x2="22" y1="16" y2="16"/>
+          </svg>
+          <span>Filters</span>
+        </button>
 
-      <button class="btn-secondary copy-all-btn" id="copyAllBtn" style="display: none;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-        </svg>
-        <span>Copy Watchlist</span>
-      </button>
+        <button class="btn-secondary copy-all-btn" id="copyAllBtn" style="display: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+          </svg>
+          <span>Copy Watchlist</span>
+        </button>
+      </div>
 
-      <button class="btn-secondary theme-toggle" id="themeToggleBtn" title="Toggle day/night mode" aria-pressed="false">
-        <svg class="theme-icon theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4"/>
-          <line x1="12" y1="2" x2="12" y2="4"/>
-          <line x1="12" y1="20" x2="12" y2="22"/>
-          <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
-          <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
-          <line x1="2" y1="12" x2="4" y2="12"/>
-          <line x1="20" y1="12" x2="22" y2="12"/>
-          <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
-          <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
-        </svg>
-        <svg class="theme-icon theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <span class="theme-label theme-label-light">Day Mode</span>
-        <span class="theme-label theme-label-dark">Night Mode</span>
-      </button>
+      <div class="controls-group controls-secondary">
+        <button class="btn-secondary theme-toggle" id="themeToggleBtn" title="Toggle day/night mode" aria-pressed="false">
+          <svg class="theme-icon theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <line x1="12" y1="2" x2="12" y2="4"/>
+            <line x1="12" y1="20" x2="12" y2="22"/>
+            <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
+            <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+            <line x1="2" y1="12" x2="4" y2="12"/>
+            <line x1="20" y1="12" x2="22" y2="12"/>
+            <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
+            <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
+          </svg>
+          <svg class="theme-icon theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span class="theme-label theme-label-light">Day Mode</span>
+          <span class="theme-label theme-label-dark">Night Mode</span>
+        </button>
 
-      <button class="btn-secondary" id="aboutBtn" title="About">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" x2="12" y1="16" y2="12"/>
-          <line x1="12" x2="12.01" y1="8" y2="8"/>
-        </svg>
-        <span>About</span>
-      </button>
+        <button class="btn-secondary" id="aboutBtn" title="About">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" x2="12" y1="16" y2="12"/>
+            <line x1="12" x2="12.01" y1="8" y2="8"/>
+          </svg>
+          <span>About</span>
+        </button>
 
-      <button class="btn-secondary" id="settingsBtn" title="Settings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <span>Settings</span>
-      </button>
-      <button class="btn-secondary" id="helpBtn" title="Help">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 2-3 4"/>
-          <line x1="12" x2="12.01" y1="17" y2="17"/>
-        </svg>
-        <span>Help</span>
-      </button>
+        <button class="btn-secondary" id="settingsBtn" title="Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>Settings</span>
+        </button>
+        <button class="btn-secondary" id="helpBtn" title="Help">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 2-3 4"/>
+            <line x1="12" x2="12.01" y1="17" y2="17"/>
+          </svg>
+          <span>Help</span>
+        </button>
+      </div>
     </div>
 
     <div class="filters-panel" id="filtersPanel" style="display: none;">
@@ -1496,96 +2166,153 @@
       </div>
     </div>
 
-    <div class="help-panel" id="helpPanel">
-      <div class="help-header">
-        <div>
-          <h3>Quick Help</h3>
-          <p>Everything you need to scan faster and read signals at a glance.</p>
-        </div>
-        <button class="btn-secondary btn-small" id="closeHelpBtn">Hide</button>
-      </div>
-      <div class="help-grid">
-        <div class="help-card">
-          <div class="help-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M16 12h-4v-4"/>
-              <path d="M12 12l-3 3"/>
-            </svg>
-          </div>
+    <div class="help-panel" id="helpPanel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="help-panel-inner">
+        <div class="help-header">
           <div>
-            <h4>Scan Flow</h4>
-            <p>Hit Scan Market, review top activity, then hover a row for a 1‑minute preview.</p>
-            <ul>
-              <li>Use Filters to refine volatility and ticks.</li>
-              <li>Copy watchlist for TradingView.</li>
-            </ul>
+            <h3 id="helpTitle">Quick Help</h3>
+            <p>Everything you need to scan faster and read signals at a glance.</p>
           </div>
+          <button class="btn-secondary btn-small" id="closeHelpBtn">Close</button>
         </div>
-        <div class="help-card">
-          <div class="help-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 3v18h18"/>
-              <path d="M18 9l-5 5-4-4-3 3"/>
-            </svg>
+        <div class="help-intro">
+          <div class="help-summary">
+            <h4>Start in 20 Seconds</h4>
+            <p>Defaults focus on liquid movers: Vol &gt; 500K, 15m volatility &gt; 0.10%, 5m ticks &gt; 200; no max cap, majors excluded.</p>
+            <div class="help-pills">
+              <span class="help-pill">1m preview</span>
+              <span class="help-pill">Expand for full view</span>
+              <span class="help-pill">10 results</span>
+              <span class="help-pill">Local presets</span>
+              <span class="help-pill">PWA ready</span>
+            </div>
           </div>
-          <div>
-            <h4>Chart Preview</h4>
-            <p>Hover to open a compact chart. Click to maximize and reveal VolUSD + S/R.</p>
-            <ul>
-              <li>Toggle 15m/1h/4h/1d levels in Settings.</li>
-              <li>Use exchange icons to jump out fast.</li>
-            </ul>
+          <div class="help-actions">
+            <button class="btn-secondary btn-small help-action-btn" id="helpActionScan">Scan Market</button>
+            <button class="btn-secondary btn-small help-action-btn" id="helpActionFilters">Open Filters</button>
+            <button class="btn-secondary btn-small help-action-btn" id="helpActionSettings">Open Settings</button>
           </div>
         </div>
-        <div class="help-card">
-          <div class="help-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-              <path d="M3.3 7l8.7 5 8.7-5"/>
-              <path d="M12 22V12"/>
-            </svg>
+        <div class="help-grid">
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M16 12h-4v-4"/>
+                <path d="M12 12l-3 3"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Scan Flow</h4>
+              <p>Hit Scan Market, review the top activity, then hover a row for a 1-minute preview.</p>
+              <ul>
+                <li>Results are sorted by 5m ticks, then volatility.</li>
+                <li>Copy watchlist for TradingView exports.</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <h4>VolUSD Read</h4>
-            <p>White bars show volume in USD. Red MA is adaptive; dashed line marks extremes.</p>
-            <ul>
-              <li>Use Settings to adjust colors per theme.</li>
-              <li>Best with 15m+ context for spikes.</li>
-            </ul>
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"/>
+                <path d="M18 9l-5 5-4-4-3 3"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Chart Preview</h4>
+              <p>Hover to open a compact chart. Expand for the full data view (volume + S/R overlays).</p>
+              <ul>
+                <li>Switch timeframe from the header dropdown.</li>
+                <li>Use exchange icons to jump out fast.</li>
+              </ul>
+            </div>
           </div>
-        </div>
-        <div class="help-card">
-          <div class="help-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <path d="M7 7h10v10H7z"/>
-            </svg>
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <path d="M3.3 7l8.7 5 8.7-5"/>
+                <path d="M12 22V12"/>
+              </svg>
+            </div>
+            <div>
+              <h4>VolUSD + S/R</h4>
+              <p>Bars show volume in USD. The MA and extreme line highlight spikes.</p>
+              <ul>
+                <li>Toggle 15m/1h/4h/1d levels in Settings.</li>
+                <li>Best with 15m+ context for spikes.</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <h4>Power Tips</h4>
-            <p>Save profiles and tune visuals once. Everything is stored locally.</p>
-            <ul>
-              <li>Settings → Chart Style for quick personalization.</li>
-              <li>Download HTML to run offline.</li>
-            </ul>
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19h16"/>
+                <path d="M6 17V9"/>
+                <path d="M12 17V5"/>
+                <path d="M18 17v-7"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Signal Legend</h4>
+              <p>Use the metrics to spot fast activity before clicking out.</p>
+              <ul>
+                <li>VolUSD = volume x close; spikes mean flow.</li>
+                <li>15m volatility is % range (0.50 = 0.50%).</li>
+                <li>5m ticks are trade counts for momentum.</li>
+                <li>BTC Δ = asset 24h% minus BTC 24h%.</li>
+              </ul>
+            </div>
           </div>
-        </div>
-        <div class="help-card">
-          <div class="help-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1.5 1.1-1.5 2.2"/>
-              <line x1="12" x2="12.01" y1="17" y2="17"/>
-            </svg>
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M7 7h10v10H7z"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Presets & Themes</h4>
+              <p>Save profiles and tune visuals once. Everything is stored locally.</p>
+              <ul>
+                <li>Use Settings → Style to adjust colors.</li>
+                <li>Toggle Day/Night for readability.</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <h4>Troubleshooting</h4>
-            <p>If data fails to load on Pages, toggle proxy fallback or open the HTML locally.</p>
-            <ul>
-              <li>Settings → Data Access for proxy control.</li>
-              <li>Check status lines in the footer.</li>
-            </ul>
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3v18"/>
+                <path d="M5 12h14"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Export & Share</h4>
+              <p>Copy a watchlist or take the screener offline with one click.</p>
+              <ul>
+                <li>Copy Watchlist formats for TradingView.</li>
+                <li>Download HTML or install the PWA.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="help-card">
+            <div class="help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1.5 1.1-1.5 2.2"/>
+                <line x1="12" x2="12.01" y1="17" y2="17"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Troubleshooting</h4>
+              <p>If data fails to load on Pages, toggle proxy fallback or open the HTML locally.</p>
+              <ul>
+                <li>Settings → Data Access for proxy control.</li>
+                <li>No results? Lower min ticks or volatility.</li>
+                <li>Check status lines in the footer.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -1602,15 +2329,15 @@
 
     <div id="emptyState" class="empty-state">
       <!-- Placeholder illustration -->
-      <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="margin-bottom: 1.5rem; opacity: 0.6;">
-        <rect x="10" y="70" width="12" height="40" rx="2" fill="#334155"/>
-        <rect x="30" y="50" width="12" height="60" rx="2" fill="#334155"/>
-        <rect x="50" y="30" width="12" height="80" rx="2" fill="#06b6d4"/>
-        <rect x="70" y="45" width="12" height="65" rx="2" fill="#334155"/>
-        <rect x="90" y="60" width="12" height="50" rx="2" fill="#334155"/>
-        <circle cx="56" cy="20" r="8" fill="#06b6d4" opacity="0.3"/>
-        <path d="M56 12v16M48 20h16" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
-        <path d="M16 65 L36 50 L56 25 L76 40 L96 55" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+      <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="margin-bottom: 1.5rem; opacity: 0.7;">
+        <rect x="10" y="70" width="12" height="40" rx="2" fill="var(--bg-tertiary)"/>
+        <rect x="30" y="50" width="12" height="60" rx="2" fill="var(--bg-tertiary)"/>
+        <rect x="50" y="30" width="12" height="80" rx="2" fill="var(--accent-2)"/>
+        <rect x="70" y="45" width="12" height="65" rx="2" fill="var(--bg-tertiary)"/>
+        <rect x="90" y="60" width="12" height="50" rx="2" fill="var(--bg-tertiary)"/>
+        <circle cx="56" cy="20" r="8" fill="var(--accent-2)" opacity="0.25"/>
+        <path d="M56 12v16M48 20h16" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M16 65 L36 50 L56 25 L76 40 L96 55" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
       </svg>
       <p>Click "Scan Market" to find active trading setups</p>
       <p class="hint" id="emptyHint">Vol &gt; 500K, 15m &gt; 0.10%, 5m Ticks &gt; 200</p>
@@ -1656,10 +2383,10 @@
   <div class="toast" id="toast"></div>
 
   <!-- About Modal -->
-  <div class="modal-overlay" id="aboutModal">
+  <div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2>About Spartan Orion Screener</h2>
+        <h2 id="aboutTitle">About Spartan Orion Screener</h2>
         <button class="modal-close" id="aboutModalClose">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/>
@@ -1707,10 +2434,10 @@
   </div>
 
   <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal">
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="modal">
       <div class="modal-header">
-        <h2>Settings</h2>
+        <h2 id="settingsTitle">Settings</h2>
         <button class="modal-close" id="settingsModalClose">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/>
@@ -1719,111 +2446,121 @@
         </button>
       </div>
       <div class="modal-body">
-        <div class="settings-grid">
-          <details class="settings-section settings-collapsible" open>
-            <summary class="settings-section-title">Chart Preview</summary>
-            <div class="settings-content">
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Enable Preview</span>
-                  <small>Show TradingView chart on hover</small>
-                </div>
-                <div class="setting-control">
-                  <label class="toggle">
-                    <input type="checkbox" id="settingChartEnabled" checked>
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
+        <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+          <button class="settings-tab active" data-tab="chart" type="button" role="tab" aria-selected="true">Chart</button>
+          <button class="settings-tab" data-tab="style" type="button" role="tab" aria-selected="false">Style</button>
+          <button class="settings-tab" data-tab="data" type="button" role="tab" aria-selected="false">Data</button>
+          <button class="settings-tab" data-tab="display" type="button" role="tab" aria-selected="false">Display</button>
+        </div>
 
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Timeframe</span>
-                  <small>Chart candle interval</small>
-                </div>
-                <div class="setting-control">
-                  <select id="settingChartTimeframe">
-                    <option value="1m" selected>1 minute</option>
-                    <option value="5m">5 minutes</option>
-                    <option value="15m">15 minutes</option>
-                    <option value="1h">1 hour</option>
-                    <option value="4h">4 hours</option>
-                    <option value="1d">1 day</option>
-                  </select>
-                </div>
+        <div class="settings-panel active" data-panel="chart" role="tabpanel">
+          <div class="settings-section">
+            <div class="settings-section-title">Preview</div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Enable Preview</span>
+                <small>Show TradingView chart on hover</small>
               </div>
-
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Preview Size</span>
-                  <small>Popup dimensions</small>
-                </div>
-                <div class="setting-control">
-                  <select id="settingChartSize">
-                    <option value="small">Small (280×180)</option>
-                    <option value="medium" selected>Medium (320×220)</option>
-                    <option value="large">Large (400×280)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Show 15m S/R Levels <span class="experimental-badge">Experimental</span></span>
-                  <small>Support & resistance zones (orange)</small>
-                </div>
-                <div class="setting-control">
-                  <label class="toggle">
-                    <input type="checkbox" id="settingSR15m">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Show 1h S/R Levels <span class="experimental-badge">Experimental</span></span>
-                  <small>Higher timeframe zones (purple)</small>
-                </div>
-                <div class="setting-control">
-                  <label class="toggle">
-                    <input type="checkbox" id="settingSR1h">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Show 4h S/R Levels <span class="experimental-badge">Experimental</span></span>
-                  <small>Broader zones (blue)</small>
-                </div>
-                <div class="setting-control">
-                  <label class="toggle">
-                    <input type="checkbox" id="settingSR4h">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Show Previous Day Levels <span class="experimental-badge">Experimental</span></span>
-                  <small>Yesterday high/low (pink)</small>
-                </div>
-                <div class="setting-control">
-                  <label class="toggle">
-                    <input type="checkbox" id="settingSR1d">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="settingChartEnabled" checked>
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
             </div>
-          </details>
 
-          <details class="settings-section settings-collapsible">
-            <summary class="settings-section-title">Chart Style</summary>
-            <div class="settings-content">
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Timeframe</span>
+                <small>Chart candle interval</small>
+              </div>
+              <div class="setting-control">
+                <select id="settingChartTimeframe">
+                  <option value="1m" selected>1 minute</option>
+                  <option value="5m">5 minutes</option>
+                  <option value="15m">15 minutes</option>
+                  <option value="1h">1 hour</option>
+                  <option value="4h">4 hours</option>
+                  <option value="1d">1 day</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Preview Size</span>
+                <small>Popup dimensions</small>
+              </div>
+              <div class="setting-control">
+                <select id="settingChartSize">
+                  <option value="small">Small (280×180)</option>
+                  <option value="medium" selected>Medium (320×220)</option>
+                  <option value="large">Large (400×280)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Levels</div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Show 15m S/R Levels <span class="experimental-badge">Experimental</span></span>
+                <small>Support & resistance zones (orange)</small>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="settingSR15m">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Show 1h S/R Levels <span class="experimental-badge">Experimental</span></span>
+                <small>Higher timeframe zones (teal)</small>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="settingSR1h">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Show 4h S/R Levels <span class="experimental-badge">Experimental</span></span>
+                <small>Broader zones (blue)</small>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="settingSR4h">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Show Previous Day Levels <span class="experimental-badge">Experimental</span></span>
+                <small>Yesterday high/low (rose)</small>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="settingSR1d">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-panel" data-panel="style" role="tabpanel">
+          <div class="settings-section">
+            <div class="settings-subsection">
+              <div class="settings-subsection-title">Candles</div>
               <div class="setting-row">
                 <div class="setting-label">
                   <span>Candle Up</span>
@@ -1842,6 +2579,10 @@
                   <input type="color" id="settingCandleDown">
                 </div>
               </div>
+            </div>
+
+            <div class="settings-subsection">
+              <div class="settings-subsection-title">VolUSD</div>
               <div class="setting-row">
                 <div class="setting-label">
                   <span>VolUSD Bars</span>
@@ -1869,6 +2610,10 @@
                   <input type="color" id="settingVolUsdExtreme">
                 </div>
               </div>
+            </div>
+
+            <div class="settings-subsection">
+              <div class="settings-subsection-title">S/R Levels</div>
               <div class="setting-row">
                 <div class="setting-label">
                   <span>S/R 15m</span>
@@ -1905,6 +2650,10 @@
                   <input type="color" id="settingSr1dColor">
                 </div>
               </div>
+            </div>
+
+            <div class="settings-subsection">
+              <div class="settings-subsection-title">Reset</div>
               <div class="setting-row">
                 <div class="setting-label">
                   <span>Reset Chart Colors</span>
@@ -1915,45 +2664,45 @@
                 </div>
               </div>
             </div>
-          </details>
+          </div>
+        </div>
 
-          <details class="settings-section settings-collapsible">
-            <summary class="settings-section-title">Data Access</summary>
-            <div class="settings-content">
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Proxy Fallback</span>
-                  <small>Use public CORS proxies if the direct API is blocked</small>
-                </div>
-                <div class="setting-control">
-                  <label class="toggle">
-                    <input type="checkbox" id="settingProxyFallback">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
+        <div class="settings-panel" data-panel="data" role="tabpanel">
+          <div class="settings-section">
+            <div class="settings-section-title">Data Access</div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Proxy Fallback</span>
+                <small>Use public CORS proxies if the direct API is blocked</small>
+              </div>
+              <div class="setting-control">
+                <label class="toggle">
+                  <input type="checkbox" id="settingProxyFallback">
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
             </div>
-          </details>
+          </div>
+        </div>
 
-          <details class="settings-section settings-collapsible">
-            <summary class="settings-section-title">Display</summary>
-            <div class="settings-content">
-              <div class="setting-row">
-                <div class="setting-label">
-                  <span>Hover Delay</span>
-                  <small>Time before chart appears</small>
-                </div>
-                <div class="setting-control">
-                  <select id="settingHoverDelay">
-                    <option value="0">Instant</option>
-                    <option value="150">Fast (150ms)</option>
-                    <option value="300" selected>Normal (300ms)</option>
-                    <option value="500">Slow (500ms)</option>
-                  </select>
-                </div>
+        <div class="settings-panel" data-panel="display" role="tabpanel">
+          <div class="settings-section">
+            <div class="settings-section-title">Display</div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Hover Delay</span>
+                <small>Time before chart appears</small>
+              </div>
+              <div class="setting-control">
+                <select id="settingHoverDelay">
+                  <option value="0">Instant</option>
+                  <option value="150">Fast (150ms)</option>
+                  <option value="300" selected>Normal (300ms)</option>
+                  <option value="500">Slow (500ms)</option>
+                </select>
               </div>
             </div>
-          </details>
+          </div>
         </div>
       </div>
     </div>
@@ -1975,7 +2724,12 @@
         </select>
         <div class="chart-preview-links" id="chartPreviewLinks">
           <a class="chart-preview-link" data-brand="tradingview" id="chartPreviewTvLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in TradingView" aria-label="Open in TradingView">
-            <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAMAEBAAAAEAIABoBAAANgAAACAgAAABACAAqBAAAJ4EAADAwAAAAQAgAOcOAABGFQAAKAAAABAAAAAgAAAAAQAgAAAAAABABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiFxOQIhYS7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhLvIhgUgAAAAAAiFhSAIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxOQIhYS7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////+Qi4n/IhcT/yIXE//V09P///////////9LQj//IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////kIuJ/yIXE/8iFxP/dW5r////////////rKin/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////5CLif8iFxP/IhcT/z00MP///////////+Ti4f8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////+Qi4n/IhcT/yIXE/8iFxP/yMXE////////////WVFO/yIXE/8iFxP/IhcT/yIXE/+Qi4n/kIuJ////////////kIuJ/zAmIv91bmv/WVFO/3Vua////////////6yop/8iFxP/IhcT/yIXE/8iFxP//////////////////////5CLif+DfXr//////+Ti4f89NDD////////////k4uH/IhcT/yIXE/8iFxP/IhcT//////////////////////+Qi4n/TEM///Hx8P+sqKb/IhcT/7q2tf///////////2dgXf8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhLvIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxPvIhcSjyIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhYSgAAAAAAiFhJ/IhYT7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhPvIhcUjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAACAAAABAAAAAAQAgAAAAAACAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAYE2AhFhLPIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yEXE78iGBSAIBAQEAAAAAAAAAAAAAAAACAYECAhFxLfIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxLfIBgQIAAAAAAgEBAQIRcS3yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxLfAAAAACIWFIAiFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8jGBNfIRcTvyIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXEs8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE//V09P///////////////////////////9LQj//IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/3Vua////////////////////////////6yop/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/PTQw////////////////////////////5OLh/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/yMXE////////////////////////////WVFO/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/91bmv///////////////////////////+sqKf/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/z00MP///////////////////////////+Ti4f8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/7q2tf///////////////////////////2dgXf8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/Z19d////////////////////////////ura1/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/4+Lh////////////////////////////PjQw/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/////////////////////////////////////////////////IhcT/yIXE/8+NDD/1dPT///////HxcT/PjQw/yIXE/+sqKb///////////////////////////91bmv/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/////////////////////////////////////////////////8iFxP/IhcT/8jFxP/////////////////W1NP/IhcT/1lRTv///////////////////////////8jFxP8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/////////////////////////////////////////////////yIXE/8iFxP///////////////////////////8iFxP/IhcT/+Pi4f///////////////////////////z40MP8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/////////////////////////////////////////////////IhcT/yIXE//V09P/////////////////yMXE/yIXE/8iFxP/rKim////////////////////////////dW5r/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/////////////////////////////////////////////////8iFxP/IhcT/z00MP/IxcT//////9XT0/89NDD/IhcT/yIXE/9LQj/////////////////////////////W1NP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIWFM8iFxP/IhcT/yIX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" alt="" />
+            <svg class="chart-preview-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" opacity="0.18" stroke="none"/>
+              <path d="M7.5 9h5.5"/>
+              <path d="M10.25 9v6"/>
+              <path d="M14 9l2.5 6 2.5-6"/>
+            </svg>
           </a>
           <a class="chart-preview-link" data-brand="binance" id="chartPreviewBinanceLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Binance Futures" aria-label="Open in Binance Futures">
             <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvN6Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrzty668wgAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzfAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/MuuvM8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvNcLrrzCAAAAAAAAAAAAAAAAC668zguuvPxLrrzty668wgAAAAAAAAAAAAAAAAuuvM6LrrzOgAAAAAAAAAAAAAAAC668wguuvO3Lrrz8S668zoAAAAAAAAAAAAAAAAuuvMILrrzXAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvO3LrrzCAAAAAAAAAAAAAAAAC668y4uuvMIAAAAAAAAAAAAAAAALrrzOi668/EuuvPzLrrzPAAAAAAAAAAAAAAAAC668wguuvMuAAAAAAAAAAAAAAAALrrzCC6687UuuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvM6Lrrz8S668/8uuvP/Lrrz/y668/8uuvPzLrrzPgAAAAAAAAAAAAAAAAAAAAAuuvMILrrztS668/8uuvP/Lrrz/y668/8uuvP/Lrrzgy6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y668/MuuvM+AAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrzty668wgAAAAAAAAAAAAAAAAuuvMuLrrzCAAAAAAAAAAAAAAAAC668zouuvPxLrrz8y668zwAAAAAAAAAAAAAAAAuuvMILrrzLgAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAC6681wuuvMIAAAAAAAAAAAAAAAALrrzOC668/EuuvO3LrrzCAAAAAAAAAAAAAAAAC668zouuvM+AAAAAAAAAAAAAAAALrrzCC6687cuuvPxLrrzOgAAAAAAAAAAAAAAAC668wguuvNcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zguuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvM4Lrrz8S668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvMILrrzty668/8uuvP/Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6683ouuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAALrrzCC6687cuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvN8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3Lrrzty668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//5////8P///+B////AP///gB///wAP//4AB//8AAP/+AYB//gPAf/4H4H//D/D//5/5/8f+f+OD/D/BAfgfgAH4H4CD/D/Bx/5/4/+f+f//D/D//gfgf/4DwH/+AYB//wAA//+AAf//wAP//+AH///wD///+B////w////+f/8=" alt="" />
@@ -1984,13 +2738,15 @@
             <img class="chart-preview-link-icon" src="data:image/png;base64,AAABAAEAMDAAAAEACAB6AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAixJREFUeJztmjGuwjAMhjlBFbNUsLAgMXaGBdERdaMH6PoklrdHXKUDJ2DkDGycg7lrnyxRFPWVxE4TShCDB4oI/2f7T9Oko+zndxRyjNoXoigCIYQUQlzi6bgCgHrIiKfjCrWgJtSmBRBCbN9BNOhhtp0A+MXQAoEYKsSjbd4589BRiaadmuzLoUUBvwpSBbgECHB5AITUPnAP1PwAGFoMWMYXADTZSVaTOs1n9W4/7xXJavLaChSHRV1el/W52jiJ8rp8HUCTdTXz8pj0ApLH5D08gLMGVud0W7MAisPCP4CaeTXwenuKxs+YVSpAms/8AKA4FELJKLYQZlKFQWEnwm919yhrABRj088oGH1BhSg1BrYG4JSfYszdfm5lYCsA28ybxMknSdEZmA2APe9KfNug8XRcdbWSzsBsABeto+tx2TG+aZHJAuDO39wqpPmMZWAWQHtwlyEVL6hJMhmYBeDSvLo2KpUlh8nALAAf/a8GdPyPycAsAJerSypATHhKJAHgQD7Fn27rfwAUA5MBfBr4/GQqpfQ/GcCngc+t2QZhsCLUTQYSgG8DF/dsN62qLvacAPg2cKrcyChzPxvgVQaOLfamjAA+FnDP+h8swgigW6u7yH6i2TJxAuDTwByzgi2ADwO3HyvBJ4DrJTRWtG/bAAcApzacp/sEZhvH8bEDnn13p8FtRsG2AsEfcIjQj5hE6Id8UejHrFnoB93ZJ7xqkH3Cyx5ZgPEHCAfghSQKZFcAAAAASUVORK5CYII=" alt="" />
           </a>
         </div>
-        <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Maximize chart">
+        <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Expand for full data view" aria-label="Expand for full data view">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 3 21 3 21 9"/>
             <polyline points="9 21 3 21 3 15"/>
             <line x1="21" x2="14" y1="3" y2="10"/>
             <line x1="3" x2="10" y1="21" y2="14"/>
           </svg>
+          <span class="chart-preview-maximize-label long">Expand for details</span>
+          <span class="chart-preview-maximize-label short">Expand</span>
         </button>
         <button class="chart-preview-close" id="chartPreviewClose" title="Close chart">Close</button>
       </div>
@@ -2046,7 +2802,7 @@
 
     const DEFAULT_FILTERS = {
       minVolume: 500000,
-      maxVolume: 100000000,
+      maxVolume: null,
       minVolatility15m: 0.1,
       minTicks5m: 200,
       maxResults: 10,
@@ -2105,6 +2861,7 @@
     let activeProfileId = 'default';
     let picks = [];
     let isLoading = false;
+    let latestBtcChange24h = null;
     let customProfiles = [];
     const MAX_CUSTOM_PROFILES = 3;
 
@@ -2509,14 +3266,14 @@
           const pick = {
             symbol,
             exchange: 'binanceusdm',
-            price: ticker.price,
-            priceChange1h: ticker.tf1h?.changePercent ?? 0,
-            priceChange4h: ticker.tf4h?.changePercent ?? 0,
-            priceChange24h: ticker.tf1d?.changePercent ?? 0,
-            volume24h: ticker.tf1d?.volume ?? 0,
-            volatility15m: ticker.tf15m?.volatility ?? 0,
-            ticks5m: ticker.tf5m?.trades ?? 0,
-            ticks15m: ticker.tf15m?.trades ?? 0,
+            price: parseFloat(ticker.price) || 0,
+            priceChange1h: parseFloat(ticker.tf1h?.changePercent) || 0,
+            priceChange4h: parseFloat(ticker.tf4h?.changePercent) || 0,
+            priceChange24h: parseFloat(ticker.tf1d?.changePercent) || 0,
+            volume24h: parseFloat(ticker.tf1d?.volume) || 0,
+            volatility15m: parseFloat(ticker.tf15m?.volatility) || 0,
+            ticks5m: parseInt(ticker.tf5m?.trades, 10) || 0,
+            ticks15m: parseInt(ticker.tf15m?.trades, 10) || 0,
           };
 
           if (pick.volume24h <= 0) continue;
@@ -2544,8 +3301,8 @@
           priceChange24h: (parseFloat(values['4']) || 0) * 100,
           volume24h: volumeUSD,
           volatility15m: parseFloat(values['46']) || 0,
-          ticks5m: parseInt(values['17']) || 0,
-          ticks15m: parseInt(values['15']) || 0,
+          ticks5m: parseInt(values['17'], 10) || 0,
+          ticks15m: parseInt(values['15'], 10) || 0,
         };
 
         if (pick.price <= 0 || pick.volume24h <= 0) continue;
@@ -2659,6 +3416,8 @@
         }
       }
       const allPicks = parseScreenerData(data);
+      const btcPick = allPicks.find(pick => pick.symbol && pick.symbol.startsWith('BTC/'));
+      latestBtcChange24h = btcPick && Number.isFinite(btcPick.priceChange24h) ? btcPick.priceChange24h : null;
       const filtered = filterPicks(allPicks, currentFilters);
       const sorted = sortPicks(filtered);
 
@@ -2896,6 +3655,8 @@
         const metricsDiv = document.createElement('div');
         metricsDiv.className = 'metrics';
         metricsDiv.textContent = 'VolUSD: ' + formatVolume(pick.volume24h) + ' | 5m: ' + pick.ticks5m + ' | Vol15m: ' + formatPercent(pick.volatility15m, 2);
+        metricsDiv.title = 'Volume in USD, 5m trades, and 15m volatility';
+        metricsDiv.setAttribute('aria-label', 'Volume in USD ' + formatVolume(pick.volume24h) + ', 5 minute trades ' + pick.ticks5m + ', 15 minute volatility ' + formatPercent(pick.volatility15m, 2));
 
         symbolInfo.appendChild(symbolRow);
         symbolInfo.appendChild(metricsDiv);
@@ -2913,14 +3674,50 @@
         const priceDiv = document.createElement('div');
         priceDiv.className = 'price';
         priceDiv.textContent = '$' + formatPrice(pick.price);
+        priceDiv.title = 'Last price (USD)';
+        priceDiv.setAttribute('aria-label', 'Last price ' + formatPrice(pick.price) + ' USD');
 
         const changeDiv = document.createElement('div');
         const isPositive = pick.priceChange24h >= 0;
         changeDiv.className = 'change ' + (isPositive ? 'positive' : 'negative');
         changeDiv.textContent = (isPositive ? '↑ ' : '↓ ') + formatChange(pick.priceChange24h);
+        changeDiv.title = '24h price change';
+        changeDiv.setAttribute('aria-label', '24 hour change ' + formatChange(pick.priceChange24h));
+
+        const changeRelativeDiv = document.createElement('div');
+        const hasBtc = Number.isFinite(latestBtcChange24h);
+        const relativeChange = hasBtc ? pick.priceChange24h - latestBtcChange24h : null;
+        const relativePositive = relativeChange !== null ? relativeChange >= 0 : true;
+        const relativeNeutral = relativeChange !== null && Math.abs(relativeChange) < 0.01;
+        const relativeClass = hasBtc
+          ? (relativeNeutral ? 'neutral' : (relativePositive ? 'positive' : 'negative'))
+          : 'disabled';
+        changeRelativeDiv.className = 'change-relative ' + relativeClass;
+        changeRelativeDiv.title = '24h performance vs BTC';
+        const relativeIcon = createSvgIcon([
+          'M4 8h8',
+          'M12 8l-3-3',
+          'M12 8l-3 3',
+          'M20 16h-8',
+          'M12 16l3-3',
+          'M12 16l3 3'
+        ]);
+        relativeIcon.classList.add('change-relative-icon');
+        const relativeLabel = document.createElement('span');
+        relativeLabel.textContent = 'BTC Δ';
+        const relativeValue = document.createElement('span');
+        relativeValue.textContent = hasBtc ? formatChange(relativeChange) : '—';
+        const relativeAria = hasBtc
+          ? 'Relative performance vs Bitcoin ' + formatChange(relativeChange)
+          : 'Relative performance vs Bitcoin unavailable';
+        changeRelativeDiv.setAttribute('aria-label', relativeAria);
 
         priceInfo.appendChild(priceDiv);
         priceInfo.appendChild(changeDiv);
+        changeRelativeDiv.appendChild(relativeIcon);
+        changeRelativeDiv.appendChild(relativeLabel);
+        changeRelativeDiv.appendChild(relativeValue);
+        priceInfo.appendChild(changeRelativeDiv);
 
         // Actions
         const actionsDiv = document.createElement('div');
@@ -3124,16 +3921,25 @@
     }
 
     function updateFilters() {
-      const minVolume = parseInt(document.getElementById('minVolume').value) || 0;
+      const minVolumeRaw = parseInt(document.getElementById('minVolume').value, 10);
+      const minVolume = Number.isFinite(minVolumeRaw) ? Math.max(0, minVolumeRaw) : 0;
       const maxVolumeVal = document.getElementById('maxVolume').value;
-      const maxVolume = maxVolumeVal ? parseInt(maxVolumeVal) : null;
-      const minVolatility = parseFloat(document.getElementById('minVolatility').value) || 0;
-      const minTicks = parseInt(document.getElementById('minTicks').value) || 0;
-      const maxResults = parseInt(document.getElementById('maxResults').value) || 10;
+      const maxVolumeRaw = maxVolumeVal ? parseInt(maxVolumeVal, 10) : null;
+      let maxVolume = maxVolumeRaw !== null && Number.isFinite(maxVolumeRaw) && maxVolumeRaw > 0 ? maxVolumeRaw : null;
+      const minVolatilityRaw = parseFloat(document.getElementById('minVolatility').value);
+      const minVolatility = Number.isFinite(minVolatilityRaw) ? Math.max(0, minVolatilityRaw) : 0;
+      const minTicksRaw = parseInt(document.getElementById('minTicks').value, 10);
+      const minTicks = Number.isFinite(minTicksRaw) ? Math.max(0, minTicksRaw) : 0;
+      const maxResultsRaw = parseInt(document.getElementById('maxResults').value, 10);
+      const maxResults = Number.isFinite(maxResultsRaw) && maxResultsRaw > 0 ? maxResultsRaw : 10;
       const excludeStr = document.getElementById('excludeSymbols').value;
       const excludeSymbols = excludeStr
         ? excludeStr.split(',').map(function(s) { return s.trim().toUpperCase(); }).filter(Boolean)
         : [];
+
+      if (maxVolume !== null && maxVolume < minVolume) {
+        maxVolume = minVolume;
+      }
 
       currentFilters = {
         minVolume: minVolume,
@@ -3240,6 +4046,46 @@
     // Settings Modal
     // =============================================================================
 
+    const SETTINGS_TAB_KEY = 'orion-screener-settings-tab';
+    let currentSettingsTab = 'chart';
+
+    function getStoredSettingsTab() {
+      try {
+        var stored = localStorage.getItem(SETTINGS_TAB_KEY);
+        if (stored) return stored;
+      } catch (e) {
+        // Ignore storage errors
+      }
+      return currentSettingsTab;
+    }
+
+    function setActiveSettingsTab(tabId, persist) {
+      var tabs = document.querySelectorAll('.settings-tab');
+      var panels = document.querySelectorAll('.settings-panel');
+      if (!tabs.length || !panels.length) return;
+
+      var nextTab = tabId || 'chart';
+      currentSettingsTab = nextTab;
+
+      tabs.forEach(function(tab) {
+        var isActive = tab.getAttribute('data-tab') === nextTab;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+
+      panels.forEach(function(panel) {
+        panel.classList.toggle('active', panel.getAttribute('data-panel') === nextTab);
+      });
+
+      if (persist) {
+        try {
+          localStorage.setItem(SETTINGS_TAB_KEY, nextTab);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+    }
+
     function openSettingsModal() {
       var modal = document.getElementById('settingsModal');
       modal.classList.add('visible');
@@ -3258,6 +4104,7 @@
         proxyToggle.checked = isProxyFallbackEnabled();
         proxyToggle.disabled = window.location.protocol === 'file:';
       }
+      setActiveSettingsTab(getStoredSettingsTab(), false);
       syncChartStyleInputs();
     }
 
@@ -3324,7 +4171,7 @@
 
       // Mobile: full-width bottom sheet (CSS handles positioning)
       if (isMobileDevice()) {
-        var mobileHeight = isChartMaximized ? Math.floor(window.innerHeight * 0.7) : 280;
+        var mobileHeight = isChartMaximized ? Math.floor(window.innerHeight * 0.7) : 300;
         return {
           width: window.innerWidth,
           height: mobileHeight,
@@ -3377,7 +4224,9 @@
     function applyPreviewLayout(layout) {
       var preview = document.getElementById('chartPreview');
       var container = document.getElementById('chartContainer');
-      var chartHeight = layout.height - 44;
+      var header = preview.querySelector('.chart-preview-header');
+      var headerHeight = header ? Math.round(header.getBoundingClientRect().height) : 44;
+      var chartHeight = layout.height - headerHeight;
 
       // On mobile, let CSS handle positioning (bottom: 0, left: 0)
       if (!isMobileDevice()) {
@@ -3391,9 +4240,11 @@
         preview.style.height = '';
         preview.style.left = '';
         preview.style.top = '';
-        chartHeight = 300 - 44; // Match CSS height
+        var previewHeight = preview.getBoundingClientRect().height || 300;
+        chartHeight = previewHeight - headerHeight;
       }
 
+      chartHeight = Math.max(120, chartHeight);
       preview.classList.toggle('maximized', isChartMaximized);
 
       container.style.width = '100%';
@@ -3444,9 +4295,9 @@
     function getSrColors() {
       return {
         sr15m: getCssVar('--sr-15m-color', '#f59e0b'),
-        sr1h: getCssVar('--sr-1h-color', '#8b5cf6'),
-        sr4h: getCssVar('--sr-4h-color', '#38bdf8'),
-        sr1d: getCssVar('--sr-1d-color', '#ec4899'),
+        sr1h: getCssVar('--sr-1h-color', '#22d3ee'),
+        sr4h: getCssVar('--sr-4h-color', '#60a5fa'),
+        sr1d: getCssVar('--sr-1d-color', '#fb7185'),
       };
     }
 
@@ -3456,7 +4307,7 @@
       var extreme = [];
       var colors = getVolUsdColors();
       var len = VOLUSD_SETTINGS.maLength;
-      var alpha = 1.618 / 100;
+      var alpha = 2 / (len + 1);
       var sum = 0;
       var prevMa = null;
 
@@ -3580,6 +4431,7 @@
           color: volUsdColors.barUp,
           priceFormat: { type: 'volume' },
           priceScaleId: 'vol',
+          title: 'VolUSD',
           priceLineVisible: false,
           lastValueVisible: true,
         });
@@ -3880,6 +4732,36 @@
       document.getElementById('closeFiltersBtn').addEventListener('click', toggleFilters);
       document.getElementById('helpBtn').addEventListener('click', toggleHelp);
       document.getElementById('closeHelpBtn').addEventListener('click', toggleHelp);
+      var helpScanBtn = document.getElementById('helpActionScan');
+      if (helpScanBtn) {
+        helpScanBtn.addEventListener('click', function() {
+          toggleHelp();
+          handleScan();
+        });
+      }
+      var helpFiltersBtn = document.getElementById('helpActionFilters');
+      if (helpFiltersBtn) {
+        helpFiltersBtn.addEventListener('click', function() {
+          toggleHelp();
+          var panel = document.getElementById('filtersPanel');
+          if (!panel || panel.style.display === 'none') {
+            toggleFilters();
+          }
+        });
+      }
+      var helpSettingsBtn = document.getElementById('helpActionSettings');
+      if (helpSettingsBtn) {
+        helpSettingsBtn.addEventListener('click', function() {
+          toggleHelp();
+          openSettingsModal();
+        });
+      }
+      var helpPanel = document.getElementById('helpPanel');
+      if (helpPanel) {
+        helpPanel.addEventListener('click', function(e) {
+          if (e.target === helpPanel) toggleHelp();
+        });
+      }
       document.getElementById('copyAllBtn').addEventListener('click', copyWatchlist);
       document.getElementById('downloadFooterBtn').addEventListener('click', downloadStandaloneHtml);
       document.getElementById('aboutBtn').addEventListener('click', openAboutModal);
@@ -3912,6 +4794,12 @@
       document.getElementById('aboutModalClose').addEventListener('click', closeAboutModal);
       document.getElementById('aboutModal').addEventListener('click', function(e) {
         if (e.target === this) closeAboutModal();
+      });
+      document.querySelectorAll('.settings-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var tabId = this.getAttribute('data-tab');
+          setActiveSettingsTab(tabId, true);
+        });
       });
 
       if (!storedTheme && window.matchMedia) {
@@ -4029,6 +4917,9 @@
         if (e.key === 'Escape') {
           closeSettingsModal();
           closeAboutModal();
+          if (document.getElementById('helpPanel')?.classList.contains('visible')) {
+            toggleHelp();
+          }
           closeChartPreview();
         }
       });

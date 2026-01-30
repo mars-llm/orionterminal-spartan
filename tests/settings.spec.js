@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 test('settings: chart style controls apply overrides', async ({ page }) => {
   await page.goto('/');
   await page.click('#settingsBtn');
-  await page.click('summary.settings-section-title:has-text("Chart Style")');
+  await page.click('.settings-tab[data-tab="style"]');
 
   await expect(page.locator('#settingCandleUp')).toBeVisible();
   await expect(page.locator('#settingVolUsdBars')).toBeVisible();
@@ -40,7 +40,7 @@ test('maximized preview shows external link icons', async ({ page }) => {
   });
 
   await expect(page.locator('#chartPreviewLinks')).toBeVisible();
-  await expect(page.locator('#chartPreviewTvLink img')).toBeVisible();
-  await expect(page.locator('#chartPreviewBinanceLink img')).toBeVisible();
-  await expect(page.locator('#chartPreviewBitunixLink img')).toBeVisible();
+  await expect(page.locator('#chartPreviewTvLink .chart-preview-link-icon')).toBeVisible();
+  await expect(page.locator('#chartPreviewBinanceLink .chart-preview-link-icon')).toBeVisible();
+  await expect(page.locator('#chartPreviewBitunixLink .chart-preview-link-icon')).toBeVisible();
 });

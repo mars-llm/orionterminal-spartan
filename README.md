@@ -8,6 +8,15 @@ A single-file market scanner for Binance Futures. Finds high-activity setups and
 
 ---
 
+## UI Preview
+
+<table>
+  <tr>
+    <td><img src="screenshot.png" alt="Desktop dark mode overview" width="460"></td>
+    <td><img src="screenshot-light.png" alt="Desktop light mode expanded chart" width="460"></td>
+  </tr>
+</table>
+
 ## Features
 
 - **One-click scan** — no signup, no API keys, no install
@@ -15,7 +24,7 @@ A single-file market scanner for Binance Futures. Finds high-activity setups and
 - **Auto S/R levels** — previous 15m and 1h candle high/low
 - **Filter presets** — Default, High Volume Majors, Low Cap Gems, Scalping
 - **PWA support** — install as an app on desktop or mobile
-- **Offline-capable** — download the HTML and run it anywhere
+- **Downloadable HTML** — run locally, with live data when connected
 
 ## Quick Start
 
