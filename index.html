@@ -1970,8 +1970,7 @@
     let chartCandleSeries = null;
     let chartSRLines = [];
     let chartVolumeSeries = null;
-    let chartVolMaUpSeries = null;
-    let chartVolMaDownSeries = null;
+    let chartVolMaSeries = null;
     let chartVolExtremeSeries = null;
 
     // =============================================================================
@@ -3165,8 +3164,7 @@
       return {
         barUp: getCssVar('--volusd-bar-up', '#0f172a'),
         barDown: getCssVar('--volusd-bar-down', '#0f172a'),
-        maUp: getCssVar('--volusd-ma-up', '#ef4444'),
-        maDown: getCssVar('--volusd-ma-down', '#ef4444'),
+        ma: getCssVar('--volusd-ma-up', getCssVar('--volusd-ma-down', '#ef4444')),
         extreme: getCssVar('--volusd-extreme', '#ef4444'),
       };
     }
@@ -3182,8 +3180,7 @@
 
     function buildVolUsdSeries(candles) {
       var bars = [];
-      var maUp = [];
-      var maDown = [];
+      var ma = [];
       var extreme = [];
       var colors = getVolUsdColors();
       var len = VOLUSD_SETTINGS.maLength;
@@ -3230,20 +3227,12 @@
         });
 
         if (maValue === null) {
-          maUp.push({ time: candle.time });
-          maDown.push({ time: candle.time });
+          ma.push({ time: candle.time });
           if (VOLUSD_SETTINGS.showExtreme) {
             extreme.push({ time: candle.time });
           }
         } else {
-          var rising = prevMa === null ? true : maValue >= prevMa;
-          if (rising) {
-            maUp.push({ time: candle.time, value: maValue });
-            maDown.push({ time: candle.time });
-          } else {
-            maUp.push({ time: candle.time });
-            maDown.push({ time: candle.time, value: maValue });
-          }
+          ma.push({ time: candle.time, value: maValue });
 
           if (VOLUSD_SETTINGS.showExtreme) {
             extreme.push({ time: candle.time, value: maValue * VOLUSD_SETTINGS.extremeRate });
@@ -3257,8 +3246,7 @@
 
       return {
         bars: bars,
-        maUp: maUp,
-        maDown: maDown,
+        ma: ma,
         extreme: VOLUSD_SETTINGS.showExtreme ? extreme : [],
       };
     }
@@ -3275,8 +3263,7 @@
         chartCandleSeries = null;
         chartSRLines = [];
         chartVolumeSeries = null;
-        chartVolMaUpSeries = null;
-        chartVolMaDownSeries = null;
+        chartVolMaSeries = null;
         chartVolExtremeSeries = null;
       }
 
@@ -3321,24 +3308,25 @@
           color: volUsdColors.barUp,
           priceFormat: { type: 'volume' },
           priceScaleId: 'vol',
+          priceLineVisible: false,
+          lastValueVisible: false,
         });
 
-        chartVolMaUpSeries = chartInstance.addLineSeries({
-          color: volUsdColors.maUp,
+        chartVolMaSeries = chartInstance.addLineSeries({
+          color: volUsdColors.ma,
           lineWidth: 2,
           priceScaleId: 'vol',
-        });
-
-        chartVolMaDownSeries = chartInstance.addLineSeries({
-          color: volUsdColors.maDown,
-          lineWidth: 2,
-          priceScaleId: 'vol',
+          priceLineVisible: false,
+          lastValueVisible: false,
         });
 
         chartVolExtremeSeries = chartInstance.addLineSeries({
           color: volUsdColors.extreme,
           lineWidth: 1,
           priceScaleId: 'vol',
+          lineStyle: LightweightCharts.LineStyle.Dashed,
+          priceLineVisible: false,
+          lastValueVisible: false,
         });
 
         chartInstance.priceScale('vol').applyOptions({
@@ -3475,8 +3463,7 @@
         if (isChartMaximized && chartVolumeSeries) {
           var volSeries = buildVolUsdSeries(candles);
           chartVolumeSeries.setData(volSeries.bars);
-          if (chartVolMaUpSeries) chartVolMaUpSeries.setData(volSeries.maUp);
-          if (chartVolMaDownSeries) chartVolMaDownSeries.setData(volSeries.maDown);
+          if (chartVolMaSeries) chartVolMaSeries.setData(volSeries.ma);
           if (chartVolExtremeSeries) chartVolExtremeSeries.setData(volSeries.extreme);
         }
 
