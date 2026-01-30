@@ -48,6 +48,17 @@
       --chart-text: #94a3b8;
       --chart-grid: rgba(71, 85, 105, 0.2);
       --chart-border: rgba(71, 85, 105, 0.5);
+      --candle-up: #22c55e;
+      --candle-down: #ef4444;
+      --sr-15m-color: #f59e0b;
+      --sr-1h-color: #8b5cf6;
+      --sr-4h-color: #38bdf8;
+      --sr-1d-color: #ec4899;
+      --volusd-bar-up: #f1f5f9;
+      --volusd-bar-down: #f1f5f9;
+      --volusd-ma-up: #ef4444;
+      --volusd-ma-down: #ef4444;
+      --volusd-extreme: #ef4444;
       color-scheme: dark;
     }
 
@@ -68,6 +79,17 @@
       --chart-text: #475569;
       --chart-grid: rgba(148, 163, 184, 0.4);
       --chart-border: rgba(148, 163, 184, 0.6);
+      --candle-up: #16a34a;
+      --candle-down: #dc2626;
+      --sr-15m-color: #d97706;
+      --sr-1h-color: #7c3aed;
+      --sr-4h-color: #0284c7;
+      --sr-1d-color: #db2777;
+      --volusd-bar-up: #0f172a;
+      --volusd-bar-down: #0f172a;
+      --volusd-ma-up: #ef4444;
+      --volusd-ma-down: #ef4444;
+      --volusd-extreme: #ef4444;
       color-scheme: light;
     }
 
@@ -532,6 +554,43 @@
       gap: 0.5rem;
     }
 
+    .chart-preview-links {
+      display: none;
+      align-items: center;
+      gap: 0.35rem;
+      margin-left: 0.15rem;
+    }
+
+    .chart-preview-link {
+      width: 28px;
+      height: 28px;
+      border-radius: 0.45rem;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .chart-preview-link:hover {
+      color: var(--text-primary);
+      border-color: var(--cyan);
+      background: var(--bg-tertiary);
+    }
+
+    .chart-preview-link-icon {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .chart-preview.maximized .chart-preview-links {
+      display: inline-flex;
+    }
+
     .chart-preview-timeframe-select {
       display: none;
       background: var(--bg-primary);
@@ -663,18 +722,26 @@
     }
 
     .legend-dot.sr-15m {
-      background: #f59e0b;
+      background: var(--sr-15m-color);
     }
 
     .legend-dot.sr-1h {
-      background: #8b5cf6;
+      background: var(--sr-1h-color);
+    }
+
+    .legend-dot.sr-4h {
+      background: var(--sr-4h-color);
+    }
+
+    .legend-dot.sr-1d {
+      background: var(--sr-1d-color);
     }
 
     .action-btn {
-      padding: 0.45rem;
-      min-width: 2.25rem;
-      min-height: 2.25rem;
-      background: var(--bg-tertiary);
+      padding: 0.5rem;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      background: var(--bg-secondary);
       border: 1px solid var(--border);
       color: var(--text-primary);
       cursor: pointer;
@@ -683,17 +750,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.9;
+      opacity: 1;
       transition: all 0.2s;
     }
 
     .action-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
     }
 
     .action-btn:hover {
-      background: var(--bg-secondary);
+      background: var(--bg-tertiary);
       color: var(--text-primary);
       border-color: var(--cyan);
       opacity: 1;
@@ -888,6 +955,25 @@
     .setting-control select:focus {
       outline: none;
       border-color: var(--cyan);
+    }
+
+    .setting-control input[type="color"] {
+      width: 2.5rem;
+      height: 2rem;
+      border: 1px solid var(--border);
+      border-radius: 0.45rem;
+      background: var(--bg-secondary);
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .setting-control input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .setting-control input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 0.35rem;
     }
 
     /* Toggle Switch */
@@ -1338,16 +1424,17 @@
         <div class="settings-section">
           <div class="settings-section-title">Chart Preview</div>
           <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
-            The preview uses a 1m chart by default and draws <strong>exactly 4 S/R lines</strong>:
-            the previous 15m candle high/low and the previous 1h candle high/low. Toggle or resize the preview in
-            Settings.
+            The preview uses a 1m chart by default and can overlay previous-candle S/R levels from 15m, 1h, 4h, and
+            1d (yesterday's high/low). Maximized view also shows VolUSD (volume x close) with its adaptive MA and
+            extreme line. Toggle or resize the preview in Settings.
           </p>
         </div>
         <div class="settings-section">
           <div class="settings-section-title">Use Anywhere</div>
           <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
-            This is a standalone HTML tool. Use the <strong>Download HTML</strong> button to grab the file and run it
-            offline. Install it as a PWA from GitHub Pages for app-like behavior.
+            This is a standalone HTML tool. Use the <strong>Download HTML</strong> button (or grab it from the repo),
+            then open it in your browser (no installation required). The hosted version is mainly for demo/testing.
+            Install it as a PWA from GitHub Pages for app-like behavior.
           </p>
         </div>
         <div class="settings-section">
@@ -1450,6 +1537,142 @@
               </label>
             </div>
           </div>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Show 4h S/R Levels <span class="experimental-badge">Experimental</span></span>
+              <small>Broader zones (blue)</small>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingSR4h">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Show Previous Day Levels <span class="experimental-badge">Experimental</span></span>
+              <small>Yesterday high/low (pink)</small>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingSR1d">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Chart Style</div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Candle Up</span>
+              <small>Bullish candle color</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingCandleUp">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Candle Down</span>
+              <small>Bearish candle color</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingCandleDown">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>VolUSD Bars</span>
+              <small>Histogram color</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingVolUsdBars">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>VolUSD MA</span>
+              <small>Adaptive MA line</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingVolUsdMa">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>VolUSD Extreme</span>
+              <small>Extreme limit line</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingVolUsdExtreme">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>S/R 15m</span>
+              <small>15m levels</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingSr15mColor">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>S/R 1h</span>
+              <small>1h levels</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingSr1hColor">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>S/R 4h</span>
+              <small>4h levels</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingSr4hColor">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>S/R 1d</span>
+              <small>Previous day levels</small>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingSr1dColor">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Reset Chart Colors</span>
+              <small>Back to theme defaults</small>
+            </div>
+            <div class="setting-control">
+              <button class="btn-secondary btn-small" id="resetChartStyleBtn" type="button">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Data Access</div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <span>Proxy Fallback</span>
+              <small>Use public CORS proxies if the direct API is blocked</small>
+            </div>
+            <div class="setting-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingProxyFallback">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- Display Settings -->
@@ -1489,6 +1712,17 @@
           <option value="4h">4h</option>
           <option value="1d">1d</option>
         </select>
+        <div class="chart-preview-links" id="chartPreviewLinks">
+          <a class="chart-preview-link" id="chartPreviewTvLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in TradingView" aria-label="Open in TradingView">
+            <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAMAEBAAAAEAIABoBAAANgAAACAgAAABACAAqBAAAJ4EAADAwAAAAQAgAOcOAABGFQAAKAAAABAAAAAgAAAAAQAgAAAAAABABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiFxOQIhYS7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhLvIhgUgAAAAAAiFhSAIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxOQIhYS7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////+Qi4n/IhcT/yIXE//V09P///////////9LQj//IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////kIuJ/yIXE/8iFxP/dW5r////////////rKin/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////5CLif8iFxP/IhcT/z00MP///////////+Ti4f8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////+Qi4n/IhcT/yIXE/8iFxP/yMXE////////////WVFO/yIXE/8iFxP/IhcT/yIXE/+Qi4n/kIuJ////////////kIuJ/zAmIv91bmv/WVFO/3Vua////////////6yop/8iFxP/IhcT/yIXE/8iFxP//////////////////////5CLif+DfXr//////+Ti4f89NDD////////////k4uH/IhcT/yIXE/8iFxP/IhcT//////////////////////+Qi4n/TEM///Hx8P+sqKb/IhcT/7q2tf///////////2dgXf8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhLvIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxPvIhcSjyIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhYSgAAAAAAiFhJ/IhYT7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhPvIhcUjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAACAAAABAAAAAAQAgAAAAAACAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAYE2AhFhLPIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yEXE78iGBSAIBAQEAAAAAAAAAAAAAAAACAYECAhFxLfIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxLfIBgQIAAAAAAgEBAQIRcS3yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxLfAAAAACIWFIAiFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8jGBNfIRcTvyIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXEs8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE//V09P///////////////////////////9LQj//IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/3Vua////////////////////////////6yop/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/PTQw////////////////////////////5OLh/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/yMXE////////////////////////////WVFO/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/91bmv///////////////////////////+sqKf/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/z00MP///////////////////////////+Ti4f8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/7q2tf///////////////////////////2dgXf8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/Z19d////////////////////////////ura1/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/4+Lh////////////////////////////PjQw/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/////////////////////////////////////////////////IhcT/yIXE/8+NDD/1dPT///////HxcT/PjQw/yIXE/+sqKb///////////////////////////91bmv/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/////////////////////////////////////////////////8iFxP/IhcT/8jFxP/////////////////W1NP/IhcT/1lRTv///////////////////////////8jFxP8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/////////////////////////////////////////////////yIXE/8iFxP///////////////////////////8iFxP/IhcT/+Pi4f///////////////////////////z40MP8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/////////////////////////////////////////////////IhcT/yIXE//V09P/////////////////yMXE/yIXE/8iFxP/rKim////////////////////////////dW5r/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/////////////////////////////////////////////////8iFxP/IhcT/z00MP/IxcT//////9XT0/89NDD/IhcT/yIXE/9LQj/////////////////////////////W1NP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIWFM8iFxP/IhcT/yIX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" alt="" />
+          </a>
+          <a class="chart-preview-link" id="chartPreviewBinanceLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Binance Futures" aria-label="Open in Binance Futures">
+            <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvN6Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrzty668wgAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzfAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/MuuvM8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvNcLrrzCAAAAAAAAAAAAAAAAC668zguuvPxLrrzty668wgAAAAAAAAAAAAAAAAuuvM6LrrzOgAAAAAAAAAAAAAAAC668wguuvO3Lrrz8S668zoAAAAAAAAAAAAAAAAuuvMILrrzXAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvO3LrrzCAAAAAAAAAAAAAAAAC668y4uuvMIAAAAAAAAAAAAAAAALrrzOi668/EuuvPzLrrzPAAAAAAAAAAAAAAAAC668wguuvMuAAAAAAAAAAAAAAAALrrzCC6687UuuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvM6Lrrz8S668/8uuvP/Lrrz/y668/8uuvPzLrrzPgAAAAAAAAAAAAAAAAAAAAAuuvMILrrztS668/8uuvP/Lrrz/y668/8uuvP/Lrrzgy6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y668/MuuvM+AAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrzty668wgAAAAAAAAAAAAAAAAuuvMuLrrzCAAAAAAAAAAAAAAAAC668zouuvPxLrrz8y668zwAAAAAAAAAAAAAAAAuuvMILrrzLgAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAC6681wuuvMIAAAAAAAAAAAAAAAALrrzOC668/EuuvO3LrrzCAAAAAAAAAAAAAAAAC668zouuvM+AAAAAAAAAAAAAAAALrrzCC6687cuuvPxLrrzOgAAAAAAAAAAAAAAAC668wguuvNcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zguuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvM4Lrrz8S668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvMILrrzty668/8uuvP/Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6683ouuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAALrrzCC6687cuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvN8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3Lrrzty668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//5////8P///+B////AP///gB///wAP//4AB//8AAP/+AYB//gPAf/4H4H//D/D//5/5/8f+f+OD/D/BAfgfgAH4H4CD/D/Bx/5/4/+f+f//D/D//gfgf/4DwH/+AYB//wAA//+AAf//wAP//+AH///wD///+B////w////+f/8=" alt="" />
+          </a>
+          <a class="chart-preview-link" id="chartPreviewBitunixLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Bitunix Futures" aria-label="Open in Bitunix Futures">
+            <img class="chart-preview-link-icon" src="data:image/png;base64,AAABAAEAMDAAAAEACAB6AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAixJREFUeJztmjGuwjAMhjlBFbNUsLAgMXaGBdERdaMH6PoklrdHXKUDJ2DkDGycg7lrnyxRFPWVxE4TShCDB4oI/2f7T9Oko+zndxRyjNoXoigCIYQUQlzi6bgCgHrIiKfjCrWgJtSmBRBCbN9BNOhhtp0A+MXQAoEYKsSjbd4589BRiaadmuzLoUUBvwpSBbgECHB5AITUPnAP1PwAGFoMWMYXADTZSVaTOs1n9W4/7xXJavLaChSHRV1el/W52jiJ8rp8HUCTdTXz8pj0ApLH5D08gLMGVud0W7MAisPCP4CaeTXwenuKxs+YVSpAms/8AKA4FELJKLYQZlKFQWEnwm919yhrABRj088oGH1BhSg1BrYG4JSfYszdfm5lYCsA28ybxMknSdEZmA2APe9KfNug8XRcdbWSzsBsABeto+tx2TG+aZHJAuDO39wqpPmMZWAWQHtwlyEVL6hJMhmYBeDSvLo2KpUlh8nALAAf/a8GdPyPycAsAJerSypATHhKJAHgQD7Fn27rfwAUA5MBfBr4/GQqpfQ/GcCngc+t2QZhsCLUTQYSgG8DF/dsN62qLvacAPg2cKrcyChzPxvgVQaOLfamjAA+FnDP+h8swgigW6u7yH6i2TJxAuDTwByzgi2ADwO3HyvBJ4DrJTRWtG/bAAcApzacp/sEZhvH8bEDnn13p8FtRsG2AsEfcIjQj5hE6Id8UejHrFnoB93ZJ7xqkH3Cyx5ZgPEHCAfghSQKZFcAAAAASUVORK5CYII=" alt="" />
+          </a>
+        </div>
         <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Maximize chart">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 3 21 3 21 9"/>
@@ -1512,6 +1746,14 @@
           <span class="legend-dot sr-1h"></span>
           <span>1h S/R</span>
         </div>
+        <div class="legend-item" id="legend4h">
+          <span class="legend-dot sr-4h"></span>
+          <span>4h S/R</span>
+        </div>
+        <div class="legend-item" id="legend1d">
+          <span class="legend-dot sr-1d"></span>
+          <span>1d S/R</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1531,6 +1773,7 @@
     const ORION_API = 'https://screener.orionterminal.com/api/screener';
     const FETCH_TIMEOUT_MS = 12000;
     const THEME_STORAGE_KEY = 'orion-screener-theme';
+    const CHART_STYLE_STORAGE_KEY = 'orion-screener-chart-style';
 
     // Try direct first (works if served from localhost), then fall back to proxies
     function getApiUrl(proxyIndex) {
@@ -1694,12 +1937,42 @@
       hoverDelay: 300,
       showSR15m: false,
       showSR1h: false,
+      showSR4h: false,
+      showSR1d: false,
+      allowProxyFallback: window.location.protocol === 'file:',
     };
+
+    const VOLUSD_SETTINGS = {
+      maLength: 20,
+      hideSmall: false,
+      smallPer: 0.5,
+      showExtreme: true,
+      extremeRate: 3.7,
+      reverseRed: false,
+      showMaRed: false,
+    };
+
+    const CHART_STYLE_CONTROLS = [
+      { id: 'settingCandleUp', vars: ['--candle-up'] },
+      { id: 'settingCandleDown', vars: ['--candle-down'] },
+      { id: 'settingVolUsdBars', vars: ['--volusd-bar-up', '--volusd-bar-down'] },
+      { id: 'settingVolUsdMa', vars: ['--volusd-ma-up', '--volusd-ma-down'] },
+      { id: 'settingVolUsdExtreme', vars: ['--volusd-extreme'] },
+      { id: 'settingSr15mColor', vars: ['--sr-15m-color'] },
+      { id: 'settingSr1hColor', vars: ['--sr-1h-color'] },
+      { id: 'settingSr4hColor', vars: ['--sr-4h-color'] },
+      { id: 'settingSr1dColor', vars: ['--sr-1d-color'] },
+    ];
+    let chartStyleOverrides = {};
 
     // Chart instance management
     let chartInstance = null;
     let chartCandleSeries = null;
     let chartSRLines = [];
+    let chartVolumeSeries = null;
+    let chartVolMaUpSeries = null;
+    let chartVolMaDownSeries = null;
+    let chartVolExtremeSeries = null;
 
     // =============================================================================
     // Data Cache (TTL-based)
@@ -1876,6 +2149,87 @@
       }
     }
 
+    function normalizeHexColor(value) {
+      if (!value) return '#000000';
+      var cleaned = value.trim().toLowerCase();
+      if (cleaned[0] === '#') {
+        if (cleaned.length === 4) {
+          return '#' + cleaned[1] + cleaned[1] + cleaned[2] + cleaned[2] + cleaned[3] + cleaned[3];
+        }
+        return cleaned;
+      }
+      var match = cleaned.match(/^rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)$/);
+      if (match) {
+        var r = parseInt(match[1], 10).toString(16).padStart(2, '0');
+        var g = parseInt(match[2], 10).toString(16).padStart(2, '0');
+        var b = parseInt(match[3], 10).toString(16).padStart(2, '0');
+        return '#' + r + g + b;
+      }
+      return '#000000';
+    }
+
+    function applyChartStyleOverrides(persist) {
+      CHART_STYLE_CONTROLS.forEach(function(control) {
+        control.vars.forEach(function(varName) {
+          var value = chartStyleOverrides[varName];
+          if (value) {
+            document.documentElement.style.setProperty(varName, value);
+          } else {
+            document.documentElement.style.removeProperty(varName);
+          }
+        });
+      });
+
+      if (persist) {
+        try {
+          localStorage.setItem(CHART_STYLE_STORAGE_KEY, JSON.stringify(chartStyleOverrides));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+
+      if (currentPreviewSymbol && currentPreviewCard) {
+        showChartPreview(currentPreviewSymbol, currentPreviewCard);
+      }
+    }
+
+    function loadChartStyleOverrides() {
+      try {
+        var saved = localStorage.getItem(CHART_STYLE_STORAGE_KEY);
+        if (saved) {
+          var parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            chartStyleOverrides = parsed;
+          }
+        }
+      } catch (e) {
+        chartStyleOverrides = {};
+      }
+      applyChartStyleOverrides(false);
+    }
+
+    function syncChartStyleInputs() {
+      CHART_STYLE_CONTROLS.forEach(function(control) {
+        var input = document.getElementById(control.id);
+        if (!input) return;
+        var varName = control.vars[0];
+        var value = chartStyleOverrides[varName] || getCssVar(varName, '#000000');
+        input.value = normalizeHexColor(value);
+      });
+    }
+
+    function handleChartStyleInput(controlId, value) {
+      var config = CHART_STYLE_CONTROLS.find(function(item) {
+        return item.id === controlId;
+      });
+      if (!config) return;
+      var colorValue = normalizeHexColor(value);
+      config.vars.forEach(function(varName) {
+        chartStyleOverrides[varName] = colorValue;
+      });
+      applyChartStyleOverrides(true);
+    }
+
     // =============================================================================
     // API & Data Parsing
     // =============================================================================
@@ -1979,6 +2333,11 @@
       }
     }
 
+    function isProxyFallbackEnabled() {
+      if (window.location.protocol === 'file:') return true;
+      return !!chartSettings.allowProxyFallback;
+    }
+
     async function fetchJsonWithTimeout(url) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -2032,6 +2391,10 @@
           data = await fetchJsonWithTimeout(ORION_API);
         } catch (err) {
           console.warn('Direct API failed, falling back to proxies:', err);
+          if (!isProxyFallbackEnabled()) {
+            var reason = err && err.message ? err.message : 'blocked';
+            throw new Error('Direct API failed (' + reason + '). Enable proxy fallback in Settings or open the HTML file locally.');
+          }
           data = await fetchWithProxy(0);
         }
       }
@@ -2083,6 +2446,16 @@
     function getTradingViewLink(symbol) {
       const cleanSymbol = symbol.replace('/', '');
       return 'https://www.tradingview.com/chart/?symbol=BINANCE:' + cleanSymbol + '.P';
+    }
+
+    function getBinanceFuturesLink(symbol) {
+      const cleanSymbol = symbol.replace('/', '');
+      return 'https://www.binance.com/en/futures/' + cleanSymbol;
+    }
+
+    function getBitunixFuturesLink(symbol) {
+      const cleanSymbol = symbol.replace('/', '');
+      return 'https://www.bitunix.com/contract-trade/' + cleanSymbol;
     }
 
     function showToast(message, type) {
@@ -2262,7 +2635,7 @@
 
         const metricsDiv = document.createElement('div');
         metricsDiv.className = 'metrics';
-        metricsDiv.textContent = 'Vol: ' + formatVolume(pick.volume24h) + ' | 5m: ' + pick.ticks5m + ' | Vol15m: ' + formatPercent(pick.volatility15m, 2);
+        metricsDiv.textContent = 'VolUSD: ' + formatVolume(pick.volume24h) + ' | 5m: ' + pick.ticks5m + ' | Vol15m: ' + formatPercent(pick.volatility15m, 2);
 
         symbolInfo.appendChild(symbolRow);
         symbolInfo.appendChild(metricsDiv);
@@ -2607,6 +2980,14 @@
       document.getElementById('settingHoverDelay').value = String(chartSettings.hoverDelay);
       document.getElementById('settingSR15m').checked = chartSettings.showSR15m;
       document.getElementById('settingSR1h').checked = chartSettings.showSR1h;
+      document.getElementById('settingSR4h').checked = chartSettings.showSR4h;
+      document.getElementById('settingSR1d').checked = chartSettings.showSR1d;
+      var proxyToggle = document.getElementById('settingProxyFallback');
+      if (proxyToggle) {
+        proxyToggle.checked = isProxyFallbackEnabled();
+        proxyToggle.disabled = window.location.protocol === 'file:';
+      }
+      syncChartStyleInputs();
     }
 
     function closeSettingsModal() {
@@ -2646,6 +3027,15 @@
           break;
         case 'settingSR1h':
           chartSettings.showSR1h = value;
+          break;
+        case 'settingSR4h':
+          chartSettings.showSR4h = value;
+          break;
+        case 'settingSR1d':
+          chartSettings.showSR1d = value;
+          break;
+        case 'settingProxyFallback':
+          chartSettings.allowProxyFallback = value;
           break;
       }
       saveSettings();
@@ -2771,14 +3161,123 @@
       };
     }
 
+    function getVolUsdColors() {
+      return {
+        barUp: getCssVar('--volusd-bar-up', '#0f172a'),
+        barDown: getCssVar('--volusd-bar-down', '#0f172a'),
+        maUp: getCssVar('--volusd-ma-up', '#ef4444'),
+        maDown: getCssVar('--volusd-ma-down', '#ef4444'),
+        extreme: getCssVar('--volusd-extreme', '#ef4444'),
+      };
+    }
+
+    function getSrColors() {
+      return {
+        sr15m: getCssVar('--sr-15m-color', '#f59e0b'),
+        sr1h: getCssVar('--sr-1h-color', '#8b5cf6'),
+        sr4h: getCssVar('--sr-4h-color', '#38bdf8'),
+        sr1d: getCssVar('--sr-1d-color', '#ec4899'),
+      };
+    }
+
+    function buildVolUsdSeries(candles) {
+      var bars = [];
+      var maUp = [];
+      var maDown = [];
+      var extreme = [];
+      var colors = getVolUsdColors();
+      var len = VOLUSD_SETTINGS.maLength;
+      var alpha = 1.618 / 100;
+      var sum = 0;
+      var prevMa = null;
+
+      for (var i = 0; i < candles.length; i += 1) {
+        var candle = candles[i];
+        var vol = candle.volume * candle.close;
+
+        sum += vol;
+        if (i >= len) {
+          var oldCandle = candles[i - len];
+          sum -= oldCandle.volume * oldCandle.close;
+        }
+
+        var sma = i >= len - 1 ? sum / len : null;
+        var maValue = null;
+        if (sma !== null && !Number.isNaN(sma)) {
+          if (prevMa === null) {
+            maValue = sma;
+          } else {
+            maValue = alpha * vol + (1 - alpha) * prevMa;
+          }
+        }
+
+        var isUp = candle.close >= candle.open;
+        var volToDisplay = vol;
+        if (VOLUSD_SETTINGS.reverseRed && !isUp) {
+          volToDisplay = -vol;
+        }
+
+        if (VOLUSD_SETTINGS.hideSmall) {
+          if (maValue === null || volToDisplay < maValue * VOLUSD_SETTINGS.smallPer) {
+            volToDisplay = 0;
+          }
+        }
+
+        bars.push({
+          time: candle.time,
+          value: volToDisplay,
+          color: isUp ? colors.barUp : colors.barDown,
+        });
+
+        if (maValue === null) {
+          maUp.push({ time: candle.time });
+          maDown.push({ time: candle.time });
+          if (VOLUSD_SETTINGS.showExtreme) {
+            extreme.push({ time: candle.time });
+          }
+        } else {
+          var rising = prevMa === null ? true : maValue >= prevMa;
+          if (rising) {
+            maUp.push({ time: candle.time, value: maValue });
+            maDown.push({ time: candle.time });
+          } else {
+            maUp.push({ time: candle.time });
+            maDown.push({ time: candle.time, value: maValue });
+          }
+
+          if (VOLUSD_SETTINGS.showExtreme) {
+            extreme.push({ time: candle.time, value: maValue * VOLUSD_SETTINGS.extremeRate });
+          }
+        }
+
+        if (maValue !== null) {
+          prevMa = maValue;
+        }
+      }
+
+      return {
+        bars: bars,
+        maUp: maUp,
+        maDown: maDown,
+        extreme: VOLUSD_SETTINGS.showExtreme ? extreme : [],
+      };
+    }
+
     function createChart(container, width, height) {
       var chartTheme = getChartThemeColors();
+      var volUsdColors = getVolUsdColors();
+      var candleUp = getCssVar('--candle-up', '#22c55e');
+      var candleDown = getCssVar('--candle-down', '#ef4444');
       // Destroy existing chart
       if (chartInstance) {
         chartInstance.remove();
         chartInstance = null;
         chartCandleSeries = null;
         chartSRLines = [];
+        chartVolumeSeries = null;
+        chartVolMaUpSeries = null;
+        chartVolMaDownSeries = null;
+        chartVolExtremeSeries = null;
       }
 
       chartInstance = LightweightCharts.createChart(container, {
@@ -2809,13 +3308,53 @@
       });
 
       chartCandleSeries = chartInstance.addCandlestickSeries({
-        upColor: '#22c55e',
-        downColor: '#ef4444',
-        borderUpColor: '#22c55e',
-        borderDownColor: '#ef4444',
-        wickUpColor: '#22c55e',
-        wickDownColor: '#ef4444',
+        upColor: candleUp,
+        downColor: candleDown,
+        borderUpColor: candleUp,
+        borderDownColor: candleDown,
+        wickUpColor: candleUp,
+        wickDownColor: candleDown,
       });
+
+      if (isChartMaximized) {
+        chartVolumeSeries = chartInstance.addHistogramSeries({
+          color: volUsdColors.barUp,
+          priceFormat: { type: 'volume' },
+          priceScaleId: 'vol',
+        });
+
+        chartVolMaUpSeries = chartInstance.addLineSeries({
+          color: volUsdColors.maUp,
+          lineWidth: 2,
+          priceScaleId: 'vol',
+        });
+
+        chartVolMaDownSeries = chartInstance.addLineSeries({
+          color: volUsdColors.maDown,
+          lineWidth: 2,
+          priceScaleId: 'vol',
+        });
+
+        chartVolExtremeSeries = chartInstance.addLineSeries({
+          color: volUsdColors.extreme,
+          lineWidth: 1,
+          priceScaleId: 'vol',
+        });
+
+        chartInstance.priceScale('vol').applyOptions({
+          scaleMargins: { top: 0.78, bottom: 0 },
+          borderVisible: false,
+          visible: false,
+        });
+
+        chartCandleSeries.priceScale().applyOptions({
+          scaleMargins: { top: 0.08, bottom: 0.3 },
+        });
+      } else {
+        chartCandleSeries.priceScale().applyOptions({
+          scaleMargins: { top: 0.1, bottom: 0.1 },
+        });
+      }
 
       return chartInstance;
     }
@@ -2869,6 +3408,12 @@
       var legend = document.getElementById('chartPreviewLegend');
       var legend15m = document.getElementById('legend15m');
       var legend1h = document.getElementById('legend1h');
+      var legend4h = document.getElementById('legend4h');
+      var legend1d = document.getElementById('legend1d');
+      var tvLink = document.getElementById('chartPreviewTvLink');
+      var binanceLink = document.getElementById('chartPreviewBinanceLink');
+      var bitunixLink = document.getElementById('chartPreviewBitunixLink');
+      var srColors = getSrColors();
 
       // Get current size
       currentPreviewCard = cardElement;
@@ -2880,12 +3425,17 @@
         size: chartSettings.size,
         sr15m: chartSettings.showSR15m,
         sr1h: chartSettings.showSR1h,
+        sr4h: chartSettings.showSR4h,
+        sr1d: chartSettings.showSR1d,
         maximized: isChartMaximized,
       });
 
       symbolSpan.textContent = symbol;
       timeframeSpan.textContent = chartSettings.timeframe;
       timeframeSelect.value = chartSettings.timeframe;
+      if (tvLink) tvLink.href = getTradingViewLink(symbol);
+      if (binanceLink) binanceLink.href = getBinanceFuturesLink(symbol);
+      if (bitunixLink) bitunixLink.href = getBitunixFuturesLink(symbol);
 
       var layout = getPreviewLayout(cardElement);
       applyPreviewLayout(layout);
@@ -2922,13 +3472,21 @@
         chartCandleSeries.setData(candles);
         chartInstance.timeScale().fitContent();
 
+        if (isChartMaximized && chartVolumeSeries) {
+          var volSeries = buildVolUsdSeries(candles);
+          chartVolumeSeries.setData(volSeries.bars);
+          if (chartVolMaUpSeries) chartVolMaUpSeries.setData(volSeries.maUp);
+          if (chartVolMaDownSeries) chartVolMaDownSeries.setData(volSeries.maDown);
+          if (chartVolExtremeSeries) chartVolExtremeSeries.setData(volSeries.extreme);
+        }
+
         // Fetch and display S/R levels
         var showLegend = false;
 
         if (chartSettings.showSR15m) {
           var sr15m = await fetchSRLevels(symbol, '15m', signal);
           if (requestId !== chartPreviewRequestId) return;
-          addSRLinesToChart(sr15m, '#f59e0b', '15m', isChartMaximized); // Orange
+          addSRLinesToChart(sr15m, srColors.sr15m, '15m', isChartMaximized);
           legend15m.style.display = sr15m.length > 0 ? 'flex' : 'none';
           if (sr15m.length > 0) showLegend = true;
         } else {
@@ -2938,11 +3496,31 @@
         if (chartSettings.showSR1h) {
           var sr1h = await fetchSRLevels(symbol, '1h', signal);
           if (requestId !== chartPreviewRequestId) return;
-          addSRLinesToChart(sr1h, '#8b5cf6', '1h', isChartMaximized); // Purple
+          addSRLinesToChart(sr1h, srColors.sr1h, '1h', isChartMaximized);
           legend1h.style.display = sr1h.length > 0 ? 'flex' : 'none';
           if (sr1h.length > 0) showLegend = true;
         } else {
           legend1h.style.display = 'none';
+        }
+
+        if (chartSettings.showSR4h) {
+          var sr4h = await fetchSRLevels(symbol, '4h', signal);
+          if (requestId !== chartPreviewRequestId) return;
+          addSRLinesToChart(sr4h, srColors.sr4h, '4h', isChartMaximized);
+          legend4h.style.display = sr4h.length > 0 ? 'flex' : 'none';
+          if (sr4h.length > 0) showLegend = true;
+        } else {
+          legend4h.style.display = 'none';
+        }
+
+        if (chartSettings.showSR1d) {
+          var sr1d = await fetchSRLevels(symbol, '1d', signal);
+          if (requestId !== chartPreviewRequestId) return;
+          addSRLinesToChart(sr1d, srColors.sr1d, '1d', isChartMaximized);
+          legend1d.style.display = sr1d.length > 0 ? 'flex' : 'none';
+          if (sr1d.length > 0) showLegend = true;
+        } else {
+          legend1d.style.display = 'none';
         }
 
         legend.style.display = showLegend ? 'flex' : 'none';
@@ -3027,6 +3605,7 @@
 
       var storedTheme = getStoredTheme();
       applyTheme(storedTheme || getPreferredTheme(), false);
+      loadChartStyleOverrides();
 
       renderProfiles();
       updateFilterInputs();
@@ -3101,6 +3680,32 @@
       document.getElementById('settingSR1h').addEventListener('change', function() {
         handleSettingChange('settingSR1h', this.checked);
       });
+      document.getElementById('settingSR4h').addEventListener('change', function() {
+        handleSettingChange('settingSR4h', this.checked);
+      });
+      document.getElementById('settingSR1d').addEventListener('change', function() {
+        handleSettingChange('settingSR1d', this.checked);
+      });
+      document.getElementById('settingProxyFallback').addEventListener('change', function() {
+        handleSettingChange('settingProxyFallback', this.checked);
+      });
+
+      CHART_STYLE_CONTROLS.forEach(function(control) {
+        var input = document.getElementById(control.id);
+        if (!input) return;
+        input.addEventListener('change', function() {
+          handleChartStyleInput(control.id, this.value);
+        });
+      });
+
+      var resetChartStyleBtn = document.getElementById('resetChartStyleBtn');
+      if (resetChartStyleBtn) {
+        resetChartStyleBtn.addEventListener('click', function() {
+          chartStyleOverrides = {};
+          applyChartStyleOverrides(true);
+          syncChartStyleInputs();
+        });
+      }
 
       var preview = document.getElementById('chartPreview');
       preview.addEventListener('mouseenter', function() {
@@ -3114,6 +3719,7 @@
         if (e.target.closest('#chartPreviewMaximize')) return;
         if (e.target.closest('#chartPreviewClose')) return;
         if (e.target.closest('#chartPreviewTimeframeSelect')) return;
+        if (e.target.closest('#chartPreviewLinks')) return;
         toggleChartMaximize();
       });
       document.getElementById('chartPreviewMaximize').addEventListener('click', function(e) {
