@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 test('settings: chart style controls apply overrides', async ({ page }) => {
   await page.goto('/');
   await page.click('#settingsBtn');
+  await page.click('summary.settings-section-title:has-text("Chart Style")');
 
   await expect(page.locator('#settingCandleUp')).toBeVisible();
   await expect(page.locator('#settingVolUsdBars')).toBeVisible();

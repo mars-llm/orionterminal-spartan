@@ -679,6 +679,10 @@
       display: block;
     }
 
+    :root:not([data-theme="light"]) .chart-preview-link[data-brand="tradingview"] .chart-preview-link-icon {
+      filter: invert(1) brightness(1.15);
+    }
+
     .chart-preview.maximized .chart-preview-links {
       display: inline-flex;
     }
@@ -981,6 +985,52 @@
       padding: 1.25rem;
     }
 
+    .settings-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .settings-collapsible {
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: var(--bg-secondary);
+    }
+
+    .settings-collapsible summary.settings-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border: none;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    .settings-collapsible summary.settings-section-title::-webkit-details-marker {
+      display: none;
+    }
+
+    .settings-collapsible summary.settings-section-title::after {
+      content: '▾';
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .settings-collapsible[open] summary.settings-section-title::after {
+      transform: rotate(180deg);
+    }
+
+    .settings-collapsible .settings-content {
+      margin-top: 0.75rem;
+    }
+
     .settings-section {
       margin-bottom: 1.5rem;
     }
@@ -1032,6 +1082,16 @@
     .setting-label small {
       font-size: 0.7rem;
       color: var(--text-muted);
+    }
+
+    .settings-grid .settings-section {
+      margin-bottom: 0;
+    }
+
+    @media (min-width: 720px) {
+      .settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     .setting-control select {
@@ -1659,235 +1719,241 @@
         </button>
       </div>
       <div class="modal-body">
-        <!-- Chart Preview Settings -->
-        <div class="settings-section">
-          <div class="settings-section-title">Chart Preview</div>
+        <div class="settings-grid">
+          <details class="settings-section settings-collapsible" open>
+            <summary class="settings-section-title">Chart Preview</summary>
+            <div class="settings-content">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Enable Preview</span>
+                  <small>Show TradingView chart on hover</small>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle">
+                    <input type="checkbox" id="settingChartEnabled" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Enable Preview</span>
-              <small>Show TradingView chart on hover</small>
-            </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="settingChartEnabled" checked>
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Timeframe</span>
+                  <small>Chart candle interval</small>
+                </div>
+                <div class="setting-control">
+                  <select id="settingChartTimeframe">
+                    <option value="1m" selected>1 minute</option>
+                    <option value="5m">5 minutes</option>
+                    <option value="15m">15 minutes</option>
+                    <option value="1h">1 hour</option>
+                    <option value="4h">4 hours</option>
+                    <option value="1d">1 day</option>
+                  </select>
+                </div>
+              </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Timeframe</span>
-              <small>Chart candle interval</small>
-            </div>
-            <div class="setting-control">
-              <select id="settingChartTimeframe">
-                <option value="1m" selected>1 minute</option>
-                <option value="5m">5 minutes</option>
-                <option value="15m">15 minutes</option>
-                <option value="1h">1 hour</option>
-                <option value="4h">4 hours</option>
-                <option value="1d">1 day</option>
-              </select>
-            </div>
-          </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Preview Size</span>
+                  <small>Popup dimensions</small>
+                </div>
+                <div class="setting-control">
+                  <select id="settingChartSize">
+                    <option value="small">Small (280×180)</option>
+                    <option value="medium" selected>Medium (320×220)</option>
+                    <option value="large">Large (400×280)</option>
+                  </select>
+                </div>
+              </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Preview Size</span>
-              <small>Popup dimensions</small>
-            </div>
-            <div class="setting-control">
-              <select id="settingChartSize">
-                <option value="small">Small (280×180)</option>
-                <option value="medium" selected>Medium (320×220)</option>
-                <option value="large">Large (400×280)</option>
-              </select>
-            </div>
-          </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Show 15m S/R Levels <span class="experimental-badge">Experimental</span></span>
+                  <small>Support & resistance zones (orange)</small>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle">
+                    <input type="checkbox" id="settingSR15m">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Show 15m S/R Levels <span class="experimental-badge">Experimental</span></span>
-              <small>Support & resistance zones (orange)</small>
-            </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="settingSR15m">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Show 1h S/R Levels <span class="experimental-badge">Experimental</span></span>
+                  <small>Higher timeframe zones (purple)</small>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle">
+                    <input type="checkbox" id="settingSR1h">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Show 1h S/R Levels <span class="experimental-badge">Experimental</span></span>
-              <small>Higher timeframe zones (purple)</small>
-            </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="settingSR1h">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Show 4h S/R Levels <span class="experimental-badge">Experimental</span></span>
+                  <small>Broader zones (blue)</small>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle">
+                    <input type="checkbox" id="settingSR4h">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Show 4h S/R Levels <span class="experimental-badge">Experimental</span></span>
-              <small>Broader zones (blue)</small>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Show Previous Day Levels <span class="experimental-badge">Experimental</span></span>
+                  <small>Yesterday high/low (pink)</small>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle">
+                    <input type="checkbox" id="settingSR1d">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
             </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="settingSR4h">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
+          </details>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Show Previous Day Levels <span class="experimental-badge">Experimental</span></span>
-              <small>Yesterday high/low (pink)</small>
+          <details class="settings-section settings-collapsible">
+            <summary class="settings-section-title">Chart Style</summary>
+            <div class="settings-content">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Candle Up</span>
+                  <small>Bullish candle color</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingCandleUp">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Candle Down</span>
+                  <small>Bearish candle color</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingCandleDown">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>VolUSD Bars</span>
+                  <small>Histogram color</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingVolUsdBars">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>VolUSD MA</span>
+                  <small>Adaptive MA line</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingVolUsdMa">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>VolUSD Extreme</span>
+                  <small>Extreme limit line</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingVolUsdExtreme">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>S/R 15m</span>
+                  <small>15m levels</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingSr15mColor">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>S/R 1h</span>
+                  <small>1h levels</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingSr1hColor">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>S/R 4h</span>
+                  <small>4h levels</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingSr4hColor">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>S/R 1d</span>
+                  <small>Previous day levels</small>
+                </div>
+                <div class="setting-control">
+                  <input type="color" id="settingSr1dColor">
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Reset Chart Colors</span>
+                  <small>Back to theme defaults</small>
+                </div>
+                <div class="setting-control">
+                  <button class="btn-secondary btn-small" id="resetChartStyleBtn" type="button">Reset</button>
+                </div>
+              </div>
             </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="settingSR1d">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-        </div>
+          </details>
 
-        <div class="settings-section">
-          <div class="settings-section-title">Chart Style</div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Candle Up</span>
-              <small>Bullish candle color</small>
+          <details class="settings-section settings-collapsible">
+            <summary class="settings-section-title">Data Access</summary>
+            <div class="settings-content">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Proxy Fallback</span>
+                  <small>Use public CORS proxies if the direct API is blocked</small>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle">
+                    <input type="checkbox" id="settingProxyFallback">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
             </div>
-            <div class="setting-control">
-              <input type="color" id="settingCandleUp">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Candle Down</span>
-              <small>Bearish candle color</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingCandleDown">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>VolUSD Bars</span>
-              <small>Histogram color</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingVolUsdBars">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>VolUSD MA</span>
-              <small>Adaptive MA line</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingVolUsdMa">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>VolUSD Extreme</span>
-              <small>Extreme limit line</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingVolUsdExtreme">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>S/R 15m</span>
-              <small>15m levels</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingSr15mColor">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>S/R 1h</span>
-              <small>1h levels</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingSr1hColor">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>S/R 4h</span>
-              <small>4h levels</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingSr4hColor">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>S/R 1d</span>
-              <small>Previous day levels</small>
-            </div>
-            <div class="setting-control">
-              <input type="color" id="settingSr1dColor">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Reset Chart Colors</span>
-              <small>Back to theme defaults</small>
-            </div>
-            <div class="setting-control">
-              <button class="btn-secondary btn-small" id="resetChartStyleBtn" type="button">Reset</button>
-            </div>
-          </div>
-        </div>
+          </details>
 
-        <div class="settings-section">
-          <div class="settings-section-title">Data Access</div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Proxy Fallback</span>
-              <small>Use public CORS proxies if the direct API is blocked</small>
+          <details class="settings-section settings-collapsible">
+            <summary class="settings-section-title">Display</summary>
+            <div class="settings-content">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span>Hover Delay</span>
+                  <small>Time before chart appears</small>
+                </div>
+                <div class="setting-control">
+                  <select id="settingHoverDelay">
+                    <option value="0">Instant</option>
+                    <option value="150">Fast (150ms)</option>
+                    <option value="300" selected>Normal (300ms)</option>
+                    <option value="500">Slow (500ms)</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div class="setting-control">
-              <label class="toggle">
-                <input type="checkbox" id="settingProxyFallback">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Display Settings -->
-        <div class="settings-section">
-          <div class="settings-section-title">Display</div>
-
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Hover Delay</span>
-              <small>Time before chart appears</small>
-            </div>
-            <div class="setting-control">
-              <select id="settingHoverDelay">
-                <option value="0">Instant</option>
-                <option value="150">Fast (150ms)</option>
-                <option value="300" selected>Normal (300ms)</option>
-                <option value="500">Slow (500ms)</option>
-              </select>
-            </div>
-          </div>
+          </details>
         </div>
       </div>
     </div>
@@ -1908,13 +1974,13 @@
           <option value="1d">1d</option>
         </select>
         <div class="chart-preview-links" id="chartPreviewLinks">
-          <a class="chart-preview-link" id="chartPreviewTvLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in TradingView" aria-label="Open in TradingView">
+          <a class="chart-preview-link" data-brand="tradingview" id="chartPreviewTvLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in TradingView" aria-label="Open in TradingView">
             <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAMAEBAAAAEAIABoBAAANgAAACAgAAABACAAqBAAAJ4EAADAwAAAAQAgAOcOAABGFQAAKAAAABAAAAAgAAAAAQAgAAAAAABABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiFxOQIhYS7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhLvIhgUgAAAAAAiFhSAIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxOQIhYS7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////+Qi4n/IhcT/yIXE//V09P///////////9LQj//IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////kIuJ/yIXE/8iFxP/dW5r////////////rKin/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////5CLif8iFxP/IhcT/z00MP///////////+Ti4f8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////+Qi4n/IhcT/yIXE/8iFxP/yMXE////////////WVFO/yIXE/8iFxP/IhcT/yIXE/+Qi4n/kIuJ////////////kIuJ/zAmIv91bmv/WVFO/3Vua////////////6yop/8iFxP/IhcT/yIXE/8iFxP//////////////////////5CLif+DfXr//////+Ti4f89NDD////////////k4uH/IhcT/yIXE/8iFxP/IhcT//////////////////////+Qi4n/TEM///Hx8P+sqKb/IhcT/7q2tf///////////2dgXf8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhLvIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxPvIhcSjyIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhYSgAAAAAAiFhJ/IhYT7yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFhPvIhcUjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAACAAAABAAAAAAQAgAAAAAACAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAYE2AhFhLPIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yEXE78iGBSAIBAQEAAAAAAAAAAAAAAAACAYECAhFxLfIhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxLfIBgQIAAAAAAgEBAQIRcS3yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxLfAAAAACIWFIAiFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8jGBNfIRcTvyIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXEs8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE//V09P///////////////////////////9LQj//IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/3Vua////////////////////////////6yop/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/PTQw////////////////////////////5OLh/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/yMXE////////////////////////////WVFO/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/91bmv///////////////////////////+sqKf/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/z00MP///////////////////////////+Ti4f8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT////////////////////////////IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/7q2tf///////////////////////////2dgXf8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP///////////////////////////8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/Z19d////////////////////////////ura1/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE////////////////////////////yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/4+Lh////////////////////////////PjQw/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/////////////////////////////////////////////////IhcT/yIXE/8+NDD/1dPT///////HxcT/PjQw/yIXE/+sqKb///////////////////////////91bmv/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/////////////////////////////////////////////////8iFxP/IhcT/8jFxP/////////////////W1NP/IhcT/1lRTv///////////////////////////8jFxP8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/////////////////////////////////////////////////yIXE/8iFxP///////////////////////////8iFxP/IhcT/+Pi4f///////////////////////////z40MP8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/////////////////////////////////////////////////IhcT/yIXE//V09P/////////////////yMXE/yIXE/8iFxP/rKim////////////////////////////dW5r/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/////////////////////////////////////////////////8iFxP/IhcT/z00MP/IxcT//////9XT0/89NDD/IhcT/yIXE/9LQj/////////////////////////////W1NP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIXE/8iFxP/IhcT/yIWFM8iFxP/IhcT/yIX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" alt="" />
           </a>
-          <a class="chart-preview-link" id="chartPreviewBinanceLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Binance Futures" aria-label="Open in Binance Futures">
+          <a class="chart-preview-link" data-brand="binance" id="chartPreviewBinanceLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Binance Futures" aria-label="Open in Binance Futures">
             <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvN6Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrzty668wgAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzfAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/MuuvM8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvNcLrrzCAAAAAAAAAAAAAAAAC668zguuvPxLrrzty668wgAAAAAAAAAAAAAAAAuuvM6LrrzOgAAAAAAAAAAAAAAAC668wguuvO3Lrrz8S668zoAAAAAAAAAAAAAAAAuuvMILrrzXAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvO3LrrzCAAAAAAAAAAAAAAAAC668y4uuvMIAAAAAAAAAAAAAAAALrrzOi668/EuuvPzLrrzPAAAAAAAAAAAAAAAAC668wguuvMuAAAAAAAAAAAAAAAALrrzCC6687UuuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvM6Lrrz8S668/8uuvP/Lrrz/y668/8uuvPzLrrzPgAAAAAAAAAAAAAAAAAAAAAuuvMILrrztS668/8uuvP/Lrrz/y668/8uuvP/Lrrzgy6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y668/MuuvM+AAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrzty668wgAAAAAAAAAAAAAAAAuuvMuLrrzCAAAAAAAAAAAAAAAAC668zouuvPxLrrz8y668zwAAAAAAAAAAAAAAAAuuvMILrrzLgAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAC6681wuuvMIAAAAAAAAAAAAAAAALrrzOC668/EuuvO3LrrzCAAAAAAAAAAAAAAAAC668zouuvM+AAAAAAAAAAAAAAAALrrzCC6687cuuvPxLrrzOgAAAAAAAAAAAAAAAC668wguuvNcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zguuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvM4Lrrz8S668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvMILrrzty668/8uuvP/Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6683ouuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAALrrzCC6687cuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvN8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3Lrrzty668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//5////8P///+B////AP///gB///wAP//4AB//8AAP/+AYB//gPAf/4H4H//D/D//5/5/8f+f+OD/D/BAfgfgAH4H4CD/D/Bx/5/4/+f+f//D/D//gfgf/4DwH/+AYB//wAA//+AAf//wAP//+AH///wD///+B////w////+f/8=" alt="" />
           </a>
-          <a class="chart-preview-link" id="chartPreviewBitunixLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Bitunix Futures" aria-label="Open in Bitunix Futures">
+          <a class="chart-preview-link" data-brand="bitunix" id="chartPreviewBitunixLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Bitunix Futures" aria-label="Open in Bitunix Futures">
             <img class="chart-preview-link-icon" src="data:image/png;base64,AAABAAEAMDAAAAEACAB6AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAixJREFUeJztmjGuwjAMhjlBFbNUsLAgMXaGBdERdaMH6PoklrdHXKUDJ2DkDGycg7lrnyxRFPWVxE4TShCDB4oI/2f7T9Oko+zndxRyjNoXoigCIYQUQlzi6bgCgHrIiKfjCrWgJtSmBRBCbN9BNOhhtp0A+MXQAoEYKsSjbd4589BRiaadmuzLoUUBvwpSBbgECHB5AITUPnAP1PwAGFoMWMYXADTZSVaTOs1n9W4/7xXJavLaChSHRV1el/W52jiJ8rp8HUCTdTXz8pj0ApLH5D08gLMGVud0W7MAisPCP4CaeTXwenuKxs+YVSpAms/8AKA4FELJKLYQZlKFQWEnwm919yhrABRj088oGH1BhSg1BrYG4JSfYszdfm5lYCsA28ybxMknSdEZmA2APe9KfNug8XRcdbWSzsBsABeto+tx2TG+aZHJAuDO39wqpPmMZWAWQHtwlyEVL6hJMhmYBeDSvLo2KpUlh8nALAAf/a8GdPyPycAsAJerSypATHhKJAHgQD7Fn27rfwAUA5MBfBr4/GQqpfQ/GcCngc+t2QZhsCLUTQYSgG8DF/dsN62qLvacAPg2cKrcyChzPxvgVQaOLfamjAA+FnDP+h8swgigW6u7yH6i2TJxAuDTwByzgi2ADwO3HyvBJ4DrJTRWtG/bAAcApzacp/sEZhvH8bEDnn13p8FtRsG2AsEfcIjQj5hE6Id8UejHrFnoB93ZJ7xqkH3Cyx5ZgPEHCAfghSQKZFcAAAAASUVORK5CYII=" alt="" />
           </a>
         </div>
@@ -3515,15 +3581,17 @@
           priceFormat: { type: 'volume' },
           priceScaleId: 'vol',
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: true,
         });
 
         chartVolMaSeries = chartInstance.addLineSeries({
           color: volUsdColors.ma,
           lineWidth: 2,
           priceScaleId: 'vol',
+          priceFormat: { type: 'volume' },
+          title: 'VolUSD MA',
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: true,
         });
 
         chartVolExtremeSeries = chartInstance.addLineSeries({
@@ -3531,14 +3599,16 @@
           lineWidth: 1,
           priceScaleId: 'vol',
           lineStyle: LightweightCharts.LineStyle.Dashed,
+          priceFormat: { type: 'volume' },
+          title: 'VolUSD Extreme',
           priceLineVisible: false,
-          lastValueVisible: false,
+          lastValueVisible: true,
         });
 
         chartInstance.priceScale('vol').applyOptions({
           scaleMargins: { top: 0.78, bottom: 0 },
           borderVisible: false,
-          visible: false,
+          visible: true,
         });
 
         chartCandleSeries.priceScale().applyOptions({
