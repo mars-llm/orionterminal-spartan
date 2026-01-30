@@ -3103,7 +3103,7 @@
 
       var response = await fetch(url, { signal: signal });
       if (!response.ok) {
-        throw new Error('Binance API error: ' + response.status);
+        throw new Error('Binance ' + response.status + ' for ' + cleanSymbol);
       }
 
       var data = await response.json();
@@ -4728,8 +4728,9 @@
       } catch (err) {
         if (requestId !== chartPreviewRequestId) return;
         if (err && err.name === 'AbortError') return;
-        console.error('Chart error:', err);
-        loading.textContent = 'Failed to load chart';
+        var errMsg = err && err.message ? err.message : 'Unknown error';
+        console.error('Chart error for ' + symbol + ':', errMsg, err);
+        loading.textContent = 'Chart failed: ' + errMsg;
         loading.classList.remove('hidden');
         container.style.display = 'none';
       }
