@@ -1137,9 +1137,9 @@
           <div class="hint">Exclude mega caps</div>
         </div>
         <div class="filter-group">
-          <label>Min Volatility (15m)</label>
-          <input type="number" id="minVolatility" step="0.01" value="0.1">
-          <div class="hint">Price movement % (tf15m.volatility)</div>
+          <label>Min Volatility (15m %)</label>
+          <input type="number" id="minVolatility" step="0.01" min="0" value="0.1">
+          <div class="hint">15m range % (Orion: tf15m.volatility). Example: 0.5 = 0.5%</div>
         </div>
         <div class="filter-group">
           <label>Min Ticks (5m)</label>
@@ -1191,7 +1191,7 @@
         <path d="M16 65 L36 50 L56 25 L76 40 L96 55" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
       </svg>
       <p>Click "Scan Market" to find active trading setups</p>
-      <p class="hint" id="emptyHint">Vol &gt; 500K, 15m &gt; 10%, 5m Ticks &gt; 200</p>
+      <p class="hint" id="emptyHint">Vol &gt; 500K, 15m &gt; 0.10%, 5m Ticks &gt; 200</p>
     </div>
 
     <div id="resultsContainer" style="display: none;">
@@ -1441,13 +1441,14 @@
     // =============================================================================
 
     // CORS proxies for standalone file usage (no local server needed)
-    // The API doesn't include CORS headers, so we route through a proxy
+    // GitHub Pages should use the direct API first, then fall back to proxies if needed
     const CORS_PROXIES = [
       { url: 'https://api.codetabs.com/v1/proxy?quest=', encode: false },
       { url: 'https://api.allorigins.win/raw?url=', encode: true },
       { url: 'https://corsproxy.io/?', encode: true },
     ];
     const ORION_API = 'https://screener.orionterminal.com/api/screener';
+    const FETCH_TIMEOUT_MS = 12000;
 
     // Try direct first (works if served from localhost), then fall back to proxies
     function getApiUrl(proxyIndex) {
@@ -1850,15 +1851,9 @@
       }
     }
 
-    async function fetchWithProxy(proxyIndex) {
-      const url = getApiUrl(proxyIndex);
-      if (!url) throw new Error('All proxies failed. Try again later.');
-
-      const proxyName = getProxyName(proxyIndex);
-      console.log('Trying proxy: ' + proxyName);
-
+    async function fetchJsonWithTimeout(url) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
         const response = await fetch(url, {
@@ -1871,8 +1866,23 @@
           throw new Error('HTTP ' + response.status);
         }
 
-        console.log('Success via ' + proxyName);
         return await response.json();
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    async function fetchWithProxy(proxyIndex) {
+      const url = getApiUrl(proxyIndex);
+      if (!url) throw new Error('All proxies failed. Try again later.');
+
+      const proxyName = getProxyName(proxyIndex);
+      console.log('Trying proxy: ' + proxyName);
+
+      try {
+        const data = await fetchJsonWithTimeout(url);
+        console.log('Success via ' + proxyName);
+        return data;
       } catch (err) {
         console.warn('Proxy failed: ' + proxyName + ' (' + err.message + ')');
         // If proxy fails, try next one
@@ -1880,14 +1890,23 @@
           return fetchWithProxy(proxyIndex + 1);
         }
         throw new Error('All proxies failed. Last error: ' + err.message);
-      } finally {
-        clearTimeout(timeoutId);
       }
     }
 
     async function fetchScreener() {
-      // Start with proxy 0 (skip direct call since file:// always fails CORS)
-      const data = await fetchWithProxy(0);
+      // file:// always fails CORS, so use proxies first there. Otherwise try direct then fall back.
+      let data;
+      if (window.location.protocol === 'file:') {
+        data = await fetchWithProxy(0);
+      } else {
+        try {
+          console.log('Trying direct API');
+          data = await fetchJsonWithTimeout(ORION_API);
+        } catch (err) {
+          console.warn('Direct API failed, falling back to proxies:', err);
+          data = await fetchWithProxy(0);
+        }
+      }
       const allPicks = parseScreenerData(data);
       const filtered = filterPicks(allPicks, currentFilters);
       const sorted = sortPicks(filtered);
@@ -1920,6 +1939,12 @@
     function formatPrice(price) {
       if (price < 1) return price.toPrecision(4);
       return price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+
+    function formatPercent(value, decimals) {
+      const places = typeof decimals === 'number' ? decimals : 2;
+      if (!Number.isFinite(value)) return '0%';
+      return value.toFixed(places) + '%';
     }
 
     function formatChange(change) {
@@ -2109,7 +2134,7 @@
 
         const metricsDiv = document.createElement('div');
         metricsDiv.className = 'metrics';
-        metricsDiv.textContent = 'Vol: ' + formatVolume(pick.volume24h) + ' | 5m: ' + pick.ticks5m + ' | Vol15m: ' + (pick.volatility15m * 100).toFixed(1) + '%';
+        metricsDiv.textContent = 'Vol: ' + formatVolume(pick.volume24h) + ' | 5m: ' + pick.ticks5m + ' | Vol15m: ' + formatPercent(pick.volatility15m, 2);
 
         symbolInfo.appendChild(symbolRow);
         symbolInfo.appendChild(metricsDiv);
@@ -2253,7 +2278,7 @@
     function updateEmptyStateHint() {
       const hint = document.getElementById('emptyHint');
       if (hint) {
-        hint.textContent = 'Vol > ' + formatVolume(currentFilters.minVolume) + ', 15m > ' + (currentFilters.minVolatility15m * 100).toFixed(0) + '%, 5m Ticks > ' + currentFilters.minTicks5m;
+        hint.textContent = 'Vol > ' + formatVolume(currentFilters.minVolume) + ', 15m > ' + formatPercent(currentFilters.minVolatility15m, 2) + ', 5m Ticks > ' + currentFilters.minTicks5m;
       }
     }
 
