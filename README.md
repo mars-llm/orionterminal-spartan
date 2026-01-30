@@ -2,9 +2,11 @@
 
 A single-file market scanner for Binance Futures. Finds high-activity setups and shows instant chart previews with S/R levels.
 
-![Spartan Orion Screener](docs/screenshot.png)
+![Spartan Orion Screener](screenshot.png)
 
-**[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/docs/index.html)
+**[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/index.html)
+
+**Socials:** [X (@marsmensch)](https://x.com/marsmensch) · [GitHub](https://github.com/mars-llm) · [Email](mailto:marsmensch@pm.me)
 
 ---
 
@@ -12,8 +14,8 @@ A single-file market scanner for Binance Futures. Finds high-activity setups and
 
 <table>
   <tr>
-    <td><img src="docs/screenshot.png" alt="Desktop dark mode overview" width="460"></td>
-    <td><img src="docs/screenshot-light.png" alt="Desktop light mode expanded chart" width="460"></td>
+    <td><img src="screenshot.png" alt="Desktop dark mode overview" width="460"></td>
+    <td><img src="screenshot-light.png" alt="Desktop light mode expanded chart" width="460"></td>
   </tr>
 </table>
 
@@ -55,6 +57,10 @@ No server required. Live data still needs an internet connection.
 - [Orion Terminal](https://orionterminal.com) — screener data
 - [Binance Futures](https://www.binance.com) — chart candles
 - [Lightweight Charts](https://tradingview.github.io/lightweight-charts/) — charting library
+
+## GitHub Social Preview
+
+Use `social-card.png` as the repository social preview image in GitHub settings.
 
 ---
 

@@ -1799,63 +1799,6 @@
       letter-spacing: 0.03em;
     }
 
-    .seo-section {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      border: 1px solid var(--glass-border);
-      border-radius: 1rem;
-      background: var(--glass-bg);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(16px);
-      animation: riseIn 0.7s ease both;
-      animation-delay: 0.06s;
-    }
-
-    .seo-section h2 {
-      font-family: var(--font-display);
-      font-size: 0.85rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 0.9rem;
-      color: var(--text-primary);
-    }
-
-    .seo-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
-    .seo-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 0.85rem;
-      padding: 0.95rem;
-    }
-
-    .seo-card h3 {
-      font-family: var(--font-display);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 0.35rem;
-      color: var(--text-primary);
-    }
-
-    .seo-card p {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .seo-card ul {
-      margin-top: 0.4rem;
-      padding-left: 1rem;
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      line-height: 1.4;
-    }
-
     footer {
       text-align: center;
       margin-top: 3rem;
@@ -2387,9 +2330,8 @@
             </div>
             <div>
               <h4>Troubleshooting</h4>
-              <p>If data fails to load on Pages, toggle proxy fallback or open the HTML locally.</p>
+              <p>If data fails to load, wait a moment and retry or open the HTML locally.</p>
               <ul>
-                <li>Settings → Data Access for proxy control.</li>
                 <li>No results? Lower min ticks or volatility.</li>
                 <li>Check status lines in the footer.</li>
               </ul>
@@ -2431,36 +2373,6 @@
       </div>
       <div class="results-list" id="resultsList"></div>
     </div>
-
-    <section class="seo-section" aria-label="About Spartan Orion Screener">
-      <h2>Built for Fast Futures Scans</h2>
-      <div class="seo-grid">
-        <div class="seo-card">
-          <h3>High-Activity Scanner</h3>
-          <p>Spartan Orion Screener surfaces Binance Futures pairs with high volume, volatility, and trade activity so you can spot momentum quickly.</p>
-          <ul>
-            <li>Instant previews + auto S/R levels.</li>
-            <li>Preset filters for different styles.</li>
-          </ul>
-        </div>
-        <div class="seo-card">
-          <h3>BTC-Relative Signal</h3>
-          <p>Each asset includes a BTC Δ metric: the asset’s 24h % change minus BTC’s 24h % change.</p>
-          <ul>
-            <li>Positive = outperformed BTC.</li>
-            <li>Negative = underperformed BTC.</li>
-          </ul>
-        </div>
-        <div class="seo-card">
-          <h3>Runs in Browser</h3>
-          <p>Use it on GitHub Pages or download the HTML for local use. Live data requires an internet connection.</p>
-          <ul>
-            <li>No signup or API keys.</li>
-            <li>Optional proxy fallback for CORS.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
 
     <footer>
       <p>
@@ -2560,7 +2472,6 @@
         <div class="settings-tabs" role="tablist" aria-label="Settings sections">
           <button class="settings-tab active" data-tab="chart" type="button" role="tab" aria-selected="true">Chart</button>
           <button class="settings-tab" data-tab="style" type="button" role="tab" aria-selected="false">Style</button>
-          <button class="settings-tab" data-tab="data" type="button" role="tab" aria-selected="false">Data</button>
           <button class="settings-tab" data-tab="display" type="button" role="tab" aria-selected="false">Display</button>
         </div>
 
@@ -2778,24 +2689,6 @@
           </div>
         </div>
 
-        <div class="settings-panel" data-panel="data" role="tabpanel">
-          <div class="settings-section">
-            <div class="settings-section-title">Data Access</div>
-            <div class="setting-row">
-              <div class="setting-label">
-                <span>Proxy Fallback</span>
-                <small>Use public CORS proxies if the direct API is blocked</small>
-              </div>
-              <div class="setting-control">
-                <label class="toggle">
-                  <input type="checkbox" id="settingProxyFallback">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="settings-panel" data-panel="display" role="tabpanel">
           <div class="settings-section">
             <div class="settings-section-title">Display</div>
@@ -2892,7 +2785,7 @@
     // =============================================================================
 
     // CORS proxies for standalone file usage (no local server needed)
-    // GitHub Pages should use the direct API first, then fall back to proxies if needed
+    // GitHub Pages must use proxy fallback because the API does not send CORS headers there.
     const CORS_PROXIES = [
       { url: 'https://api.codetabs.com/v1/proxy?quest=', encode: false },
       { url: 'https://api.allorigins.win/raw?url=', encode: true },
@@ -2902,9 +2795,70 @@
     const FETCH_TIMEOUT_MS = 12000;
     const THEME_STORAGE_KEY = 'orion-screener-theme';
     const CHART_STYLE_STORAGE_KEY = 'orion-screener-chart-style';
+    const DIRECT_API_STATUS_KEY = 'orion-screener-direct-api-status';
+    const PROXY_STATUS_KEY = 'orion-screener-proxy-index';
+    const DIRECT_API_BLOCK_TTL = 12 * 60 * 60 * 1000;
+    const SCAN_RETRY_BASE_DELAY_MS = 1500;
+    const SCAN_RETRY_MAX_DELAY_MS = 10000;
 
     function isGithubPages() {
       return window.location.hostname.endsWith('github.io');
+    }
+
+    function isDirectApiBlocked() {
+      if (window.location.protocol === 'file:') return true;
+      if (isGithubPages()) return true;
+      try {
+        var raw = localStorage.getItem(DIRECT_API_STATUS_KEY);
+        if (!raw) return false;
+        var parsed = JSON.parse(raw);
+        if (!parsed || !parsed.blocked || !parsed.timestamp) return false;
+        if (Date.now() - parsed.timestamp > DIRECT_API_BLOCK_TTL) return false;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function markDirectApiBlocked() {
+      try {
+        localStorage.setItem(
+          DIRECT_API_STATUS_KEY,
+          JSON.stringify({ blocked: true, timestamp: Date.now() })
+        );
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function clearDirectApiBlocked() {
+      try {
+        localStorage.removeItem(DIRECT_API_STATUS_KEY);
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getPreferredProxyIndex() {
+      try {
+        var stored = localStorage.getItem(PROXY_STATUS_KEY);
+        if (stored === null || stored === undefined || stored === '') return 0;
+        var parsed = parseInt(stored, 10);
+        if (Number.isFinite(parsed) && parsed >= 0 && parsed < CORS_PROXIES.length) {
+          return parsed;
+        }
+      } catch (e) {
+        // Ignore storage errors
+      }
+      return 0;
+    }
+
+    function setPreferredProxyIndex(index) {
+      try {
+        localStorage.setItem(PROXY_STATUS_KEY, String(index));
+      } catch (e) {
+        // Ignore storage errors
+      }
     }
 
     // Try direct first (works if served from localhost), then fall back to proxies
@@ -3073,7 +3027,6 @@
       showSR1h: false,
       showSR4h: false,
       showSR1d: false,
-      allowProxyFallback: true,
     };
 
     const VOLUSD_SETTINGS = {
@@ -3221,10 +3174,6 @@
         if (saved) {
           var parsed = JSON.parse(saved);
           chartSettings = { ...chartSettings, ...parsed };
-        }
-        if (isGithubPages() && !chartSettings.allowProxyFallback) {
-          chartSettings.allowProxyFallback = true;
-          saveSettings();
         }
       } catch (e) {
         console.warn('Failed to load settings:', e);
@@ -3470,11 +3419,6 @@
       }
     }
 
-    function isProxyFallbackEnabled() {
-      if (window.location.protocol === 'file:') return true;
-      return !!chartSettings.allowProxyFallback;
-    }
-
     async function fetchJsonWithTimeout(url) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -3497,42 +3441,42 @@
     }
 
     async function fetchWithProxy(proxyIndex) {
-      const url = getApiUrl(proxyIndex);
-      if (!url) throw new Error('All proxies failed. Try again later.');
+      var startIndex = Number.isFinite(proxyIndex) ? proxyIndex : 0;
+      for (var offset = 0; offset < CORS_PROXIES.length; offset += 1) {
+        var index = (startIndex + offset) % CORS_PROXIES.length;
+        const url = getApiUrl(index);
+        if (!url) continue;
 
-      const proxyName = getProxyName(proxyIndex);
-      console.log('Trying proxy: ' + proxyName);
+        const proxyName = getProxyName(index);
+        console.log('Trying proxy: ' + proxyName);
 
-      try {
-        const data = await fetchJsonWithTimeout(url);
-        console.log('Success via ' + proxyName);
-        return data;
-      } catch (err) {
-        console.warn('Proxy failed: ' + proxyName + ' (' + err.message + ')');
-        // If proxy fails, try next one
-        if (proxyIndex < CORS_PROXIES.length - 1) {
-          return fetchWithProxy(proxyIndex + 1);
+        try {
+          const data = await fetchJsonWithTimeout(url);
+          console.log('Success via ' + proxyName);
+          setPreferredProxyIndex(index);
+          return data;
+        } catch (err) {
+          console.warn('Proxy failed: ' + proxyName + ' (' + err.message + ')');
         }
-        throw new Error('All proxies failed. Last error: ' + err.message);
       }
+
+      throw new Error('Proxy chain failed');
     }
 
     async function fetchScreener() {
-      // file:// always fails CORS, so use proxies first there. Otherwise try direct then fall back.
+      // Use proxies on file:// and GitHub Pages. Otherwise try direct and fall back to proxies if needed.
       let data;
-      if (window.location.protocol === 'file:') {
-        data = await fetchWithProxy(0);
+      if (isDirectApiBlocked()) {
+        data = await fetchWithProxy(getPreferredProxyIndex());
       } else {
         try {
           console.log('Trying direct API');
           data = await fetchJsonWithTimeout(ORION_API);
+          clearDirectApiBlocked();
         } catch (err) {
           console.warn('Direct API failed, falling back to proxies:', err);
-          if (!isProxyFallbackEnabled()) {
-            var reason = err && err.message ? err.message : 'blocked';
-            throw new Error('Direct API failed (' + reason + '). Enable proxy fallback in Settings or open the HTML file locally.');
-          }
-          data = await fetchWithProxy(0);
+          markDirectApiBlocked();
+          data = await fetchWithProxy(getPreferredProxyIndex());
         }
       }
       const allPicks = parseScreenerData(data);
@@ -3964,13 +3908,30 @@
     // Event Handlers
     // =============================================================================
 
+    function sleep(ms) {
+      return new Promise(function(resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
+    async function fetchScreenerWithRetry() {
+      var attempt = 0;
+      while (true) {
+        try {
+          return await fetchScreener();
+        } catch (err) {
+          attempt += 1;
+          var delay = Math.min(SCAN_RETRY_BASE_DELAY_MS * Math.pow(1.5, attempt - 1), SCAN_RETRY_MAX_DELAY_MS);
+          console.warn('Fetch failed, retrying in ' + Math.round(delay) + 'ms');
+          await sleep(delay);
+        }
+      }
+    }
+
     async function handleScan() {
       if (isLoading) return;
 
       const btn = document.getElementById('scanBtn');
-      const errorDiv = document.getElementById('error');
-      const errorText = document.getElementById('errorText');
-
       isLoading = true;
       btn.disabled = true;
 
@@ -3984,16 +3945,10 @@
       btn.insertBefore(spinner, btn.firstChild);
       btn.querySelector('svg').style.display = 'none';
 
-      errorDiv.style.display = 'none';
-
       try {
-        picks = await fetchScreener();
+        picks = await fetchScreenerWithRetry();
         renderPicks();
         showToast('Found ' + picks.length + ' picks');
-      } catch (err) {
-        console.error('Scan failed:', err);
-        errorText.textContent = err.message || 'Failed to fetch data. Check your connection.';
-        errorDiv.style.display = 'flex';
       } finally {
         isLoading = false;
         btn.disabled = false;
@@ -4185,6 +4140,10 @@
       if (!tabs.length || !panels.length) return;
 
       var nextTab = tabId || 'chart';
+      var hasTab = Array.from(tabs).some(function(tab) {
+        return tab.getAttribute('data-tab') === nextTab;
+      });
+      if (!hasTab) nextTab = 'chart';
       currentSettingsTab = nextTab;
 
       tabs.forEach(function(tab) {
@@ -4219,11 +4178,6 @@
       document.getElementById('settingSR1h').checked = chartSettings.showSR1h;
       document.getElementById('settingSR4h').checked = chartSettings.showSR4h;
       document.getElementById('settingSR1d').checked = chartSettings.showSR1d;
-      var proxyToggle = document.getElementById('settingProxyFallback');
-      if (proxyToggle) {
-        proxyToggle.checked = isProxyFallbackEnabled();
-        proxyToggle.disabled = window.location.protocol === 'file:';
-      }
       setActiveSettingsTab(getStoredSettingsTab(), false);
       syncChartStyleInputs();
     }
@@ -4271,9 +4225,6 @@
           break;
         case 'settingSR1d':
           chartSettings.showSR1d = value;
-          break;
-        case 'settingProxyFallback':
-          chartSettings.allowProxyFallback = value;
           break;
       }
       saveSettings();
@@ -4958,9 +4909,6 @@
       });
       document.getElementById('settingSR1d').addEventListener('change', function() {
         handleSettingChange('settingSR1d', this.checked);
-      });
-      document.getElementById('settingProxyFallback').addEventListener('change', function() {
-        handleSettingChange('settingProxyFallback', this.checked);
       });
 
       CHART_STYLE_CONTROLS.forEach(function(control) {
