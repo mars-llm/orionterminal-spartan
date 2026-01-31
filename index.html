@@ -1126,10 +1126,35 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .chart-preview-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
     .chart-preview-symbol {
       font-weight: 600;
       font-size: 0.875rem;
       color: var(--text-primary);
+    }
+
+    .chart-preview-badge {
+      display: none;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.08rem 0.4rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      color: var(--yellow);
+      background: rgba(251, 191, 36, 0.12);
+      pointer-events: none;
+    }
+
+    .chart-preview-badge.visible {
+      display: inline-flex;
     }
 
     .chart-preview-timeframe {
@@ -2715,7 +2740,10 @@
   <!-- Chart Preview Popup -->
   <div class="chart-preview" id="chartPreview">
     <div class="chart-preview-header">
-      <span class="chart-preview-symbol" id="chartPreviewSymbol"></span>
+      <div class="chart-preview-title">
+        <span class="chart-preview-symbol" id="chartPreviewSymbol"></span>
+        <span class="chart-preview-badge" id="chartPreviewBadge"></span>
+      </div>
       <div class="chart-preview-actions">
         <span class="chart-preview-timeframe" id="chartPreviewTimeframe">1m</span>
         <select class="chart-preview-timeframe-select" id="chartPreviewTimeframeSelect">
@@ -3068,50 +3096,110 @@
     const dataCache = new Map();
     const CACHE_TTL = 60000; // 1 minute cache for kline data
 
-    function getCachedData(key) {
+    function getCachedEntry(key) {
       var cached = dataCache.get(key);
       if (!cached) return null;
       if (Date.now() - cached.timestamp > CACHE_TTL) {
         dataCache.delete(key);
         return null;
       }
-      return cached.data;
+      return cached;
     }
 
-    function setCachedData(key, data) {
-      dataCache.set(key, { data: data, timestamp: Date.now() });
+    function getCachedData(key) {
+      var cached = getCachedEntry(key);
+      return cached ? cached.data : null;
+    }
+
+    function setCachedData(key, data, meta) {
+      dataCache.set(key, { data: data, meta: meta || null, timestamp: Date.now() });
     }
 
     // =============================================================================
-    // Binance Kline Data Fetcher
+    // Chart Data Fetcher (Futures-first with Spot fallback)
     // =============================================================================
 
-    async function fetchBinanceKlines(symbol, interval, limit, signal) {
-      // Clean symbol (e.g., "DOGE/USDT" -> "DOGEUSDT")
-      var cleanSymbol = symbol.replace('/', '');
-      var cacheKey = cleanSymbol + '-' + interval + '-' + limit;
+    const CHART_REGION_KEY = 'orion-region-restricted';
+    const COINBASE_GRANULARITY = {
+      '1m': 60,
+      '5m': 300,
+      '15m': 900,
+      '1h': 3600,
+      '1d': 86400,
+    };
+    const KRAKEN_INTERVALS = {
+      '1m': 1,
+      '5m': 5,
+      '15m': 15,
+      '1h': 60,
+      '4h': 240,
+      '1d': 1440,
+    };
+    const KRAKEN_BASE_MAP = {
+      BTC: 'XBT',
+      DOGE: 'XDG',
+    };
+    const CHART_SOURCES = {
+      'binance-futures': { id: 'binance-futures', label: 'Binance Futures', isSpot: false },
+      'binance-futures-proxy': { id: 'binance-futures-proxy', label: 'Binance Futures', isSpot: false },
+      'binance-spot': { id: 'binance-spot', label: 'Binance Spot', isSpot: true },
+      'coinbase': { id: 'coinbase', label: 'Coinbase', isSpot: true },
+      'kraken': { id: 'kraken', label: 'Kraken', isSpot: true },
+    };
+    const SPOT_FALLBACK_CHAIN = ['binance-spot', 'coinbase', 'kraken'];
 
-      // Check cache first
-      var cached = getCachedData(cacheKey);
-      if (cached) {
-        console.log('Using cached kline data for', cleanSymbol);
-        return cached;
+    function getCleanSymbol(symbol) {
+      return symbol.replace('/', '').toUpperCase();
+    }
+
+    function getBaseAsset(symbol) {
+      var clean = getCleanSymbol(symbol);
+      if (clean.endsWith('USDT')) {
+        return clean.slice(0, -4);
       }
-
-      var url = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + cleanSymbol +
-                '&interval=' + interval + '&limit=' + limit;
-
-      var response = await fetch(url, { signal: signal });
-      if (!response.ok) {
-        throw new Error('Binance ' + response.status + ' for ' + cleanSymbol);
+      if (symbol.indexOf('/') >= 0) {
+        return symbol.split('/')[0].toUpperCase();
       }
+      return clean;
+    }
 
-      var data = await response.json();
+    function isRegionRestricted() {
+      try {
+        var raw = sessionStorage.getItem(CHART_REGION_KEY);
+        if (!raw) return false;
+        var parsed = JSON.parse(raw);
+        return !!(parsed && parsed.restricted);
+      } catch (e) {
+        return false;
+      }
+    }
 
-      // Transform to lightweight-charts format
-      var candles = data.map(function(k) {
+    function markRegionRestricted() {
+      try {
+        sessionStorage.setItem(CHART_REGION_KEY, JSON.stringify({
+          restricted: true,
+          timestamp: Date.now(),
+        }));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getChartCacheKey(sourceId, cleanSymbol, timeframe, limit) {
+      var cacheSource = sourceId === 'binance-futures-proxy' ? 'binance-futures' : sourceId;
+      return cacheSource + '-' + cleanSymbol + '-' + timeframe + '-' + limit;
+    }
+
+    function getBinanceFuturesUrl(cleanSymbol, timeframe, limit) {
+      return 'https://fapi.binance.com/fapi/v1/klines?symbol=' + cleanSymbol +
+        '&interval=' + timeframe + '&limit=' + limit;
+    }
+
+    function normalizeBinanceCandles(data) {
+      if (!Array.isArray(data)) return [];
+      return data.map(function(k) {
         return {
-          time: Math.floor(k[0] / 1000), // Convert ms to seconds
+          time: Math.floor(k[0] / 1000),
           open: parseFloat(k[1]),
           high: parseFloat(k[2]),
           low: parseFloat(k[3]),
@@ -3119,9 +3207,208 @@
           volume: parseFloat(k[5]),
         };
       });
+    }
 
-      setCachedData(cacheKey, candles);
+    function normalizeCoinbaseCandles(data, limit) {
+      if (!Array.isArray(data)) return [];
+      var candles = data.map(function(c) {
+        return {
+          time: Number(c[0]),
+          open: parseFloat(c[3]),
+          high: parseFloat(c[2]),
+          low: parseFloat(c[1]),
+          close: parseFloat(c[4]),
+          volume: parseFloat(c[5]),
+        };
+      });
+      candles.sort(function(a, b) { return a.time - b.time; });
+      if (limit && candles.length > limit) {
+        candles = candles.slice(candles.length - limit);
+      }
       return candles;
+    }
+
+    function normalizeKrakenCandles(result, limit) {
+      if (!result || typeof result !== 'object') return [];
+      var key = Object.keys(result).find(function(k) { return k !== 'last'; });
+      var rows = key ? result[key] : [];
+      if (!Array.isArray(rows)) return [];
+      var candles = rows.map(function(c) {
+        return {
+          time: Number(c[0]),
+          open: parseFloat(c[1]),
+          high: parseFloat(c[2]),
+          low: parseFloat(c[3]),
+          close: parseFloat(c[4]),
+          volume: parseFloat(c[6]),
+        };
+      });
+      if (limit && candles.length > limit) {
+        candles = candles.slice(candles.length - limit);
+      }
+      return candles;
+    }
+
+    async function fetchJsonOrThrow(url, signal, timeoutMs) {
+      var controller = new AbortController();
+      var didTimeout = false;
+      var timeoutId = setTimeout(function() {
+        didTimeout = true;
+        controller.abort();
+      }, timeoutMs || FETCH_TIMEOUT_MS);
+      var abortHandler = null;
+      if (signal) {
+        if (signal.aborted) controller.abort();
+        abortHandler = function() { controller.abort(); };
+        signal.addEventListener('abort', abortHandler);
+      }
+
+      try {
+        var response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) {
+          var err = new Error('HTTP ' + response.status);
+          err.status = response.status;
+          throw err;
+        }
+        var data = await response.json();
+        return { response: response, data: data };
+      } catch (err) {
+        if (didTimeout && err && err.name === 'AbortError') {
+          var timeoutErr = new Error('Request timed out');
+          timeoutErr.name = 'TimeoutError';
+          throw timeoutErr;
+        }
+        throw err;
+      } finally {
+        clearTimeout(timeoutId);
+        if (signal && abortHandler) {
+          signal.removeEventListener('abort', abortHandler);
+        }
+      }
+    }
+
+    async function fetchJsonWithProxies(url, signal, forceEncode) {
+      var lastErr = null;
+      for (var i = 0; i < CORS_PROXIES.length; i += 1) {
+        var proxy = CORS_PROXIES[i];
+        var shouldEncode = forceEncode || proxy.encode;
+        var proxiedUrl = proxy.url + (shouldEncode ? encodeURIComponent(url) : url);
+        try {
+          return await fetchJsonOrThrow(proxiedUrl, signal);
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error('Proxy fetch failed');
+    }
+
+    async function fetchCandlesFromSource(sourceId, cleanSymbol, baseAsset, timeframe, limit, signal) {
+      var source = CHART_SOURCES[sourceId];
+      if (!source) throw new Error('Unknown source');
+
+      if (sourceId === 'binance-futures') {
+        var url = getBinanceFuturesUrl(cleanSymbol, timeframe, limit);
+        var futuresData = await fetchJsonOrThrow(url, signal);
+        return normalizeBinanceCandles(futuresData.data);
+      }
+
+      if (sourceId === 'binance-futures-proxy') {
+        var proxyUrl = getBinanceFuturesUrl(cleanSymbol, timeframe, limit);
+        var proxyData = await fetchJsonWithProxies(proxyUrl, signal, true);
+        return normalizeBinanceCandles(proxyData.data);
+      }
+
+      if (sourceId === 'binance-spot') {
+        var spotUrl = 'https://data-api.binance.vision/api/v3/klines?symbol=' + cleanSymbol +
+          '&interval=' + timeframe + '&limit=' + limit;
+        var spotData = await fetchJsonOrThrow(spotUrl, signal);
+        return normalizeBinanceCandles(spotData.data);
+      }
+
+      if (sourceId === 'coinbase') {
+        var granularity = COINBASE_GRANULARITY[timeframe];
+        if (!granularity) {
+          throw new Error('Coinbase timeframe unsupported');
+        }
+        var product = baseAsset + '-USD';
+        var coinbaseUrl = 'https://api.exchange.coinbase.com/products/' + product +
+          '/candles?granularity=' + granularity;
+        var coinbaseData = await fetchJsonOrThrow(coinbaseUrl, signal);
+        return normalizeCoinbaseCandles(coinbaseData.data, limit);
+      }
+
+      if (sourceId === 'kraken') {
+        var krakenInterval = KRAKEN_INTERVALS[timeframe];
+        if (!krakenInterval) {
+          throw new Error('Kraken timeframe unsupported');
+        }
+        var krakenBase = KRAKEN_BASE_MAP[baseAsset] || baseAsset;
+        var krakenUrl = 'https://api.kraken.com/0/public/OHLC?pair=' + krakenBase +
+          'USD&interval=' + krakenInterval;
+        var krakenData = await fetchJsonWithProxies(krakenUrl, signal, true);
+        if (krakenData.data && Array.isArray(krakenData.data.error) && krakenData.data.error.length > 0) {
+          var errMsg = krakenData.data.error.join(', ');
+          var apiErr = new Error('Kraken ' + errMsg);
+          apiErr.status = krakenData.response ? krakenData.response.status : 400;
+          throw apiErr;
+        }
+        return normalizeKrakenCandles(krakenData.data.result, limit);
+      }
+
+      throw new Error('Unsupported source');
+    }
+
+    async function fetchChartCandles(symbol, timeframe, limit, signal) {
+      var cleanSymbol = getCleanSymbol(symbol);
+      var baseAsset = getBaseAsset(symbol);
+      var lastErr = null;
+      var regionRestricted = isRegionRestricted();
+
+      async function trySource(sourceId) {
+        var cacheKey = getChartCacheKey(sourceId, cleanSymbol, timeframe, limit);
+        var cached = getCachedEntry(cacheKey);
+        if (cached && cached.data && cached.data.length > 0) {
+          return { candles: cached.data, source: CHART_SOURCES[sourceId], cached: true };
+        }
+        var candles = await fetchCandlesFromSource(sourceId, cleanSymbol, baseAsset, timeframe, limit, signal);
+        if (!candles || candles.length === 0) {
+          throw new Error('No data');
+        }
+        setCachedData(cacheKey, candles, { source: sourceId });
+        return { candles: candles, source: CHART_SOURCES[sourceId], cached: false };
+      }
+
+      if (!regionRestricted) {
+        try {
+          return await trySource('binance-futures');
+        } catch (err) {
+          lastErr = err;
+          if (err && (err.status === 451 || err.status === 403)) {
+            markRegionRestricted();
+            regionRestricted = true;
+          }
+        }
+      }
+
+      try {
+        return await trySource('binance-futures-proxy');
+      } catch (err) {
+        lastErr = err;
+      }
+
+      for (var i = 0; i < SPOT_FALLBACK_CHAIN.length; i += 1) {
+        var sourceId = SPOT_FALLBACK_CHAIN[i];
+        try {
+          return await trySource(sourceId);
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+
+      if (regionRestricted) {
+        throw new Error('Chart not available in your region');
+      }
+      throw lastErr || new Error('Chart data not available');
     }
 
     // =============================================================================
@@ -3149,13 +3436,16 @@
     /**
      * Fetch S/R levels for a specific timeframe
      */
-    async function fetchSRLevels(symbol, interval, signal) {
-      var cacheKey = symbol.replace('/', '') + '-sr-' + interval;
+    async function fetchSRLevels(symbol, interval, signal, source) {
+      if (!source || !source.id) return [];
+      var cacheKey = symbol.replace('/', '') + '-sr-' + interval + '-' + source.id;
       var cached = getCachedData(cacheKey);
       if (cached) return cached;
 
       try {
-        var candles = await fetchBinanceKlines(symbol, interval, 3, signal);
+        var cleanSymbol = getCleanSymbol(symbol);
+        var baseAsset = getBaseAsset(symbol);
+        var candles = await fetchCandlesFromSource(source.id, cleanSymbol, baseAsset, interval, 3, signal);
         var levels = detectSRLevels(candles);
         setCachedData(cacheKey, levels);
         return levels;
@@ -4350,6 +4640,7 @@
     var currentPreviewSymbol = null;
     var currentPreviewSettings = null;
     var currentPreviewCard = null;
+    var currentPreviewSource = null;
     var isChartMaximized = false;
     var isPreviewHovered = false;
 
@@ -4383,6 +4674,20 @@
         sr4h: getCssVar('--sr-4h-color', '#60a5fa'),
         sr1d: getCssVar('--sr-1d-color', '#fb7185'),
       };
+    }
+
+    function updateChartPreviewBadge(source) {
+      var badge = document.getElementById('chartPreviewBadge');
+      if (!badge) return;
+      if (source && source.isSpot) {
+        badge.textContent = 'Spot data';
+        badge.title = 'Futures unavailable; showing spot data via ' + source.label;
+        badge.classList.add('visible');
+      } else {
+        badge.textContent = '';
+        badge.title = '';
+        badge.classList.remove('visible');
+      }
     }
 
     function buildVolUsdSeries(candles) {
@@ -4618,10 +4923,14 @@
       // Get current size
       currentPreviewCard = cardElement;
 
+      var resolvedTimeframe = BINANCE_INTERVALS[chartSettings.timeframe]
+        ? chartSettings.timeframe
+        : '15m';
+
       // Build settings key for cache comparison
       var settingsKey = JSON.stringify({
         symbol: symbol,
-        timeframe: chartSettings.timeframe,
+        timeframe: resolvedTimeframe,
         size: chartSettings.size,
         sr15m: chartSettings.showSR15m,
         sr1h: chartSettings.showSR1h,
@@ -4631,8 +4940,8 @@
       });
 
       symbolSpan.textContent = symbol;
-      timeframeSpan.textContent = chartSettings.timeframe;
-      timeframeSelect.value = chartSettings.timeframe;
+      timeframeSpan.textContent = resolvedTimeframe;
+      timeframeSelect.value = resolvedTimeframe;
       if (tvLink) tvLink.href = getTradingViewLink(symbol);
       if (binanceLink) binanceLink.href = getBinanceFuturesLink(symbol);
       if (bitunixLink) bitunixLink.href = getBitunixFuturesLink(symbol);
@@ -4654,12 +4963,18 @@
       loading.classList.remove('hidden');
       container.style.display = 'none';
       legend.style.display = 'none';
+      currentPreviewSource = null;
+      updateChartPreviewBadge(null);
 
       try {
         // Fetch candle data
-        var intervalConfig = BINANCE_INTERVALS[chartSettings.timeframe] || BINANCE_INTERVALS['15m'];
-        var candles = await fetchBinanceKlines(symbol, intervalConfig.interval, intervalConfig.limit, signal);
+        var intervalConfig = BINANCE_INTERVALS[resolvedTimeframe] || BINANCE_INTERVALS['15m'];
+        var chartResult = await fetchChartCandles(symbol, resolvedTimeframe, intervalConfig.limit, signal);
         if (requestId !== chartPreviewRequestId) return;
+        var candles = chartResult.candles;
+        var source = chartResult.source;
+        currentPreviewSource = source;
+        updateChartPreviewBadge(source);
 
         if (candles.length === 0) {
           throw new Error('No data available');
@@ -4683,7 +4998,7 @@
         var showLegend = false;
 
         if (chartSettings.showSR15m) {
-          var sr15m = await fetchSRLevels(symbol, '15m', signal);
+          var sr15m = await fetchSRLevels(symbol, '15m', signal, source);
           if (requestId !== chartPreviewRequestId) return;
           addSRLinesToChart(sr15m, srColors.sr15m, '15m', isChartMaximized);
           legend15m.style.display = sr15m.length > 0 ? 'flex' : 'none';
@@ -4693,7 +5008,7 @@
         }
 
         if (chartSettings.showSR1h) {
-          var sr1h = await fetchSRLevels(symbol, '1h', signal);
+          var sr1h = await fetchSRLevels(symbol, '1h', signal, source);
           if (requestId !== chartPreviewRequestId) return;
           addSRLinesToChart(sr1h, srColors.sr1h, '1h', isChartMaximized);
           legend1h.style.display = sr1h.length > 0 ? 'flex' : 'none';
@@ -4703,7 +5018,7 @@
         }
 
         if (chartSettings.showSR4h) {
-          var sr4h = await fetchSRLevels(symbol, '4h', signal);
+          var sr4h = await fetchSRLevels(symbol, '4h', signal, source);
           if (requestId !== chartPreviewRequestId) return;
           addSRLinesToChart(sr4h, srColors.sr4h, '4h', isChartMaximized);
           legend4h.style.display = sr4h.length > 0 ? 'flex' : 'none';
@@ -4713,7 +5028,7 @@
         }
 
         if (chartSettings.showSR1d) {
-          var sr1d = await fetchSRLevels(symbol, '1d', signal);
+          var sr1d = await fetchSRLevels(symbol, '1d', signal, source);
           if (requestId !== chartPreviewRequestId) return;
           addSRLinesToChart(sr1d, srColors.sr1d, '1d', isChartMaximized);
           legend1d.style.display = sr1d.length > 0 ? 'flex' : 'none';
@@ -4730,7 +5045,14 @@
         if (err && err.name === 'AbortError') return;
         var errMsg = err && err.message ? err.message : 'Unknown error';
         console.error('Chart error for ' + symbol + ':', errMsg, err);
-        loading.textContent = 'Chart failed: ' + errMsg;
+        updateChartPreviewBadge(null);
+        if (errMsg.indexOf('region') >= 0) {
+          loading.textContent = 'Chart not available in your region.';
+        } else if (errMsg.indexOf('data not available') >= 0) {
+          loading.textContent = 'Chart data not available.';
+        } else {
+          loading.textContent = 'Chart failed: ' + errMsg;
+        }
         loading.classList.remove('hidden');
         container.style.display = 'none';
       }
@@ -4746,10 +5068,12 @@
         chartPreviewAbortController = null;
       }
       chartPreviewRequestId += 1;
+      currentPreviewSource = null;
 
       // Reset loading text for next time
       var loading = document.getElementById('chartPreviewLoading');
       loading.textContent = 'Loading chart...';
+      updateChartPreviewBadge(null);
     }
 
     function closeChartPreview() {
@@ -4763,9 +5087,11 @@
         chartPreviewAbortController = null;
       }
       chartPreviewRequestId += 1;
+      currentPreviewSource = null;
 
       var loading = document.getElementById('chartPreviewLoading');
       loading.textContent = 'Loading chart...';
+      updateChartPreviewBadge(null);
     }
 
     function handleCardMouseEnter(symbol, cardElement) {
