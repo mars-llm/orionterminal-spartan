@@ -3120,6 +3120,7 @@
     // =============================================================================
 
     const CHART_REGION_KEY = 'orion-region-restricted';
+    const CHART_PROXY_STATUS_KEY = 'orion-chart-proxy-index';
     const COINBASE_GRANULARITY = {
       '1m': 60,
       '5m': 300,
@@ -3180,6 +3181,26 @@
           restricted: true,
           timestamp: Date.now(),
         }));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getPreferredChartProxyIndex() {
+      try {
+        var stored = sessionStorage.getItem(CHART_PROXY_STATUS_KEY);
+        if (stored === null || stored === undefined) return -1;
+        var index = parseInt(stored, 10);
+        if (Number.isFinite(index)) return index;
+      } catch (e) {
+        // Ignore storage errors
+      }
+      return -1;
+    }
+
+    function setPreferredChartProxyIndex(index) {
+      try {
+        sessionStorage.setItem(CHART_PROXY_STATUS_KEY, String(index));
       } catch (e) {
         // Ignore storage errors
       }
@@ -3287,16 +3308,39 @@
       }
     }
 
-    async function fetchJsonWithProxies(url, signal, forceEncode) {
+    async function fetchJsonWithProxies(url, signal, options) {
       var lastErr = null;
+      var forceEncode = options && options.forceEncode;
+      var preferredIndex = getPreferredChartProxyIndex();
+      var order = [];
+      if (preferredIndex >= 0 && preferredIndex < CORS_PROXIES.length) {
+        order.push(preferredIndex);
+      }
       for (var i = 0; i < CORS_PROXIES.length; i += 1) {
-        var proxy = CORS_PROXIES[i];
-        var shouldEncode = forceEncode || proxy.encode;
-        var proxiedUrl = proxy.url + (shouldEncode ? encodeURIComponent(url) : url);
-        try {
-          return await fetchJsonOrThrow(proxiedUrl, signal);
-        } catch (err) {
-          lastErr = err;
+        if (i !== preferredIndex) order.push(i);
+      }
+
+      for (var j = 0; j < order.length; j += 1) {
+        var index = order[j];
+        var proxy = CORS_PROXIES[index];
+        var attempts = [];
+        if (forceEncode) {
+          attempts.push(proxy.url + encodeURIComponent(url));
+          if (!proxy.encode) {
+            attempts.push(proxy.url + url);
+          }
+        } else {
+          attempts.push(proxy.url + (proxy.encode ? encodeURIComponent(url) : url));
+        }
+
+        for (var k = 0; k < attempts.length; k += 1) {
+          try {
+            var result = await fetchJsonOrThrow(attempts[k], signal);
+            setPreferredChartProxyIndex(index);
+            return result;
+          } catch (err) {
+            lastErr = err;
+          }
         }
       }
       throw lastErr || new Error('Proxy fetch failed');
@@ -3314,7 +3358,7 @@
 
       if (sourceId === 'binance-futures-proxy') {
         var proxyUrl = getBinanceFuturesUrl(cleanSymbol, timeframe, limit);
-        var proxyData = await fetchJsonWithProxies(proxyUrl, signal, true);
+        var proxyData = await fetchJsonWithProxies(proxyUrl, signal, { forceEncode: true });
         return normalizeBinanceCandles(proxyData.data);
       }
 
@@ -3345,7 +3389,7 @@
         var krakenBase = KRAKEN_BASE_MAP[baseAsset] || baseAsset;
         var krakenUrl = 'https://api.kraken.com/0/public/OHLC?pair=' + krakenBase +
           'USD&interval=' + krakenInterval;
-        var krakenData = await fetchJsonWithProxies(krakenUrl, signal, true);
+        var krakenData = await fetchJsonWithProxies(krakenUrl, signal, { forceEncode: true });
         if (krakenData.data && Array.isArray(krakenData.data.error) && krakenData.data.error.length > 0) {
           var errMsg = krakenData.data.error.join(', ');
           var apiErr = new Error('Kraken ' + errMsg);
@@ -3368,7 +3412,14 @@
         var cacheKey = getChartCacheKey(sourceId, cleanSymbol, timeframe, limit);
         var cached = getCachedEntry(cacheKey);
         if (cached && cached.data && cached.data.length > 0) {
-          return { candles: cached.data, source: CHART_SOURCES[sourceId], cached: true };
+          var cachedSourceId = sourceId;
+          if (cached.meta && cached.meta.source) {
+            cachedSourceId = cached.meta.source;
+          }
+          if (sourceId === 'binance-futures-proxy') {
+            cachedSourceId = 'binance-futures-proxy';
+          }
+          return { candles: cached.data, source: CHART_SOURCES[cachedSourceId] || CHART_SOURCES[sourceId], cached: true };
         }
         var candles = await fetchCandlesFromSource(sourceId, cleanSymbol, baseAsset, timeframe, limit, signal);
         if (!candles || candles.length === 0) {
