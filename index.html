@@ -993,6 +993,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .symbol-info .symbol {
@@ -1004,6 +1005,219 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       text-transform: uppercase;
+    }
+
+    .pick-card.candidate {
+      border-color: rgba(148, 163, 184, 0.32);
+    }
+
+    .pick-card.candidate-rank-1 {
+      border-color: rgba(245, 176, 65, 0.42);
+      box-shadow: var(--shadow-soft), var(--glow-accent);
+    }
+
+    .pick-card.candidate-rank-1:hover {
+      border-color: rgba(245, 176, 65, 0.55);
+      box-shadow: var(--shadow-strong), var(--glow-accent);
+    }
+
+    .pick-card.candidate-rank-2 {
+      border-color: rgba(45, 212, 191, 0.32);
+      box-shadow: var(--shadow-soft), var(--glow-cool);
+    }
+
+    .pick-card.candidate-rank-2:hover {
+      border-color: rgba(45, 212, 191, 0.5);
+      box-shadow: var(--shadow-strong), var(--glow-cool);
+    }
+
+    .pick-card.candidate-rank-3 {
+      border-color: rgba(96, 165, 250, 0.3);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .pick-card.candidate-rank-3:hover {
+      border-color: rgba(96, 165, 250, 0.46);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .candidate-badge-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .candidate-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      padding: 0.26rem 0.72rem;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 1px solid rgba(245, 176, 65, 0.45);
+      color: var(--accent);
+      background: rgba(245, 176, 65, 0.14);
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      outline: none;
+      white-space: nowrap;
+      font-family: inherit;
+      appearance: none;
+      -webkit-appearance: none;
+      box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.08);
+    }
+
+    .candidate-badge-icon {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.4;
+    }
+
+    .candidate-badge-hint {
+      width: 12px;
+      height: 12px;
+      opacity: 0.7;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .candidate-badge-wrap.open .candidate-badge-hint {
+      transform: rotate(180deg);
+      opacity: 0.9;
+    }
+
+    .candidate-badge.rank-2 {
+      border-color: rgba(45, 212, 191, 0.45);
+      color: var(--accent-2);
+      background: rgba(45, 212, 191, 0.12);
+    }
+
+    .candidate-badge.rank-3 {
+      border-color: rgba(96, 165, 250, 0.45);
+      color: var(--sr-4h-color);
+      background: rgba(96, 165, 250, 0.12);
+    }
+
+    .candidate-badge:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(245, 176, 65, 0.22);
+    }
+
+    .candidate-badge.rank-2:hover {
+      box-shadow: 0 0 22px rgba(45, 212, 191, 0.18);
+    }
+
+    .candidate-badge.rank-3:hover {
+      box-shadow: 0 0 22px rgba(96, 165, 250, 0.18);
+    }
+
+    .candidate-badge:active {
+      transform: translateY(0);
+    }
+
+    .candidate-badge:focus-visible {
+      box-shadow: 0 0 0 3px rgba(245, 176, 65, 0.25);
+    }
+
+    .candidate-badge.rank-2:focus-visible {
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.22);
+    }
+
+    .candidate-badge.rank-3:focus-visible {
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.22);
+    }
+
+    .candidate-tooltip {
+      position: absolute;
+      top: calc(100% + 0.55rem);
+      left: 0;
+      width: 260px;
+      max-width: min(320px, calc(100vw - 3rem));
+      padding: 0.8rem 0.85rem;
+      border-radius: 0.9rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-strong);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      backdrop-filter: blur(18px);
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 2500;
+    }
+
+    .candidate-badge-wrap:hover .candidate-tooltip,
+    .candidate-badge-wrap:focus-within .candidate-tooltip,
+    .candidate-badge-wrap.open .candidate-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    body.chart-preview-visible #resultsList .candidate-badge-wrap:hover .candidate-tooltip {
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+    }
+
+    .candidate-tooltip-title {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .candidate-tooltip-subtitle {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .candidate-tooltip-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-top: 0.7rem;
+    }
+
+    .candidate-tooltip-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 0.6rem;
+      align-items: baseline;
+    }
+
+    .candidate-tooltip-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .candidate-tooltip-value {
+      font-size: 0.72rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      color: var(--text-secondary);
+    }
+
+    .candidate-tooltip-rank {
+      font-size: 0.7rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    .candidate-tooltip-footnote {
+      margin-top: 0.65rem;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.85;
     }
 
     .symbol-info .metrics {
@@ -1102,6 +1316,8 @@
       box-shadow: var(--shadow-strong);
       z-index: 1000;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.15s ease;
@@ -1119,17 +1335,77 @@
 
     .chart-preview-header {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      align-items: stretch;
       padding: 0.5rem 0.75rem;
       background: var(--surface-card);
       border-bottom: 1px solid var(--border);
+    }
+
+    .chart-preview-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
     }
 
     .chart-preview-title {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .chart-preview-stats {
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.45rem;
+    }
+
+    .chart-preview-stats.visible {
+      display: flex;
+    }
+
+    .chart-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.5);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    :root[data-theme="light"] .chart-stat {
+      background: rgba(255, 255, 255, 0.75);
+      border-color: rgba(148, 163, 184, 0.32);
+    }
+
+    .chart-stat-label {
+      color: var(--text-muted);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .chart-stat-value {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .chart-stat-value.positive {
+      color: var(--green);
+    }
+
+    .chart-stat-value.negative {
+      color: var(--red);
     }
 
     .chart-preview-symbol {
@@ -1154,6 +1430,14 @@
     }
 
     .chart-preview-badge.visible {
+      display: inline-flex;
+    }
+
+    .chart-preview-candidate {
+      display: none;
+    }
+
+    .chart-preview-candidate.visible {
       display: inline-flex;
     }
 
@@ -1300,7 +1584,7 @@
 
     .chart-preview-body {
       width: 100%;
-      height: calc(100% - 36px);
+      flex: 1;
       background: var(--chart-bg);
       position: relative;
     }
@@ -1963,7 +2247,8 @@
       }
 
       .chart-preview-body {
-        height: calc(100% - 44px) !important;
+        flex: 1 !important;
+        height: auto !important;
       }
 
       .chart-preview-header {
@@ -2740,21 +3025,26 @@
   <!-- Chart Preview Popup -->
   <div class="chart-preview" id="chartPreview">
     <div class="chart-preview-header">
-      <div class="chart-preview-title">
-        <span class="chart-preview-symbol" id="chartPreviewSymbol"></span>
-        <span class="chart-preview-badge" id="chartPreviewBadge"></span>
-      </div>
-      <div class="chart-preview-actions">
-        <span class="chart-preview-timeframe" id="chartPreviewTimeframe">1m</span>
-        <select class="chart-preview-timeframe-select" id="chartPreviewTimeframeSelect">
-          <option value="1m">1m</option>
-          <option value="5m">5m</option>
-          <option value="15m">15m</option>
-          <option value="1h">1h</option>
-          <option value="4h">4h</option>
-          <option value="1d">1d</option>
-        </select>
-        <div class="chart-preview-links" id="chartPreviewLinks">
+      <div class="chart-preview-header-row">
+        <div class="chart-preview-title">
+          <span class="chart-preview-symbol" id="chartPreviewSymbol"></span>
+          <span class="chart-preview-badge" id="chartPreviewBadge"></span>
+          <span class="candidate-badge-wrap chart-preview-candidate" id="chartPreviewCandidateWrap">
+            <button type="button" class="candidate-badge" id="chartPreviewCandidateBadge" aria-expanded="false"></button>
+            <div class="candidate-tooltip" id="chartPreviewCandidateTooltip" role="tooltip"></div>
+          </span>
+        </div>
+        <div class="chart-preview-actions">
+          <span class="chart-preview-timeframe" id="chartPreviewTimeframe">1m</span>
+          <select class="chart-preview-timeframe-select" id="chartPreviewTimeframeSelect">
+            <option value="1m">1m</option>
+            <option value="5m">5m</option>
+            <option value="15m">15m</option>
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="1d">1d</option>
+          </select>
+          <div class="chart-preview-links" id="chartPreviewLinks">
           <a class="chart-preview-link" data-brand="tradingview" id="chartPreviewTvLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in TradingView" aria-label="Open in TradingView">
             <svg class="chart-preview-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" opacity="0.18" stroke="none"/>
@@ -2770,7 +3060,7 @@
             <img class="chart-preview-link-icon" src="data:image/png;base64,AAABAAEAMDAAAAEACAB6AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAixJREFUeJztmjGuwjAMhjlBFbNUsLAgMXaGBdERdaMH6PoklrdHXKUDJ2DkDGycg7lrnyxRFPWVxE4TShCDB4oI/2f7T9Oko+zndxRyjNoXoigCIYQUQlzi6bgCgHrIiKfjCrWgJtSmBRBCbN9BNOhhtp0A+MXQAoEYKsSjbd4589BRiaadmuzLoUUBvwpSBbgECHB5AITUPnAP1PwAGFoMWMYXADTZSVaTOs1n9W4/7xXJavLaChSHRV1el/W52jiJ8rp8HUCTdTXz8pj0ApLH5D08gLMGVud0W7MAisPCP4CaeTXwenuKxs+YVSpAms/8AKA4FELJKLYQZlKFQWEnwm919yhrABRj088oGH1BhSg1BrYG4JSfYszdfm5lYCsA28ybxMknSdEZmA2APe9KfNug8XRcdbWSzsBsABeto+tx2TG+aZHJAuDO39wqpPmMZWAWQHtwlyEVL6hJMhmYBeDSvLo2KpUlh8nALAAf/a8GdPyPycAsAJerSypATHhKJAHgQD7Fn27rfwAUA5MBfBr4/GQqpfQ/GcCngc+t2QZhsCLUTQYSgG8DF/dsN62qLvacAPg2cKrcyChzPxvgVQaOLfamjAA+FnDP+h8swgigW6u7yH6i2TJxAuDTwByzgi2ADwO3HyvBJ4DrJTRWtG/bAAcApzacp/sEZhvH8bEDnn13p8FtRsG2AsEfcIjQj5hE6Id8UejHrFnoB93ZJ7xqkH3Cyx5ZgPEHCAfghSQKZFcAAAAASUVORK5CYII=" alt="" />
           </a>
         </div>
-        <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Expand for full data view" aria-label="Expand for full data view">
+          <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Expand for full data view" aria-label="Expand for full data view">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 3 21 3 21 9"/>
             <polyline points="9 21 3 21 3 15"/>
@@ -2779,9 +3069,11 @@
           </svg>
           <span class="chart-preview-maximize-label long">Expand for details</span>
           <span class="chart-preview-maximize-label short">Expand</span>
-        </button>
-        <button class="chart-preview-close" id="chartPreviewClose" title="Close chart">Close</button>
+          </button>
+          <button class="chart-preview-close" id="chartPreviewClose" title="Close chart">Close</button>
+        </div>
       </div>
+      <div class="chart-preview-stats" id="chartPreviewStats"></div>
     </div>
     <div class="chart-preview-body" id="chartPreviewBody">
       <div class="chart-preview-loading" id="chartPreviewLoading">Loading chart...</div>
@@ -2961,6 +3253,8 @@
     let isLoading = false;
     // Stores BTC 24h % change for BTC-relative comparisons (BTC Δ).
     let latestBtcChange24h = null;
+    // Top-candidate highlights computed from current scan results.
+    let candidateHighlights = { bySymbol: {}, topSymbols: [], total: 0 };
     let customProfiles = [];
     const MAX_CUSTOM_PROFILES = 3;
 
@@ -3509,6 +3803,166 @@
       }
     }
 
+    // =============================================================================
+    // Futures Extra Metrics (Funding + Open Interest)
+    // =============================================================================
+
+    const FUTURES_EXTRAS_CACHE_PREFIX = 'binance-futures-extras-';
+
+    function getFuturesExtrasCacheKey(cleanSymbol) {
+      return FUTURES_EXTRAS_CACHE_PREFIX + cleanSymbol;
+    }
+
+    function parseFiniteNumber(value) {
+      var num = typeof value === 'number' ? value : parseFloat(value);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function getBinanceFuturesPremiumIndexUrl(cleanSymbol) {
+      return 'https://fapi.binance.com/fapi/v1/premiumIndex?symbol=' + cleanSymbol;
+    }
+
+    function getBinanceFuturesOpenInterestUrl(cleanSymbol) {
+      return 'https://fapi.binance.com/fapi/v1/openInterest?symbol=' + cleanSymbol;
+    }
+
+    async function fetchBinanceFuturesExtras(cleanSymbol, signal) {
+      var premiumUrl = getBinanceFuturesPremiumIndexUrl(cleanSymbol);
+      var openInterestUrl = getBinanceFuturesOpenInterestUrl(cleanSymbol);
+      var lastErr = null;
+      var regionRestricted = isRegionRestricted();
+
+      async function fetchPair(fetcher, viaId) {
+        var results = await Promise.all([
+          fetcher(premiumUrl, signal),
+          fetcher(openInterestUrl, signal),
+        ]);
+        return {
+          via: viaId,
+          premium: results[0] && results[0].data ? results[0].data : null,
+          openInterest: results[1] && results[1].data ? results[1].data : null,
+        };
+      }
+
+      if (!regionRestricted) {
+        try {
+          return await fetchPair(fetchJsonOrThrow, 'binance-futures');
+        } catch (err) {
+          lastErr = err;
+          if (err && (err.status === 451 || err.status === 403)) {
+            markRegionRestricted();
+            regionRestricted = true;
+          }
+        }
+      }
+
+      try {
+        return await fetchPair(function(url, sig) {
+          return fetchJsonWithProxies(url, sig, { forceEncode: true });
+        }, 'binance-futures-proxy');
+      } catch (err) {
+        lastErr = err;
+      }
+
+      throw lastErr || new Error('Extras unavailable');
+    }
+
+    async function getFuturesExtras(symbol, signal) {
+      if (!symbol) return null;
+      var cleanSymbol = getCleanSymbol(symbol);
+      var cacheKey = getFuturesExtrasCacheKey(cleanSymbol);
+      var cached = getCachedEntry(cacheKey);
+      if (cached && cached.data) return cached.data;
+
+      var fetched = await fetchBinanceFuturesExtras(cleanSymbol, signal);
+      var premium = fetched && fetched.premium ? fetched.premium : null;
+      var openInterest = fetched && fetched.openInterest ? fetched.openInterest : null;
+      if (!premium || !openInterest) {
+        throw new Error('Extras missing');
+      }
+
+      var markPrice = parseFiniteNumber(premium.markPrice);
+      var indexPrice = parseFiniteNumber(premium.indexPrice);
+      var fundingRate = parseFiniteNumber(premium.lastFundingRate);
+      var nextFundingTime = parseFiniteNumber(premium.nextFundingTime);
+      var oiBase = parseFiniteNumber(openInterest.openInterest);
+
+      var basisPercent = null;
+      if (markPrice !== null && indexPrice !== null && indexPrice > 0) {
+        basisPercent = ((markPrice - indexPrice) / indexPrice) * 100;
+      }
+
+      var oiUsd = null;
+      if (oiBase !== null && markPrice !== null) {
+        oiUsd = oiBase * markPrice;
+      }
+
+      var extras = {
+        fundingRate: fundingRate,
+        nextFundingTime: nextFundingTime,
+        markPrice: markPrice,
+        indexPrice: indexPrice,
+        basisPercent: basisPercent,
+        openInterestBase: oiBase,
+        openInterestUsd: oiUsd,
+        source: fetched && fetched.via ? fetched.via : 'unknown',
+        fetchedAt: Date.now(),
+      };
+
+      setCachedData(cacheKey, extras, { source: extras.source });
+      return extras;
+    }
+
+    var extrasPrefetchAbortController = null;
+    var hoverExtrasAbortController = null;
+
+    function abortExtrasPrefetch() {
+      if (extrasPrefetchAbortController) {
+        extrasPrefetchAbortController.abort();
+        extrasPrefetchAbortController = null;
+      }
+    }
+
+    function abortHoverExtrasPrefetch() {
+      if (hoverExtrasAbortController) {
+        hoverExtrasAbortController.abort();
+        hoverExtrasAbortController = null;
+      }
+    }
+
+    function prefetchHoverExtras(symbol) {
+      if (!symbol) return;
+      if (!chartSettings || !chartSettings.enabled) return;
+
+      var cleanSymbol = getCleanSymbol(symbol);
+      var cached = getCachedEntry(getFuturesExtrasCacheKey(cleanSymbol));
+      if (cached && cached.data) return;
+
+      abortHoverExtrasPrefetch();
+      hoverExtrasAbortController = new AbortController();
+      var signal = hoverExtrasAbortController.signal;
+      getFuturesExtras(symbol, signal).catch(function() {
+        // Best-effort; ignore failures.
+      });
+    }
+
+    function prefetchTopCandidateExtras() {
+      abortExtrasPrefetch();
+      if (!chartSettings || !chartSettings.enabled) return;
+      if (!candidateHighlights || !Array.isArray(candidateHighlights.topSymbols)) return;
+      var symbols = candidateHighlights.topSymbols.slice(0, 3);
+      if (!symbols.length) return;
+
+      extrasPrefetchAbortController = new AbortController();
+      var signal = extrasPrefetchAbortController.signal;
+
+      symbols.forEach(function(symbol) {
+        getFuturesExtras(symbol, signal).catch(function() {
+          // Prefetch is best-effort; ignore failures.
+        });
+      });
+    }
+
     // Load settings from localStorage
     function loadSettings() {
       try {
@@ -3913,6 +4367,314 @@
       return svg;
     }
 
+    // =============================================================================
+    // Candidate Highlights (Top Picks)
+    // =============================================================================
+
+    const CANDIDATE_BADGE_ICON_PATH = 'M12 2L15.09 8.26L22 9.27L17 14.14L18.18 22L12 18.77L5.82 22L7 14.14L2 9.27L8.91 8.26L12 2Z';
+
+    function clamp(value, min, max) {
+      if (!Number.isFinite(value)) return min;
+      if (value < min) return min;
+      if (value > max) return max;
+      return value;
+    }
+
+    function percentile(sortedValues, p) {
+      if (!sortedValues || sortedValues.length === 0) return null;
+      var idx = Math.floor((sortedValues.length - 1) * p);
+      idx = Math.max(0, Math.min(sortedValues.length - 1, idx));
+      return sortedValues[idx];
+    }
+
+    function buildWinsorScale(values) {
+      var finite = (values || [])
+        .filter(function(v) { return Number.isFinite(v); })
+        .sort(function(a, b) { return a - b; });
+      if (finite.length === 0) return { low: 0, high: 1 };
+
+      var low = percentile(finite, 0.05);
+      var high = percentile(finite, 0.95);
+      if (!Number.isFinite(low) || !Number.isFinite(high) || high <= low) {
+        low = finite[0];
+        high = finite[finite.length - 1];
+      }
+      if (high <= low) {
+        // Avoid divide-by-zero normalization.
+        high = low + 1;
+      }
+      return { low: low, high: high };
+    }
+
+    function normalizeWithScale(value, scale) {
+      if (!scale) return 0;
+      if (!Number.isFinite(value)) return 0;
+      var denom = scale.high - scale.low;
+      if (denom <= 0) return 0.5;
+      var v = clamp(value, scale.low, scale.high);
+      return (v - scale.low) / denom;
+    }
+
+    function buildRankMap(picks, getValue) {
+      var entries = (picks || []).map(function(pick) {
+        var value = getValue(pick);
+        return {
+          symbol: pick.symbol,
+          value: Number.isFinite(value) ? value : -Infinity,
+        };
+      });
+      entries.sort(function(a, b) { return b.value - a.value; });
+      var rankMap = {};
+      entries.forEach(function(entry, idx) {
+        if (!rankMap[entry.symbol]) {
+          rankMap[entry.symbol] = idx + 1;
+        }
+      });
+      return rankMap;
+    }
+
+    function evaluateCandidateHighlights(nextPicks) {
+      var highlights = { bySymbol: {}, topSymbols: [], total: 0 };
+      if (!Array.isArray(nextPicks) || nextPicks.length === 0) return highlights;
+
+      var hasBtc = Number.isFinite(latestBtcChange24h);
+      highlights.total = nextPicks.length;
+
+      var liquidityValues = nextPicks.map(function(pick) {
+        return Math.log10(Math.max(1, pick.volume24h || 0));
+      });
+      var activityValues = nextPicks.map(function(pick) {
+        return Math.log10(Math.max(1, pick.ticks5m || 0));
+      });
+      var volatilityValues = nextPicks.map(function(pick) {
+        return pick.volatility15m;
+      });
+      var btcRelAbsValues = hasBtc
+        ? nextPicks.map(function(pick) { return Math.abs((pick.priceChange24h || 0) - latestBtcChange24h); })
+        : [];
+
+      var scales = {
+        liquidity: buildWinsorScale(liquidityValues),
+        activity: buildWinsorScale(activityValues),
+        volatility: buildWinsorScale(volatilityValues),
+        btcRel: hasBtc ? buildWinsorScale(btcRelAbsValues) : null,
+      };
+
+      // Scoring is a weighted blend of the metrics traders care about most:
+      // liquidity (VolUSD), tape activity (5m trades), and short-term volatility.
+      // BTC-relative move is included when BTC data is available.
+      var weights = { liquidity: 0.32, activity: 0.32, volatility: 0.26, btcRel: 0.10 };
+      var totalWeight = weights.liquidity + weights.activity + weights.volatility + (hasBtc ? weights.btcRel : 0);
+
+      var liquidityRank = buildRankMap(nextPicks, function(pick) { return pick.volume24h; });
+      var activityRank = buildRankMap(nextPicks, function(pick) { return pick.ticks5m; });
+      var volatilityRank = buildRankMap(nextPicks, function(pick) { return pick.volatility15m; });
+      var btcRelRank = hasBtc
+        ? buildRankMap(nextPicks, function(pick) { return Math.abs((pick.priceChange24h || 0) - latestBtcChange24h); })
+        : {};
+
+      nextPicks.forEach(function(pick) {
+        var liquidityRaw = Math.log10(Math.max(1, pick.volume24h || 0));
+        var activityRaw = Math.log10(Math.max(1, pick.ticks5m || 0));
+        var volatilityRaw = pick.volatility15m;
+        var btcRelAbs = hasBtc ? Math.abs((pick.priceChange24h || 0) - latestBtcChange24h) : null;
+
+        var liquidityN = normalizeWithScale(liquidityRaw, scales.liquidity);
+        var activityN = normalizeWithScale(activityRaw, scales.activity);
+        var volatilityN = normalizeWithScale(volatilityRaw, scales.volatility);
+        var btcRelN = hasBtc ? normalizeWithScale(btcRelAbs, scales.btcRel) : 0;
+
+        var score01 = (
+          liquidityN * weights.liquidity +
+          activityN * weights.activity +
+          volatilityN * weights.volatility +
+          (hasBtc ? btcRelN * weights.btcRel : 0)
+        ) / totalWeight;
+
+        var relativeChange = hasBtc ? ((pick.priceChange24h || 0) - latestBtcChange24h) : null;
+
+        highlights.bySymbol[pick.symbol] = {
+          score: Math.round(score01 * 100),
+          liquidity: { value: pick.volume24h, rank: liquidityRank[pick.symbol] || null },
+          activity: { value: pick.ticks5m, rank: activityRank[pick.symbol] || null },
+          volatility: { value: pick.volatility15m, rank: volatilityRank[pick.symbol] || null },
+          btcRelative: hasBtc
+            ? { value: relativeChange, abs: btcRelAbs, rank: btcRelRank[pick.symbol] || null }
+            : null,
+          topRank: null,
+        };
+      });
+
+      // Pick top 3 by score (deterministic tie-breakers).
+      var sorted = nextPicks.slice().sort(function(a, b) {
+        var aInfo = highlights.bySymbol[a.symbol];
+        var bInfo = highlights.bySymbol[b.symbol];
+        var scoreDiff = (bInfo ? bInfo.score : 0) - (aInfo ? aInfo.score : 0);
+        if (scoreDiff !== 0) return scoreDiff;
+
+        var ticksDiff = (b.ticks5m || 0) - (a.ticks5m || 0);
+        if (ticksDiff !== 0) return ticksDiff;
+
+        var volDiff = (b.volatility15m || 0) - (a.volatility15m || 0);
+        if (volDiff !== 0) return volDiff;
+
+        return (b.volume24h || 0) - (a.volume24h || 0);
+      });
+
+      sorted.slice(0, 3).forEach(function(pick, idx) {
+        var info = pick && highlights.bySymbol[pick.symbol];
+        if (!info) return;
+        info.topRank = idx + 1;
+        highlights.topSymbols.push(pick.symbol);
+      });
+
+      return highlights;
+    }
+
+    function pinTopCandidates(nextPicks, highlights) {
+      if (!Array.isArray(nextPicks) || nextPicks.length === 0) return [];
+      if (!highlights || !Array.isArray(highlights.topSymbols) || highlights.topSymbols.length === 0) {
+        return nextPicks.slice();
+      }
+
+      var topLookup = {};
+      highlights.topSymbols.forEach(function(symbol) {
+        topLookup[symbol] = true;
+      });
+
+      var bySymbol = {};
+      nextPicks.forEach(function(pick) {
+        bySymbol[pick.symbol] = pick;
+      });
+
+      var ordered = [];
+      highlights.topSymbols.forEach(function(symbol) {
+        var pick = bySymbol[symbol];
+        if (pick) ordered.push(pick);
+      });
+
+      nextPicks.forEach(function(pick) {
+        if (!topLookup[pick.symbol]) ordered.push(pick);
+      });
+
+      return ordered;
+    }
+
+    function setCandidateTooltipOpen(wrap, open) {
+      if (!wrap) return;
+      var isOpen = !!open;
+      wrap.classList.toggle('open', isOpen);
+      var badge = wrap.querySelector('.candidate-badge');
+      if (badge) badge.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    function closeAllCandidateTooltips(exceptWrap) {
+      document.querySelectorAll('.candidate-badge-wrap.open').forEach(function(wrap) {
+        if (exceptWrap && wrap === exceptWrap) return;
+        setCandidateTooltipOpen(wrap, false);
+      });
+    }
+
+    function toggleCandidateTooltip(wrap) {
+      if (!wrap) return;
+      var willOpen = !wrap.classList.contains('open');
+      closeAllCandidateTooltips(willOpen ? wrap : null);
+      setCandidateTooltipOpen(wrap, willOpen);
+    }
+
+    function formatRank(rank, total) {
+      if (!rank || !total) return '';
+      return '#' + rank + '/' + total;
+    }
+
+    function buildCandidateTooltipText(symbol, highlight, total) {
+      var lines = [];
+      lines.push('Top Candidate #' + highlight.topRank + ' — ' + symbol);
+      lines.push('Score: ' + highlight.score + '/100');
+      lines.push('Liquidity (24h VolUSD): ' + formatVolume(highlight.liquidity.value) + ' ' + formatRank(highlight.liquidity.rank, total));
+      lines.push('Activity (5m Trades): ' + (Number.isFinite(highlight.activity.value) ? highlight.activity.value.toLocaleString() : '—') + ' ' + formatRank(highlight.activity.rank, total));
+      lines.push('Volatility (15m): ' + formatPercent(highlight.volatility.value, 2) + ' ' + formatRank(highlight.volatility.rank, total));
+      if (highlight.btcRelative) {
+        lines.push('BTC Δ (24h): ' + formatChange(highlight.btcRelative.value) + ' ' + formatRank(highlight.btcRelative.rank, total));
+      }
+      lines.push('Weighted: Liquidity, Activity, Volatility' + (highlight.btcRelative ? ', BTC Δ' : ''));
+      return lines.join('\n');
+    }
+
+    function populateCandidateTooltip(tooltipEl, symbol, highlight, total) {
+      tooltipEl.textContent = '';
+
+      var title = document.createElement('div');
+      title.className = 'candidate-tooltip-title';
+      title.textContent = 'Top Candidate #' + highlight.topRank;
+      tooltipEl.appendChild(title);
+
+      var subtitle = document.createElement('div');
+      subtitle.className = 'candidate-tooltip-subtitle';
+      subtitle.textContent = symbol + ' · Score ' + highlight.score + '/100';
+      tooltipEl.appendChild(subtitle);
+
+      var grid = document.createElement('div');
+      grid.className = 'candidate-tooltip-grid';
+
+      function addRow(label, value, rank) {
+        var row = document.createElement('div');
+        row.className = 'candidate-tooltip-row';
+        var labelSpan = document.createElement('span');
+        labelSpan.className = 'candidate-tooltip-label';
+        labelSpan.textContent = label;
+        var valueSpan = document.createElement('span');
+        valueSpan.className = 'candidate-tooltip-value';
+        valueSpan.textContent = value;
+        row.appendChild(labelSpan);
+        row.appendChild(valueSpan);
+        if (rank) {
+          var rankSpan = document.createElement('span');
+          rankSpan.className = 'candidate-tooltip-rank';
+          rankSpan.textContent = rank;
+          row.appendChild(rankSpan);
+        }
+        grid.appendChild(row);
+      }
+
+      addRow('Liquidity', formatVolume(highlight.liquidity.value), formatRank(highlight.liquidity.rank, total));
+      addRow('Activity', Number.isFinite(highlight.activity.value) ? highlight.activity.value.toLocaleString() + ' / 5m' : '—', formatRank(highlight.activity.rank, total));
+      addRow('Volatility', formatPercent(highlight.volatility.value, 2), formatRank(highlight.volatility.rank, total));
+      if (highlight.btcRelative) {
+        addRow('BTC Δ', formatChange(highlight.btcRelative.value), formatRank(highlight.btcRelative.rank, total));
+      }
+
+      tooltipEl.appendChild(grid);
+
+      var footer = document.createElement('div');
+      footer.className = 'candidate-tooltip-footnote';
+      footer.textContent = 'Weighted: Liquidity · Activity · Volatility' + (highlight.btcRelative ? ' · BTC Δ' : '');
+      tooltipEl.appendChild(footer);
+    }
+
+    function setCandidateBadgeContent(badgeEl, symbol, highlight, total, tooltipEl) {
+      badgeEl.className = 'candidate-badge rank-' + highlight.topRank;
+      badgeEl.textContent = '';
+      var icon = createSvgIcon([CANDIDATE_BADGE_ICON_PATH], '16', '16');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.classList.add('candidate-badge-icon');
+      badgeEl.appendChild(icon);
+      var text = document.createElement('span');
+      text.textContent = 'Top ' + highlight.topRank;
+      badgeEl.appendChild(text);
+      var hint = createSvgIcon(['M6 9l6 6 6-6'], '12', '12');
+      hint.setAttribute('aria-hidden', 'true');
+      hint.classList.add('candidate-badge-hint');
+      badgeEl.appendChild(hint);
+
+      var tooltipText = buildCandidateTooltipText(symbol, highlight, total);
+      badgeEl.setAttribute('aria-label', tooltipText.replace(/\n/g, '. '));
+
+      if (tooltipEl) {
+        populateCandidateTooltip(tooltipEl, symbol, highlight, total);
+      }
+    }
+
     function fallbackCopyText(text) {
       var textarea = document.createElement('textarea');
       textarea.value = text;
@@ -4014,6 +4776,8 @@
       const copyAllBtn = document.getElementById('copyAllBtn');
 
       if (picks.length === 0) {
+        candidateHighlights = { bySymbol: {}, topSymbols: [], total: 0 };
+        updateChartPreviewCandidateBadge('');
         resultsContainer.style.display = 'none';
         emptyState.style.display = 'block';
         copyAllBtn.style.display = 'none';
@@ -4029,9 +4793,19 @@
 
       resultsList.textContent = '';
 
+      candidateHighlights = evaluateCandidateHighlights(picks);
+      picks = pinTopCandidates(picks, candidateHighlights);
+      updateChartPreviewCandidateBadge(currentPreviewSymbol || '');
+      updateChartPreviewStats(currentPreviewSymbol || '', chartPreviewRequestId, chartPreviewAbortController ? chartPreviewAbortController.signal : null);
+
       picks.forEach(function(pick, index) {
+        var highlight = candidateHighlights.bySymbol[pick.symbol];
+
         const card = document.createElement('div');
         card.className = 'pick-card';
+        if (highlight && highlight.topRank) {
+          card.classList.add('candidate', 'candidate-rank-' + highlight.topRank);
+        }
 
         // Left side
         const leftDiv = document.createElement('div');
@@ -4057,6 +4831,39 @@
 
         symbolRow.appendChild(symbolSpan);
         symbolRow.appendChild(exchangeSpan);
+
+        if (highlight && highlight.topRank) {
+          var badgeWrap = document.createElement('span');
+          badgeWrap.className = 'candidate-badge-wrap';
+
+          var badge = document.createElement('button');
+          badge.className = 'candidate-badge';
+          badge.type = 'button';
+          badge.setAttribute('aria-expanded', 'false');
+
+          var tooltip = document.createElement('div');
+          tooltip.className = 'candidate-tooltip';
+          tooltip.setAttribute('role', 'tooltip');
+
+          setCandidateBadgeContent(badge, pick.symbol, highlight, candidateHighlights.total, tooltip);
+          badgeWrap.addEventListener('click', function(e) {
+            // Keep tap targets from triggering chart/card actions.
+            e.stopPropagation();
+          });
+          badge.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleCandidateTooltip(badgeWrap);
+          });
+          badge.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleCandidateTooltip(badgeWrap);
+            }
+          });
+          badgeWrap.appendChild(badge);
+          badgeWrap.appendChild(tooltip);
+          symbolRow.appendChild(badgeWrap);
+        }
 
         const metricsDiv = document.createElement('div');
         metricsDiv.className = 'metrics';
@@ -4285,6 +5092,8 @@
       const btn = document.getElementById('scanBtn');
       isLoading = true;
       btn.disabled = true;
+      abortExtrasPrefetch();
+      abortHoverExtrasPrefetch();
 
       // Update button to loading state
       const btnSpan = btn.querySelector('span');
@@ -4299,6 +5108,7 @@
       try {
         picks = await fetchScreenerWithRetry();
         renderPicks();
+        prefetchTopCandidateExtras();
         showToast('Found ' + picks.length + ' picks');
       } catch (err) {
         console.error('Scan failed:', err);
@@ -4649,9 +5459,7 @@
     function applyPreviewLayout(layout) {
       var preview = document.getElementById('chartPreview');
       var container = document.getElementById('chartContainer');
-      var header = preview.querySelector('.chart-preview-header');
-      var headerHeight = header ? Math.round(header.getBoundingClientRect().height) : 44;
-      var chartHeight = layout.height - headerHeight;
+      var body = document.getElementById('chartPreviewBody');
 
       // On mobile, let CSS handle positioning (bottom: 0, left: 0)
       if (!isMobileDevice()) {
@@ -4665,18 +5473,20 @@
         preview.style.height = '';
         preview.style.left = '';
         preview.style.top = '';
-        var previewHeight = preview.getBoundingClientRect().height || 300;
-        chartHeight = previewHeight - headerHeight;
       }
 
-      chartHeight = Math.max(120, chartHeight);
       preview.classList.toggle('maximized', isChartMaximized);
 
       container.style.width = '100%';
+      var bodyRect = body ? body.getBoundingClientRect() : null;
+      var chartWidth = bodyRect ? Math.round(bodyRect.width) : layout.width;
+      var chartHeight = bodyRect ? Math.round(bodyRect.height) : layout.height;
+      chartWidth = Math.max(200, chartWidth);
+      chartHeight = Math.max(120, chartHeight);
       container.style.height = chartHeight + 'px';
 
       if (chartInstance) {
-        chartInstance.resize(isMobileDevice() ? window.innerWidth : layout.width, chartHeight);
+        chartInstance.resize(chartWidth, chartHeight);
         chartInstance.timeScale().fitContent();
       }
     }
@@ -4688,12 +5498,26 @@
     var chartPreviewTimeout = null;
     var chartPreviewAbortController = null;
     var chartPreviewRequestId = 0;
+    var chartPreviewLayoutSyncRaf = null;
     var currentPreviewSymbol = null;
     var currentPreviewSettings = null;
     var currentPreviewCard = null;
     var currentPreviewSource = null;
     var isChartMaximized = false;
     var isPreviewHovered = false;
+
+    function scheduleChartPreviewLayoutSync() {
+      if (chartPreviewLayoutSyncRaf) return;
+      if (!currentPreviewCard) return;
+      var preview = document.getElementById('chartPreview');
+      if (!preview || !preview.classList.contains('visible')) return;
+
+      chartPreviewLayoutSyncRaf = requestAnimationFrame(function() {
+        chartPreviewLayoutSyncRaf = null;
+        if (!currentPreviewCard) return;
+        applyPreviewLayout(getPreviewLayout(currentPreviewCard));
+      });
+    }
 
     function getCssVar(name, fallback) {
       var value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -4739,6 +5563,148 @@
         badge.title = '';
         badge.classList.remove('visible');
       }
+    }
+
+    function updateChartPreviewCandidateBadge(symbol) {
+      var wrap = document.getElementById('chartPreviewCandidateWrap');
+      var badge = document.getElementById('chartPreviewCandidateBadge');
+      var tooltip = document.getElementById('chartPreviewCandidateTooltip');
+      if (!wrap || !badge || !tooltip) return;
+
+      var highlight = (candidateHighlights && candidateHighlights.bySymbol)
+        ? candidateHighlights.bySymbol[symbol]
+        : null;
+
+      if (!highlight || !highlight.topRank) {
+        wrap.classList.remove('visible');
+        setCandidateTooltipOpen(wrap, false);
+        badge.textContent = '';
+        tooltip.textContent = '';
+        return;
+      }
+
+      wrap.classList.add('visible');
+      setCandidateTooltipOpen(wrap, false);
+      var total = candidateHighlights.total || (Array.isArray(picks) ? picks.length : 0);
+      setCandidateBadgeContent(badge, symbol, highlight, total, tooltip);
+    }
+
+    function formatFundingRate(fundingRate) {
+      if (!Number.isFinite(fundingRate)) return '—';
+      var pct = fundingRate * 100;
+      var abs = Math.abs(pct);
+      var decimals = abs < 0.01 ? 4 : (abs < 0.1 ? 3 : 2);
+      var sign = pct >= 0 ? '+' : '';
+      return sign + pct.toFixed(decimals) + '%';
+    }
+
+    function createChartStatChip(label, valueText, valueClass) {
+      var chip = document.createElement('div');
+      chip.className = 'chart-stat';
+
+      var labelSpan = document.createElement('span');
+      labelSpan.className = 'chart-stat-label';
+      labelSpan.textContent = label;
+
+      var valueSpan = document.createElement('span');
+      valueSpan.className = 'chart-stat-value' + (valueClass ? ' ' + valueClass : '');
+      valueSpan.textContent = valueText;
+
+      chip.appendChild(labelSpan);
+      chip.appendChild(valueSpan);
+      return chip;
+    }
+
+    function clearChartPreviewStats() {
+      var stats = document.getElementById('chartPreviewStats');
+      if (!stats) return;
+      stats.textContent = '';
+      stats.classList.remove('visible');
+    }
+
+    function renderChartPreviewStats(symbol, highlight, pick, extras, extrasState) {
+      var stats = document.getElementById('chartPreviewStats');
+      if (!stats) return;
+
+      if (!symbol) {
+        clearChartPreviewStats();
+        return;
+      }
+
+      stats.textContent = '';
+
+      if (highlight && Number.isFinite(highlight.score)) {
+        stats.appendChild(createChartStatChip('Score', highlight.score + '/100'));
+      }
+
+      if (pick && Number.isFinite(pick.priceChange1h)) {
+        var change1hClass = pick.priceChange1h >= 0 ? 'positive' : 'negative';
+        stats.appendChild(createChartStatChip('1h', formatChange(pick.priceChange1h), change1hClass));
+      }
+
+      if (pick && Number.isFinite(pick.priceChange4h)) {
+        var change4hClass = pick.priceChange4h >= 0 ? 'positive' : 'negative';
+        stats.appendChild(createChartStatChip('4h', formatChange(pick.priceChange4h), change4hClass));
+      }
+
+      var fundingValue = '—';
+      var fundingClass = '';
+      if (extras && Number.isFinite(extras.fundingRate)) {
+        fundingValue = formatFundingRate(extras.fundingRate);
+        fundingClass = extras.fundingRate >= 0 ? 'positive' : 'negative';
+      } else if (extrasState === 'loading') {
+        fundingValue = 'Loading…';
+      } else if (extrasState === 'error') {
+        fundingValue = 'Unavailable';
+      }
+      stats.appendChild(createChartStatChip('Funding', fundingValue, fundingClass));
+
+      var oiValue = '—';
+      if (extras && Number.isFinite(extras.openInterestUsd)) {
+        oiValue = '$' + formatVolume(extras.openInterestUsd);
+      } else if (extrasState === 'loading') {
+        oiValue = 'Loading…';
+      } else if (extrasState === 'error') {
+        oiValue = 'Unavailable';
+      }
+      stats.appendChild(createChartStatChip('OI', oiValue));
+
+      stats.classList.add('visible');
+      scheduleChartPreviewLayoutSync();
+    }
+
+    function updateChartPreviewStats(symbol, requestId, signal) {
+      if (!symbol) {
+        clearChartPreviewStats();
+        return;
+      }
+
+      var pick = Array.isArray(picks) ? picks.find(function(p) { return p.symbol === symbol; }) : null;
+      var highlight = candidateHighlights && candidateHighlights.bySymbol ? candidateHighlights.bySymbol[symbol] : null;
+      var cleanSymbol = getCleanSymbol(symbol);
+      var cacheKey = getFuturesExtrasCacheKey(cleanSymbol);
+      var cached = getCachedEntry(cacheKey);
+      var cachedExtras = cached && cached.data ? cached.data : null;
+
+      if (cachedExtras) {
+        renderChartPreviewStats(symbol, highlight, pick, cachedExtras, 'ready');
+        return;
+      }
+
+      renderChartPreviewStats(symbol, highlight, pick, null, 'loading');
+
+      getFuturesExtras(symbol, signal).then(function(extras) {
+        if (requestId !== chartPreviewRequestId) return;
+        if (!extras) {
+          renderChartPreviewStats(symbol, highlight, pick, null, 'error');
+          return;
+        }
+        renderChartPreviewStats(symbol, highlight, pick, extras, 'ready');
+      }).catch(function(err) {
+        if (requestId !== chartPreviewRequestId) return;
+        if (err && err.name === 'AbortError') return;
+        renderChartPreviewStats(symbol, highlight, pick, null, 'error');
+      });
     }
 
     function buildVolUsdSeries(candles) {
@@ -4991,6 +5957,8 @@
       });
 
       symbolSpan.textContent = symbol;
+      updateChartPreviewCandidateBadge(symbol);
+      updateChartPreviewStats(symbol, requestId, signal);
       timeframeSpan.textContent = resolvedTimeframe;
       timeframeSelect.value = resolvedTimeframe;
       if (tvLink) tvLink.href = getTradingViewLink(symbol);
@@ -5000,6 +5968,8 @@
       var layout = getPreviewLayout(cardElement);
       applyPreviewLayout(layout);
       preview.classList.add('visible');
+      document.body.classList.add('chart-preview-visible');
+      closeAllCandidateTooltips();
 
       // Check if we need to reload the chart
       if (currentPreviewSettings === settingsKey && chartInstance) {
@@ -5034,7 +6004,10 @@
         // Create/recreate chart
         container.style.display = 'block';
 
-        createChart(container, layout.width, layout.height - 36);
+        var containerRect = container.getBoundingClientRect();
+        var chartWidth = Math.max(200, Math.round(containerRect.width || layout.width));
+        var chartHeight = Math.max(120, Math.round(containerRect.height || (layout.height - 44)));
+        createChart(container, chartWidth, chartHeight);
         chartCandleSeries.setData(candles);
         chartInstance.timeScale().fitContent();
 
@@ -5113,6 +6086,7 @@
       if (isChartMaximized) return;
       var preview = document.getElementById('chartPreview');
       preview.classList.remove('visible');
+      document.body.classList.remove('chart-preview-visible');
 
       if (chartPreviewAbortController) {
         chartPreviewAbortController.abort();
@@ -5125,6 +6099,7 @@
       var loading = document.getElementById('chartPreviewLoading');
       loading.textContent = 'Loading chart...';
       updateChartPreviewBadge(null);
+      clearChartPreviewStats();
     }
 
     function closeChartPreview() {
@@ -5132,6 +6107,7 @@
       isPreviewHovered = false;
       var preview = document.getElementById('chartPreview');
       preview.classList.remove('visible');
+      document.body.classList.remove('chart-preview-visible');
 
       if (chartPreviewAbortController) {
         chartPreviewAbortController.abort();
@@ -5143,11 +6119,13 @@
       var loading = document.getElementById('chartPreviewLoading');
       loading.textContent = 'Loading chart...';
       updateChartPreviewBadge(null);
+      clearChartPreviewStats();
     }
 
     function handleCardMouseEnter(symbol, cardElement) {
       if (!chartSettings.enabled) return;
 
+      prefetchHoverExtras(symbol);
       chartPreviewTimeout = setTimeout(function() {
         showChartPreview(symbol, cardElement);
       }, chartSettings.hoverDelay);
@@ -5332,6 +6310,7 @@
         if (e.target.closest('#chartPreviewClose')) return;
         if (e.target.closest('#chartPreviewTimeframeSelect')) return;
         if (e.target.closest('#chartPreviewLinks')) return;
+        if (e.target.closest('#chartPreviewCandidateWrap')) return;
         toggleChartMaximize();
       });
       document.getElementById('chartPreviewMaximize').addEventListener('click', function(e) {
@@ -5352,6 +6331,29 @@
         e.stopPropagation();
         closeChartPreview();
       });
+
+      // Candidate tooltip open/close (supports touch)
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.candidate-badge-wrap')) return;
+        closeAllCandidateTooltips();
+      });
+      var chartCandidateWrap = document.getElementById('chartPreviewCandidateWrap');
+      var chartCandidateBadge = document.getElementById('chartPreviewCandidateBadge');
+      if (chartCandidateWrap && chartCandidateBadge) {
+        chartCandidateWrap.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+        chartCandidateBadge.addEventListener('click', function(e) {
+          e.preventDefault();
+          toggleCandidateTooltip(chartCandidateWrap);
+        });
+        chartCandidateBadge.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleCandidateTooltip(chartCandidateWrap);
+          }
+        });
+      }
 
       // Screenshot helper (query param only, no effect on normal usage).
       if (window.location.search.indexOf('screenshot=1') !== -1) {
@@ -5374,6 +6376,7 @@
       // Keyboard shortcut to close modal
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+          closeAllCandidateTooltips();
           closeSettingsModal();
           closeAboutModal();
           if (document.getElementById('helpPanel')?.classList.contains('visible')) {
