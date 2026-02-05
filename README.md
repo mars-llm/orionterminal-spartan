@@ -6,7 +6,7 @@ A single-file market scanner for Binance USDT‑M futures. Finds high-activity s
 
 **[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/index.html)
 
-**Socials:** [X (@marsmensch)](https://x.com/marsmensch) · [GitHub](https://github.com/mars-llm) · [Email](mailto:marsmensch@pm.me)
+**Socials:** [X (@marsmensch)](https://x.com/marsmensch) · [GitHub](https://github.com/mars-llm)
 
 ---
 
@@ -61,7 +61,7 @@ Live data needs an internet connection. If opening `index.html` directly causes 
 - [Orion Terminal](https://orionterminal.com) — screener data
 - [Binance Futures](https://www.binance.com) — chart candles + futures extras (funding/open interest)
 - Spot / fallback chart sources — Binance Vision, Coinbase, Kraken (when needed)
-- Public CORS proxies — used when direct API access is blocked (for example `file://` or GitHub Pages)
+- Public CORS proxies — used when direct API access is blocked (for example `file://` or GitHub Pages). You can review and customize the proxy list in Settings → Network.
 - [Lightweight Charts](https://tradingview.github.io/lightweight-charts/) — charting library
 
 ## Development

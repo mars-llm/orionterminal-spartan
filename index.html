@@ -1951,6 +1951,123 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .settings-note {
+      margin: 0 0 0.95rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .settings-note code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.45rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.55);
+      color: var(--text-primary);
+    }
+
+    :root[data-theme="light"] .settings-note code {
+      background: rgba(226, 232, 240, 0.85);
+    }
+
+    .settings-footnote {
+      margin: 0.75rem 0 0;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .proxy-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 0.9rem;
+    }
+
+    .proxy-item {
+      padding: 0.85rem;
+      border-radius: 0.95rem;
+      border: 1px solid var(--border);
+      background: var(--surface-card);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    }
+
+    .proxy-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .proxy-item-title {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+    }
+
+    .proxy-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .proxy-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .proxy-url-input {
+      flex: 1;
+      min-width: 240px;
+      width: 100%;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.75rem;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .proxy-url-input:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+    }
+
+    .proxy-url-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .proxy-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .proxy-toggle input {
+      cursor: pointer;
+      accent-color: var(--accent-2);
+    }
+
+    .proxy-actions {
+      margin-top: 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
     .setting-row {
       display: flex;
       align-items: center;
@@ -2016,6 +2133,27 @@
       outline: none;
       border-color: var(--accent-2);
       box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+    }
+
+    .setting-control input[type="text"] {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.75rem;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      min-width: 260px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .setting-control input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+    }
+
+    .setting-control input[type="text"]::placeholder {
+      color: var(--text-muted);
     }
 
     .setting-control input[type="color"] {
@@ -2692,7 +2830,7 @@
         <a href="https://github.com/mars-llm/orionterminal-spartan" target="_blank" rel="noopener">GitHub</a>
       </p>
       <p style="margin-top: 0.375rem;">
-        <a href="mailto:marsmensch@pm.me">marsmensch@pm.me</a> · Please use responsibly.
+        Please use responsibly.
       </p>
       <div class="footer-actions">
         <button class="btn-secondary" id="installPwaBtn" style="display: none;">
@@ -2783,6 +2921,7 @@
           <button class="settings-tab active" data-tab="chart" type="button" role="tab" aria-selected="true">Chart</button>
           <button class="settings-tab" data-tab="style" type="button" role="tab" aria-selected="false">Style</button>
           <button class="settings-tab" data-tab="display" type="button" role="tab" aria-selected="false">Display</button>
+          <button class="settings-tab" data-tab="network" type="button" role="tab" aria-selected="false">Network</button>
         </div>
 
         <div class="settings-panel active" data-panel="chart" role="tabpanel">
@@ -3018,6 +3157,36 @@
             </div>
           </div>
         </div>
+
+        <div class="settings-panel" data-panel="network" role="tabpanel">
+          <div class="settings-section">
+            <div class="settings-section-title">CORS Proxy Fallback</div>
+            <p class="settings-note">
+              When direct API access is blocked (for example on <code>file://</code> or GitHub Pages), the app can route
+              requests through public CORS proxies. Proxies can see the requested URL. Use at your own risk.
+            </p>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>Preferred Scan Proxy</span>
+                <small>First proxy tried for Orion API scans</small>
+              </div>
+              <div class="setting-control">
+                <select id="settingPreferredProxy"></select>
+              </div>
+            </div>
+
+            <div class="proxy-list" id="corsProxyList"></div>
+
+            <div class="proxy-actions">
+              <button class="btn-secondary btn-small" id="addCorsProxyBtn" type="button">Add Proxy</button>
+              <button class="btn-secondary btn-small" id="saveCorsProxyBtn" type="button">Save</button>
+              <button class="btn-secondary btn-small" id="resetCorsProxyBtn" type="button">Reset Defaults</button>
+            </div>
+
+            <p class="settings-footnote" id="corsProxyStatus"></p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -3104,13 +3273,80 @@
     // Configuration & State
     // =============================================================================
 
-    // CORS proxies for standalone file usage (no local server needed)
-    // GitHub Pages must use proxy fallback because the API does not send CORS headers there.
-    const CORS_PROXIES = [
+    // CORS proxies for environments where direct API requests are blocked (ex: file://, GitHub Pages).
+    // Users can review/customize this list in Settings → Network.
+    const CORS_PROXIES_STORAGE_KEY = 'orion-screener-cors-proxies-v1';
+    const DEFAULT_CORS_PROXIES = [
       { url: 'https://api.codetabs.com/v1/proxy?quest=', encode: false },
       { url: 'https://api.allorigins.win/raw?url=', encode: true },
       { url: 'https://corsproxy.io/?', encode: true },
     ];
+    let CORS_PROXIES = DEFAULT_CORS_PROXIES.map(function(proxy) {
+      return { url: proxy.url, encode: proxy.encode };
+    });
+
+    function normalizeCorsProxyEntry(entry) {
+      if (!entry || typeof entry !== 'object') return null;
+      if (!entry.url) return null;
+      var url = String(entry.url).trim();
+      if (!url) return null;
+      var lower = url.toLowerCase();
+      if (!(lower.startsWith('https://') || lower.startsWith('http://'))) return null;
+      return { url: url, encode: !!entry.encode };
+    }
+
+    function sanitizeCorsProxyList(list) {
+      var next = [];
+      var seen = {};
+      (Array.isArray(list) ? list : []).forEach(function(entry) {
+        var normalized = normalizeCorsProxyEntry(entry);
+        if (!normalized) return;
+        var key = normalized.url + '|' + (normalized.encode ? '1' : '0');
+        if (seen[key]) return;
+        seen[key] = true;
+        next.push(normalized);
+      });
+      return next.slice(0, 10);
+    }
+
+    function applyCorsProxies(nextList, persist) {
+      var sanitized = sanitizeCorsProxyList(nextList);
+      if (!sanitized.length) {
+        sanitized = DEFAULT_CORS_PROXIES.map(function(proxy) {
+          return { url: proxy.url, encode: proxy.encode };
+        });
+      }
+      CORS_PROXIES = sanitized;
+      if (persist) {
+        try {
+          localStorage.setItem(CORS_PROXIES_STORAGE_KEY, JSON.stringify(CORS_PROXIES));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+    }
+
+    function loadCorsProxies() {
+      try {
+        var raw = localStorage.getItem(CORS_PROXIES_STORAGE_KEY);
+        if (!raw) return;
+        var parsed = JSON.parse(raw);
+        applyCorsProxies(parsed, false);
+      } catch (e) {
+        // Ignore parse errors and fall back to defaults.
+      }
+    }
+
+    function resetCorsProxiesToDefault() {
+      try {
+        localStorage.removeItem(CORS_PROXIES_STORAGE_KEY);
+      } catch (e) {
+        // Ignore storage errors
+      }
+      applyCorsProxies(DEFAULT_CORS_PROXIES, false);
+    }
+
+    loadCorsProxies();
     const ORION_API = 'https://screener.orionterminal.com/api/screener';
     const FETCH_TIMEOUT_MS = 12000;
     const THEME_STORAGE_KEY = 'orion-screener-theme';
@@ -5287,6 +5523,225 @@
 
     const SETTINGS_TAB_KEY = 'orion-screener-settings-tab';
     let currentSettingsTab = 'chart';
+    let corsProxyDraft = null;
+    let preferredProxyDraft = 'auto';
+
+    function copyCorsProxyList(list) {
+      return (Array.isArray(list) ? list : []).map(function(proxy) {
+        return { url: proxy.url, encode: !!proxy.encode };
+      });
+    }
+
+    function getCorsProxyLabel(proxy) {
+      if (!proxy || !proxy.url) return 'Unknown';
+      try {
+        return new URL(proxy.url).hostname;
+      } catch (e) {
+        var raw = String(proxy.url);
+        var lower = raw.toLowerCase();
+        if (lower.startsWith('https://')) raw = raw.slice(8);
+        if (lower.startsWith('http://')) raw = raw.slice(7);
+        return raw.slice(0, 38);
+      }
+    }
+
+    function getStoredPreferredProxyDraft() {
+      try {
+        var stored = localStorage.getItem(PROXY_STATUS_KEY);
+        if (stored === null || stored === undefined || stored === '') return 'auto';
+        var parsed = parseInt(stored, 10);
+        if (Number.isFinite(parsed)) return String(parsed);
+      } catch (e) {
+        // Ignore storage errors
+      }
+      return 'auto';
+    }
+
+    function updateCorsProxyStatusFootnote() {
+      var statusEl = document.getElementById('corsProxyStatus');
+      if (!statusEl) return;
+
+      var directBlocked = isDirectApiBlocked();
+      var statusParts = [];
+      statusParts.push(directBlocked
+        ? 'Direct Orion API access is blocked here; scans will use proxy fallback.'
+        : 'Direct Orion API access is available; proxies are used only when needed.'
+      );
+
+      var isCustom = false;
+      try {
+        isCustom = localStorage.getItem(CORS_PROXIES_STORAGE_KEY) !== null;
+      } catch (e) {
+        isCustom = false;
+      }
+      statusParts.push('Proxy list: ' + (isCustom ? 'custom' : 'default') + ' (' + CORS_PROXIES.length + ').');
+      statusParts.push('Changes apply after clicking Save.');
+      statusEl.textContent = statusParts.join(' ');
+    }
+
+    function renderPreferredProxySelect() {
+      var select = document.getElementById('settingPreferredProxy');
+      if (!select) return;
+
+      select.textContent = '';
+      var autoOpt = document.createElement('option');
+      autoOpt.value = 'auto';
+      autoOpt.textContent = 'Auto (recommended)';
+      select.appendChild(autoOpt);
+
+      var list = corsProxyDraft ? corsProxyDraft : CORS_PROXIES;
+      list.forEach(function(proxy, idx) {
+        var option = document.createElement('option');
+        option.value = String(idx);
+        option.textContent = (idx + 1) + '. ' + getCorsProxyLabel(proxy);
+        select.appendChild(option);
+      });
+
+      var nextValue = preferredProxyDraft || 'auto';
+      var maxIndex = list.length - 1;
+      if (nextValue !== 'auto') {
+        var parsed = parseInt(nextValue, 10);
+        if (!Number.isFinite(parsed) || parsed < 0 || parsed > maxIndex) {
+          nextValue = 'auto';
+        }
+      }
+      select.value = nextValue;
+    }
+
+    function renderCorsProxyList() {
+      var container = document.getElementById('corsProxyList');
+      if (!container) return;
+      container.textContent = '';
+
+      if (!corsProxyDraft) corsProxyDraft = copyCorsProxyList(CORS_PROXIES);
+      if (!corsProxyDraft.length) {
+        var empty = document.createElement('div');
+        empty.className = 'settings-footnote';
+        empty.textContent = 'No proxies configured. Reset defaults to restore.';
+        container.appendChild(empty);
+        return;
+      }
+
+      corsProxyDraft.forEach(function(proxy, idx) {
+        var item = document.createElement('div');
+        item.className = 'proxy-item';
+
+        var top = document.createElement('div');
+        top.className = 'proxy-item-top';
+
+        var title = document.createElement('div');
+        title.className = 'proxy-item-title';
+        title.textContent = 'Proxy ' + (idx + 1) + ' · ' + getCorsProxyLabel(proxy);
+
+        var actions = document.createElement('div');
+        actions.className = 'proxy-item-actions';
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-secondary btn-small';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', function() {
+          corsProxyDraft.splice(idx, 1);
+          if (preferredProxyDraft !== 'auto') {
+            var preferredIndex = parseInt(preferredProxyDraft, 10);
+            if (Number.isFinite(preferredIndex)) {
+              if (preferredIndex === idx) preferredProxyDraft = 'auto';
+              if (preferredIndex > idx) preferredProxyDraft = String(preferredIndex - 1);
+            }
+          }
+          renderCorsProxySettingsUi();
+        });
+        actions.appendChild(removeBtn);
+
+        top.appendChild(title);
+        top.appendChild(actions);
+
+        var controls = document.createElement('div');
+        controls.className = 'proxy-item-controls';
+
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'proxy-url-input';
+        input.placeholder = 'https://example.com/proxy?url=';
+        input.value = proxy.url || '';
+        input.addEventListener('input', function() {
+          corsProxyDraft[idx].url = this.value;
+        });
+        controls.appendChild(input);
+
+        var encodeLabel = document.createElement('label');
+        encodeLabel.className = 'proxy-toggle';
+        var encodeInput = document.createElement('input');
+        encodeInput.type = 'checkbox';
+        encodeInput.checked = !!proxy.encode;
+        encodeInput.addEventListener('change', function() {
+          corsProxyDraft[idx].encode = this.checked;
+        });
+        var encodeText = document.createElement('span');
+        encodeText.textContent = 'Encode URL';
+        encodeLabel.appendChild(encodeInput);
+        encodeLabel.appendChild(encodeText);
+        controls.appendChild(encodeLabel);
+
+        item.appendChild(top);
+        item.appendChild(controls);
+        container.appendChild(item);
+      });
+    }
+
+    function renderCorsProxySettingsUi() {
+      renderPreferredProxySelect();
+      renderCorsProxyList();
+      updateCorsProxyStatusFootnote();
+    }
+
+    function syncCorsProxySettingsUi() {
+      corsProxyDraft = copyCorsProxyList(CORS_PROXIES);
+      preferredProxyDraft = getStoredPreferredProxyDraft();
+      renderCorsProxySettingsUi();
+    }
+
+    function addCorsProxyDraftRow() {
+      if (!corsProxyDraft) corsProxyDraft = copyCorsProxyList(CORS_PROXIES);
+      corsProxyDraft.push({ url: '', encode: true });
+      renderCorsProxySettingsUi();
+      setTimeout(function() {
+        var container = document.getElementById('corsProxyList');
+        if (!container) return;
+        var inputs = container.querySelectorAll('input.proxy-url-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 0);
+    }
+
+    function saveCorsProxyDraft() {
+      applyCorsProxies(corsProxyDraft, true);
+
+      var list = CORS_PROXIES;
+      var nextPreferred = preferredProxyDraft || 'auto';
+      if (nextPreferred === 'auto') {
+        try {
+          localStorage.removeItem(PROXY_STATUS_KEY);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      } else {
+        var parsed = parseInt(nextPreferred, 10);
+        if (Number.isFinite(parsed) && parsed >= 0 && parsed < list.length) {
+          setPreferredProxyIndex(parsed);
+        } else {
+          try {
+            localStorage.removeItem(PROXY_STATUS_KEY);
+          } catch (e) {
+            // Ignore storage errors
+          }
+        }
+      }
+
+      corsProxyDraft = copyCorsProxyList(CORS_PROXIES);
+      preferredProxyDraft = getStoredPreferredProxyDraft();
+      renderCorsProxySettingsUi();
+      showToast('Network settings saved');
+    }
 
     function getStoredSettingsTab() {
       try {
@@ -5344,6 +5799,7 @@
       document.getElementById('settingSR1d').checked = chartSettings.showSR1d;
       setActiveSettingsTab(getStoredSettingsTab(), false);
       syncChartStyleInputs();
+      syncCorsProxySettingsUi();
     }
 
     function closeSettingsModal() {
@@ -6279,6 +6735,28 @@
       document.getElementById('settingSR1d').addEventListener('change', function() {
         handleSettingChange('settingSR1d', this.checked);
       });
+      var preferredProxySelect = document.getElementById('settingPreferredProxy');
+      if (preferredProxySelect) {
+        preferredProxySelect.addEventListener('change', function() {
+          preferredProxyDraft = this.value;
+        });
+      }
+      var addCorsProxyBtn = document.getElementById('addCorsProxyBtn');
+      if (addCorsProxyBtn) {
+        addCorsProxyBtn.addEventListener('click', addCorsProxyDraftRow);
+      }
+      var saveCorsProxyBtn = document.getElementById('saveCorsProxyBtn');
+      if (saveCorsProxyBtn) {
+        saveCorsProxyBtn.addEventListener('click', saveCorsProxyDraft);
+      }
+      var resetCorsProxyBtn = document.getElementById('resetCorsProxyBtn');
+      if (resetCorsProxyBtn) {
+        resetCorsProxyBtn.addEventListener('click', function() {
+          resetCorsProxiesToDefault();
+          syncCorsProxySettingsUi();
+          showToast('Proxy list reset');
+        });
+      }
 
       CHART_STYLE_CONTROLS.forEach(function(control) {
         var input = document.getElementById(control.id);
