@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spartan-orion-screener-v3';
+const CACHE_NAME = 'spartan-orion-screener-v4';
 const ASSETS = [
   './',
   './index.html',
