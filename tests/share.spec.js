@@ -14,11 +14,14 @@ function fromBase64UrlJson(value) {
   return JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
 }
 
-test('share: button hidden before scan and visible with picks', async ({ page }) => {
+test('share: setup link button is contextual and social card is available', async ({ page }) => {
   await page.goto('./');
 
-  const shareBtn = page.locator('#shareScanBtn');
-  await expect(shareBtn).toBeHidden();
+  const shareSetupBtn = page.locator('#shareScanBtn');
+  const shareCardBtn = page.locator('#shareSocialCardBtn');
+  await expect(shareSetupBtn).toBeHidden();
+  await expect(shareCardBtn).toBeVisible();
+  await expect(shareCardBtn).toContainText('Share Social Card');
 
   await page.evaluate(() => {
     picks = [{
@@ -36,10 +39,12 @@ test('share: button hidden before scan and visible with picks', async ({ page })
     renderPicks();
   });
 
-  await expect(shareBtn).toBeVisible();
+  await expect(shareSetupBtn).toBeVisible();
+  await expect(shareSetupBtn).toContainText('Share Setup Link');
+  await expect(shareCardBtn).toBeVisible();
 });
 
-test('share: clicking share emits metric and includes encoded payload', async ({ page }) => {
+test('share: clicking setup link emits metric and includes encoded payload', async ({ page }) => {
   await page.addInitScript(() => {
     window.__sharedCalls = [];
     Object.defineProperty(navigator, 'share', {

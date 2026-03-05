@@ -30,6 +30,7 @@ A single-file market scanner for Binance USDT‑M futures. Finds high-activity s
 - **Auto S/R levels** — 15m, 1h, 4h, and 1d candle high/low
 - **Filter presets** — Default, High Volume Majors, Low Cap Gems, Scalping
 - **Style controls** — customize chart colors and overlays
+- **Sharing modes** — share setup links (filters) or visual social cards (setups/filters)
 - **PWA support** — install as an app on desktop or mobile
 - **Downloadable HTML** — run locally, with live data when connected
 
@@ -39,8 +40,20 @@ A single-file market scanner for Binance USDT‑M futures. Finds high-activity s
 2. Click **Scan Market**
 3. Hover rows to preview charts (use **Expand** for the full modal)
 4. Hover/tap the **Top** badge to see why it ranked
+5. Use **Share Setup Link** or **Share Social Card** from the top controls
 
 Live data needs an internet connection. If opening `index.html` directly causes scan requests to fail, serve it locally (for example: `python3 -m http.server`) and open `http://localhost:8000`.
+
+## Sharing
+
+- **Share Setup Link** copies a URL with the current filter setup.
+- **Share Social Card** creates a visual card:
+  - If results exist, card type is **setup** (top candidates + metrics).
+  - If no results exist, card type is **filters** (threshold snapshot).
+- Query params:
+  - `?share=<payload>` loads shared filters and auto-scans (backward compatible).
+  - `?card=<payload>` opens card payload in-app.
+  - `?view=social-card&card=<payload>` renders clean card-only view.
 
 ## Filter Presets
 

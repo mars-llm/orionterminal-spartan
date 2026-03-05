@@ -1797,6 +1797,20 @@
       color: var(--green);
     }
 
+    .share-helper {
+      width: 100%;
+      margin-top: 0.15rem;
+      font-size: 0.67rem;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      line-height: 1.45;
+    }
+
+    .share-helper strong {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
     /* Settings Modal */
     .modal-overlay {
       position: fixed;
@@ -2472,6 +2486,220 @@
       font-size: 0.75rem;
     }
 
+    .social-card-modal {
+      width: min(92vw, 760px);
+    }
+
+    .social-card-modal-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .social-card-view-link {
+      text-decoration: none;
+    }
+
+    .social-card-root {
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      border-radius: 1rem;
+      padding: 0.9rem;
+      min-height: 220px;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    :root[data-theme="light"] .social-card-root {
+      background: rgba(241, 245, 249, 0.72);
+    }
+
+    .social-card-surface {
+      border-radius: 1rem;
+      border: 1px solid var(--glass-border);
+      background: linear-gradient(140deg, rgba(245, 176, 65, 0.22), rgba(45, 212, 191, 0.16), rgba(15, 23, 42, 0.9) 72%);
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+      color: var(--text-primary);
+    }
+
+    .social-card-root[data-card-theme="light"] .social-card-surface {
+      background: linear-gradient(140deg, rgba(245, 176, 65, 0.2), rgba(45, 212, 191, 0.14), rgba(248, 250, 252, 0.98) 78%);
+      border-color: rgba(148, 163, 184, 0.45);
+    }
+
+    .social-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.9rem;
+    }
+
+    .social-card-title {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .social-card-meta {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .social-card-note {
+      margin-top: 0.35rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .social-card-filters {
+      margin-bottom: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .social-card-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.45);
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      letter-spacing: 0.03em;
+    }
+
+    .social-card-root[data-card-theme="light"] .social-card-chip {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(148, 163, 184, 0.45);
+      color: #334155;
+    }
+
+    .social-card-list {
+      display: grid;
+      gap: 0.55rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .social-card-entry {
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 0.8rem;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 0.7rem;
+    }
+
+    .social-card-root[data-card-theme="light"] .social-card-entry {
+      background: rgba(255, 255, 255, 0.74);
+      border-color: rgba(148, 163, 184, 0.42);
+    }
+
+    .social-card-entry-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .social-card-rank {
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .social-card-symbol {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .social-card-score {
+      border-radius: 999px;
+      padding: 0.16rem 0.46rem;
+      font-size: 0.66rem;
+      border: 1px solid rgba(245, 176, 65, 0.55);
+      color: var(--accent);
+      background: rgba(245, 176, 65, 0.16);
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+
+    .social-card-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.32rem;
+    }
+
+    .social-card-metric {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      border-radius: 0.45rem;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(15, 23, 42, 0.3);
+      padding: 0.18rem 0.4rem;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+
+    .social-card-root[data-card-theme="light"] .social-card-metric {
+      background: rgba(248, 250, 252, 0.88);
+      border-color: rgba(148, 163, 184, 0.4);
+      color: #334155;
+    }
+
+    .social-card-footer {
+      margin-top: 0.5rem;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      line-height: 1.45;
+    }
+
+    .social-card-error {
+      border: 1px solid rgba(248, 113, 113, 0.45);
+      border-radius: 0.85rem;
+      background: rgba(248, 113, 113, 0.12);
+      color: #fecaca;
+      padding: 1rem;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    body.social-card-only {
+      padding: 0;
+      overflow: auto;
+    }
+
+    body.social-card-only .container,
+    body.social-card-only #chartPreview,
+    body.social-card-only #toast,
+    body.social-card-only #helpPanel,
+    body.social-card-only #settingsModal,
+    body.social-card-only #aboutModal {
+      display: none !important;
+    }
+
+    body.social-card-only #socialCardModal {
+      opacity: 1 !important;
+      visibility: visible !important;
+      background: linear-gradient(180deg, rgba(8, 12, 20, 0.88), rgba(8, 12, 20, 0.95));
+      padding: 1rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.social-card-only #socialCardModal .modal {
+      max-height: calc(100vh - 2rem);
+    }
+
+    body.social-card-only #socialCardModal .social-card-dismiss,
+    body.social-card-only #socialCardModal .social-card-modal-actions {
+      display: none !important;
+    }
+
     @media (max-width: 640px) {
       body {
         padding: 1.25rem 1rem 2.5rem;
@@ -2531,6 +2759,10 @@
 
       .copy-all-btn {
         margin-left: 0;
+      }
+
+      .share-helper {
+        font-size: 0.64rem;
       }
 
       .pick-card {
@@ -2729,8 +2961,21 @@
             <path d="m8.59 13.51 6.83 3.98"/>
             <path d="m15.41 6.51-6.82 3.98"/>
           </svg>
-          <span>Share Scan</span>
+          <span>Share Setup Link</span>
         </button>
+
+        <button class="btn-secondary copy-all-btn" id="shareSocialCardBtn" style="display: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="14" rx="2"/>
+            <path d="M7 9h10"/>
+            <path d="M7 13h5"/>
+            <path d="M15 16h2"/>
+          </svg>
+          <span>Share Social Card</span>
+        </button>
+        <p class="share-helper" id="shareHelperText">
+          <strong>Share Setup Link</strong> copies filter settings. <strong>Share Social Card</strong> creates a visual setup/filter card.
+        </p>
       </div>
 
       <div class="controls-group controls-secondary">
@@ -2963,6 +3208,7 @@
               <p>Copy a watchlist or download the HTML for local use.</p>
               <ul>
                 <li>Copy Watchlist formats for TradingView.</li>
+                <li>Share Setup Link = filters URL; Share Social Card = visual snapshot.</li>
                 <li>Download HTML or install the PWA.</li>
                 <li>Live data still needs an internet connection.</li>
               </ul>
@@ -3052,6 +3298,28 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Social Card Modal -->
+  <div class="modal-overlay" id="socialCardModal" role="dialog" aria-modal="true" aria-labelledby="socialCardTitle">
+    <div class="modal social-card-modal">
+      <div class="modal-header">
+        <h2 id="socialCardTitle">Social Card</h2>
+        <div class="social-card-modal-actions">
+          <a class="btn-secondary btn-small social-card-view-link" id="socialCardOpenBtn" href="#" target="_blank" rel="noopener noreferrer">Open Card</a>
+          <button class="btn-secondary btn-small" id="socialCardCopyBtn" type="button">Copy Card Link</button>
+        </div>
+        <button class="modal-close social-card-dismiss" id="socialCardClose">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"/>
+            <path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="socialCardRoot" class="social-card-root" data-ready="false" aria-live="polite" aria-label="Shared social card preview"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- About Modal -->
   <div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
@@ -3573,7 +3841,13 @@
     const SCAN_TIMEOUT_MS = 15000;
     const SHARE_PARAM_KEY = 'share';
     const SHARE_PAYLOAD_VERSION = 1;
+    const CARD_PARAM_KEY = 'card';
+    const CARD_VIEW_PARAM_KEY = 'view';
+    const CARD_VIEW_MODE = 'social-card';
+    const CARD_PAYLOAD_VERSION = 1;
+    const CARD_MAX_PARAM_LENGTH = 9000;
     const EVENT_COUNTS_STORAGE_KEY = 'orion-screener-event-counts-v1';
+    window.__ORION_SOCIAL_CARD_READY__ = false;
 
     function isGithubPages() {
       return window.location.hostname.endsWith('github.io');
@@ -5220,6 +5494,19 @@
       }
     }
 
+    function updateShareActionButtons() {
+      var shareSetupBtn = document.getElementById('shareScanBtn');
+      var shareCardBtn = document.getElementById('shareSocialCardBtn');
+      if (shareSetupBtn) {
+        shareSetupBtn.style.display = picks.length > 0 ? 'inline-flex' : 'none';
+      }
+      if (shareCardBtn) {
+        // Becomes available once results are rendered (including empty scans),
+        // so users can still share a filter card when no setups pass.
+        shareCardBtn.style.display = 'inline-flex';
+      }
+    }
+
     function renderPicks() {
       const resultsContainer = document.getElementById('resultsContainer');
       const emptyState = document.getElementById('emptyState');
@@ -5227,7 +5514,6 @@
       const resultsCount = document.getElementById('resultsCount');
       const lastUpdated = document.getElementById('lastUpdated');
       const copyAllBtn = document.getElementById('copyAllBtn');
-      const shareScanBtn = document.getElementById('shareScanBtn');
 
       if (picks.length === 0) {
         candidateHighlights = { bySymbol: {}, topSymbols: [], total: 0 };
@@ -5235,14 +5521,14 @@
         resultsContainer.style.display = 'none';
         emptyState.style.display = 'block';
         copyAllBtn.style.display = 'none';
-        if (shareScanBtn) shareScanBtn.style.display = 'none';
+        updateShareActionButtons();
         return;
       }
 
       emptyState.style.display = 'none';
       resultsContainer.style.display = 'block';
       copyAllBtn.style.display = 'inline-flex';
-      if (shareScanBtn) shareScanBtn.style.display = 'inline-flex';
+      updateShareActionButtons();
 
       resultsCount.textContent = picks.length + ' active setups';
       lastUpdated.textContent = new Date().toLocaleTimeString();
@@ -5799,6 +6085,15 @@
       }
     }
 
+    function isSocialCardViewRequested() {
+      try {
+        var view = new URLSearchParams(window.location.search).get(CARD_VIEW_PARAM_KEY) || '';
+        return String(view).trim().toLowerCase() === CARD_VIEW_MODE;
+      } catch (e) {
+        return false;
+      }
+    }
+
     function applySharedFiltersFromQuery() {
       var shareValue = '';
       try {
@@ -5821,6 +6116,465 @@
       });
       showToast('Shared setup loaded');
       handleScan();
+      return true;
+    }
+
+    function getCurrentThemeMode() {
+      return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    }
+
+    function compactCardNumber(value, decimals) {
+      if (!Number.isFinite(value)) return null;
+      var places = typeof decimals === 'number' ? decimals : 2;
+      return Number(value.toFixed(places));
+    }
+
+    function normalizeCardTopEntry(entry) {
+      if (!entry || typeof entry !== 'object') return null;
+      var symbol = entry.symbol ? String(entry.symbol).trim().toUpperCase() : '';
+      if (!symbol) return null;
+      var next = {
+        symbol: symbol,
+        score: Number.isFinite(entry.score) ? clamp(Math.round(entry.score), 0, 100) : null,
+        volume24h: compactCardNumber(Number(entry.volume24h), 2),
+        ticks5m: Number.isFinite(entry.ticks5m) ? Math.max(0, Math.round(entry.ticks5m)) : null,
+        volatility15m: compactCardNumber(Number(entry.volatility15m), 2),
+        btcDelta24h: Number.isFinite(entry.btcDelta24h) ? compactCardNumber(Number(entry.btcDelta24h), 2) : null,
+      };
+      return next;
+    }
+
+    function sanitizeCardPayload(raw, options) {
+      var opts = options || {};
+      var source = raw && typeof raw === 'object' ? raw : {};
+      var version = parseInt(source.v, 10);
+      if (version !== CARD_PAYLOAD_VERSION) {
+        if (opts.allowVersionFallback) {
+          version = CARD_PAYLOAD_VERSION;
+        } else {
+          return null;
+        }
+      }
+
+      var type = source.type === 'setup' ? 'setup' : 'filters';
+      var createdAt = '';
+      if (source.createdAt) {
+        var parsedDate = new Date(source.createdAt);
+        if (!isNaN(parsedDate.getTime())) {
+          createdAt = parsedDate.toISOString();
+        }
+      }
+      if (!createdAt) createdAt = new Date().toISOString();
+
+      var theme = source.theme === 'light' ? 'light' : 'dark';
+      var title = source.title ? String(source.title).trim().slice(0, 90) : '';
+      var note = source.note ? String(source.note).trim().slice(0, 220) : '';
+      var filters = sanitizeFilterState(source.filters);
+
+      var payload = {
+        v: CARD_PAYLOAD_VERSION,
+        type: type,
+        createdAt: createdAt,
+        theme: theme,
+        filters: filters,
+      };
+      if (title) payload.title = title;
+      if (note) payload.note = note;
+
+      if (type === 'setup') {
+        var setupSummary = source.setupSummary && typeof source.setupSummary === 'object'
+          ? source.setupSummary
+          : {};
+        var count = parseInt(setupSummary.count, 10);
+        if (!Number.isFinite(count) || count < 0) count = Array.isArray(picks) ? picks.length : 0;
+        var top = (Array.isArray(setupSummary.top) ? setupSummary.top : [])
+          .map(normalizeCardTopEntry)
+          .filter(function(item) { return !!item; })
+          .slice(0, 3);
+        if (!top.length) {
+          payload.type = 'filters';
+        } else {
+          payload.setupSummary = { count: count, top: top };
+        }
+      }
+
+      return payload;
+    }
+
+    function encodeCardPayload(payload) {
+      var sanitized = sanitizeCardPayload(payload, { allowVersionFallback: true });
+      if (!sanitized) return '';
+      return encodeBase64UrlUtf8(JSON.stringify(sanitized));
+    }
+
+    function decodeCardPayload(value) {
+      if (!value || typeof value !== 'string') {
+        return { ok: false, error: 'missing' };
+      }
+      if (value.length > CARD_MAX_PARAM_LENGTH) {
+        return { ok: false, error: 'too-large' };
+      }
+      var decoded = decodeBase64UrlUtf8(value);
+      if (!decoded) return { ok: false, error: 'invalid' };
+      try {
+        var parsed = JSON.parse(decoded);
+        var version = parseInt(parsed && parsed.v, 10);
+        if (version !== CARD_PAYLOAD_VERSION) {
+          return { ok: false, error: 'unsupported-version' };
+        }
+        var payload = sanitizeCardPayload(parsed, { allowVersionFallback: false });
+        if (!payload) return { ok: false, error: 'invalid' };
+        return { ok: true, payload: payload };
+      } catch (e) {
+        return { ok: false, error: 'invalid' };
+      }
+    }
+
+    function formatCardErrorMessage(errorCode) {
+      if (errorCode === 'too-large') {
+        return 'This social card payload is too large to open. Create a smaller card and try again.';
+      }
+      if (errorCode === 'unsupported-version') {
+        return 'This social card version is not supported by the current app.';
+      }
+      if (errorCode === 'missing') {
+        return 'No social card payload was provided in the link.';
+      }
+      return 'Unable to load social card payload. Please regenerate a fresh card link.';
+    }
+
+    function buildSocialCardUrl(payload, options) {
+      var opts = options || {};
+      var encodedPayload = encodeCardPayload(payload);
+      var includeView = opts.includeView !== false;
+      try {
+        var url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set(CARD_PARAM_KEY, encodedPayload);
+        if (includeView) {
+          url.searchParams.set(CARD_VIEW_PARAM_KEY, CARD_VIEW_MODE);
+        }
+        return url.toString();
+      } catch (e) {
+        var base = window.location.href.split('#')[0].split('?')[0];
+        var parts = [CARD_PARAM_KEY + '=' + encodeURIComponent(encodedPayload)];
+        if (includeView) {
+          parts.push(CARD_VIEW_PARAM_KEY + '=' + encodeURIComponent(CARD_VIEW_MODE));
+        }
+        return base + '?' + parts.join('&');
+      }
+    }
+
+    function buildTopCardEntriesFromCurrentPicks() {
+      if (!Array.isArray(picks) || picks.length === 0) return [];
+      var symbolOrder = (candidateHighlights && Array.isArray(candidateHighlights.topSymbols) && candidateHighlights.topSymbols.length)
+        ? candidateHighlights.topSymbols.slice(0, 3)
+        : picks.slice(0, 3).map(function(pick) { return pick.symbol; });
+
+      return symbolOrder.map(function(symbol) {
+        var pick = picks.find(function(item) { return item.symbol === symbol; });
+        if (!pick) return null;
+        var highlight = candidateHighlights && candidateHighlights.bySymbol
+          ? candidateHighlights.bySymbol[symbol]
+          : null;
+        var btcDelta = Number.isFinite(latestBtcChange24h)
+          ? pick.priceChange24h - latestBtcChange24h
+          : null;
+        return normalizeCardTopEntry({
+          symbol: pick.symbol,
+          score: highlight && Number.isFinite(highlight.score) ? highlight.score : null,
+          volume24h: pick.volume24h,
+          ticks5m: pick.ticks5m,
+          volatility15m: pick.volatility15m,
+          btcDelta24h: btcDelta,
+        });
+      }).filter(function(entry) { return !!entry; }).slice(0, 3);
+    }
+
+    function buildSocialCardPayloadFromState() {
+      var payload = {
+        v: CARD_PAYLOAD_VERSION,
+        type: 'filters',
+        createdAt: new Date().toISOString(),
+        theme: getCurrentThemeMode(),
+        filters: sanitizeFilterState(currentFilters),
+        title: 'Filter setup snapshot',
+        note: 'Shared from Spartan Orion Screener',
+      };
+
+      var topEntries = buildTopCardEntriesFromCurrentPicks();
+      if (topEntries.length > 0) {
+        payload.type = 'setup';
+        payload.title = 'Top setup snapshot';
+        payload.note = 'Top-ranked results from the latest scan';
+        payload.setupSummary = {
+          count: picks.length,
+          top: topEntries,
+        };
+      }
+
+      return sanitizeCardPayload(payload, { allowVersionFallback: true });
+    }
+
+    function setSocialCardReady(ready) {
+      var isReady = !!ready;
+      window.__ORION_SOCIAL_CARD_READY__ = isReady;
+      var root = document.getElementById('socialCardRoot');
+      if (root) {
+        root.setAttribute('data-ready', isReady ? 'true' : 'false');
+      }
+    }
+
+    function renderSocialCardFilterChips(container, filters) {
+      if (!container || !filters) return;
+      var entries = [
+        { label: 'Min VolUSD', value: formatVolume(filters.minVolume || 0) },
+        { label: 'Max VolUSD', value: filters.maxVolume ? formatVolume(filters.maxVolume) : 'No limit' },
+        { label: 'Min Vol15m', value: formatPercent(filters.minVolatility15m || 0, 2) },
+        { label: 'Min Ticks5m', value: String(filters.minTicks5m || 0) },
+        { label: 'Max Results', value: String(filters.maxResults || 0) },
+      ];
+      entries.forEach(function(entry) {
+        var chip = document.createElement('span');
+        chip.className = 'social-card-chip';
+        chip.textContent = entry.label + ': ' + entry.value;
+        container.appendChild(chip);
+      });
+      if (filters.excludeSymbols && filters.excludeSymbols.length) {
+        var chip = document.createElement('span');
+        chip.className = 'social-card-chip';
+        chip.textContent = 'Exclude: ' + filters.excludeSymbols.slice(0, 6).join(', ');
+        container.appendChild(chip);
+      }
+    }
+
+    function renderSocialCard(payload, errorMessage) {
+      var root = document.getElementById('socialCardRoot');
+      if (!root) return;
+      root.textContent = '';
+      setSocialCardReady(false);
+
+      if (errorMessage) {
+        root.removeAttribute('data-card-theme');
+        var err = document.createElement('div');
+        err.className = 'social-card-error';
+        err.textContent = errorMessage;
+        root.appendChild(err);
+        setSocialCardReady(true);
+        return;
+      }
+
+      root.setAttribute('data-card-theme', payload.theme === 'light' ? 'light' : 'dark');
+
+      var surface = document.createElement('article');
+      surface.className = 'social-card-surface';
+
+      var head = document.createElement('div');
+      head.className = 'social-card-head';
+
+      var titleWrap = document.createElement('div');
+      var title = document.createElement('div');
+      title.className = 'social-card-title';
+      title.textContent = payload.title || (payload.type === 'setup' ? 'Top setup snapshot' : 'Filter setup snapshot');
+      titleWrap.appendChild(title);
+
+      if (payload.note) {
+        var note = document.createElement('div');
+        note.className = 'social-card-note';
+        note.textContent = payload.note;
+        titleWrap.appendChild(note);
+      }
+
+      var meta = document.createElement('div');
+      meta.className = 'social-card-meta';
+      var timestamp = new Date(payload.createdAt);
+      meta.textContent = 'Captured: ' + (isNaN(timestamp.getTime()) ? payload.createdAt : timestamp.toLocaleString());
+
+      head.appendChild(titleWrap);
+      head.appendChild(meta);
+      surface.appendChild(head);
+
+      var filterChips = document.createElement('div');
+      filterChips.className = 'social-card-filters';
+      renderSocialCardFilterChips(filterChips, payload.filters);
+      surface.appendChild(filterChips);
+
+      if (payload.type === 'setup' && payload.setupSummary && Array.isArray(payload.setupSummary.top) && payload.setupSummary.top.length) {
+        var list = document.createElement('div');
+        list.className = 'social-card-list';
+        payload.setupSummary.top.forEach(function(entry, idx) {
+          var item = document.createElement('div');
+          item.className = 'social-card-entry';
+
+          var entryHead = document.createElement('div');
+          entryHead.className = 'social-card-entry-head';
+
+          var left = document.createElement('div');
+          var rank = document.createElement('div');
+          rank.className = 'social-card-rank';
+          rank.textContent = 'Top ' + (idx + 1);
+          var symbol = document.createElement('div');
+          symbol.className = 'social-card-symbol';
+          symbol.textContent = entry.symbol;
+          left.appendChild(rank);
+          left.appendChild(symbol);
+
+          entryHead.appendChild(left);
+          if (Number.isFinite(entry.score)) {
+            var score = document.createElement('span');
+            score.className = 'social-card-score';
+            score.textContent = entry.score + '/100';
+            entryHead.appendChild(score);
+          }
+          item.appendChild(entryHead);
+
+          var metrics = document.createElement('div');
+          metrics.className = 'social-card-metrics';
+          if (Number.isFinite(entry.volume24h)) {
+            var vol = document.createElement('span');
+            vol.className = 'social-card-metric';
+            vol.textContent = 'VolUSD ' + formatVolume(entry.volume24h);
+            metrics.appendChild(vol);
+          }
+          if (Number.isFinite(entry.ticks5m)) {
+            var ticks = document.createElement('span');
+            ticks.className = 'social-card-metric';
+            ticks.textContent = '5m ' + entry.ticks5m.toLocaleString();
+            metrics.appendChild(ticks);
+          }
+          if (Number.isFinite(entry.volatility15m)) {
+            var vol15 = document.createElement('span');
+            vol15.className = 'social-card-metric';
+            vol15.textContent = 'Vol15m ' + formatPercent(entry.volatility15m, 2);
+            metrics.appendChild(vol15);
+          }
+          if (Number.isFinite(entry.btcDelta24h)) {
+            var btc = document.createElement('span');
+            btc.className = 'social-card-metric';
+            btc.textContent = 'BTC Δ ' + formatChange(entry.btcDelta24h);
+            metrics.appendChild(btc);
+          }
+
+          item.appendChild(metrics);
+          list.appendChild(item);
+        });
+        surface.appendChild(list);
+      }
+
+      var footer = document.createElement('div');
+      footer.className = 'social-card-footer';
+      if (payload.type === 'setup' && payload.setupSummary && Number.isFinite(payload.setupSummary.count)) {
+        footer.textContent = payload.setupSummary.count + ' setups matched at capture time · Not financial advice.';
+      } else {
+        footer.textContent = 'Filter-focused card · Open the setup link to run a fresh scan.';
+      }
+      surface.appendChild(footer);
+
+      root.appendChild(surface);
+      setSocialCardReady(true);
+    }
+
+    function openSocialCardModal(payload, cardUrl, options) {
+      var opts = options || {};
+      socialCardState.payload = payload || null;
+      socialCardState.url = cardUrl || '';
+      socialCardState.onlyMode = !!opts.onlyMode;
+
+      var modal = document.getElementById('socialCardModal');
+      var openBtn = document.getElementById('socialCardOpenBtn');
+      var copyBtn = document.getElementById('socialCardCopyBtn');
+
+      if (openBtn) {
+        if (socialCardState.url) {
+          openBtn.href = socialCardState.url;
+          openBtn.removeAttribute('aria-disabled');
+        } else {
+          openBtn.href = '#';
+          openBtn.setAttribute('aria-disabled', 'true');
+        }
+      }
+      if (copyBtn) {
+        copyBtn.disabled = !socialCardState.url;
+      }
+
+      renderSocialCard(payload, opts.errorMessage || '');
+      modal.classList.add('visible');
+    }
+
+    function closeSocialCardModal() {
+      if (socialCardState.onlyMode) return;
+      var modal = document.getElementById('socialCardModal');
+      if (modal) modal.classList.remove('visible');
+    }
+
+    async function shareOrCopyUrl(url, title, text, successToast) {
+      if (!url) return false;
+      if (navigator.share && typeof navigator.share === 'function') {
+        try {
+          await navigator.share({
+            title: title,
+            text: text,
+            url: url,
+          });
+          showToast('Share sheet opened');
+          return true;
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            return false;
+          }
+        }
+      }
+
+      var success = await copyTextToClipboard(url);
+      if (success) {
+        showToast(successToast);
+      } else {
+        showToast('Failed to copy', 'error');
+      }
+      return success;
+    }
+
+    function openSocialCardFromQuery() {
+      var cardValue = '';
+      var view = '';
+      try {
+        var params = new URLSearchParams(window.location.search);
+        cardValue = params.get(CARD_PARAM_KEY) || '';
+        view = (params.get(CARD_VIEW_PARAM_KEY) || '').trim().toLowerCase();
+      } catch (e) {
+        cardValue = '';
+        view = '';
+      }
+
+      var isCardOnly = view === CARD_VIEW_MODE;
+      if (!cardValue && !isCardOnly) return false;
+
+      if (isCardOnly) {
+        document.body.classList.add('social-card-only');
+        socialCardState.onlyMode = true;
+      }
+
+      if (!cardValue) {
+        openSocialCardModal(null, '', {
+          onlyMode: isCardOnly,
+          errorMessage: formatCardErrorMessage('missing'),
+        });
+        return true;
+      }
+
+      var decoded = decodeCardPayload(cardValue);
+      if (!decoded.ok) {
+        openSocialCardModal(null, '', {
+          onlyMode: isCardOnly,
+          errorMessage: formatCardErrorMessage(decoded.error),
+        });
+        return true;
+      }
+
+      var payload = decoded.payload;
+      var cardUrl = buildSocialCardUrl(payload, { includeView: true });
+      openSocialCardModal(payload, cardUrl, { onlyMode: isCardOnly });
       return true;
     }
 
@@ -5858,41 +6612,41 @@
       }
     }
 
-    async function handleShareScan() {
+    async function handleShareSetupLink() {
       if (picks.length === 0) return;
-
       var shareUrl = buildShareScanUrl(currentFilters);
       trackEvent('share_clicked', {
         picks: picks.length,
         maxResults: currentFilters.maxResults,
       });
+      await shareOrCopyUrl(
+        shareUrl,
+        'Spartan Orion Screener setup',
+        'Open this shared screener setup:',
+        'Setup link copied to clipboard'
+      );
+    }
 
-      if (navigator.share && typeof navigator.share === 'function') {
-        try {
-          await navigator.share({
-            title: 'Spartan Orion Screener setup',
-            text: 'Open this shared screener setup:',
-            url: shareUrl,
-          });
-          showToast('Share sheet opened');
-          return;
-        } catch (err) {
-          if (err && err.name === 'AbortError') {
-            return;
-          }
-        }
-      }
+    async function handleShareScan() {
+      // Backward-compatible alias for existing tests/hooks.
+      return handleShareSetupLink();
+    }
 
-      try {
-        var success = await copyTextToClipboard(shareUrl);
-        if (success) {
-          showToast('Share link copied to clipboard');
-        } else {
-          showToast('Failed to copy', 'error');
-        }
-      } catch (e) {
-        showToast('Failed to copy', 'error');
-      }
+    async function handleShareSocialCard() {
+      var payload = buildSocialCardPayloadFromState();
+      var cardUrl = buildSocialCardUrl(payload, { includeView: true });
+      openSocialCardModal(payload, cardUrl, { onlyMode: false });
+      trackEvent('share_social_card_clicked', {
+        type: payload.type,
+        picks: picks.length,
+        maxResults: currentFilters.maxResults,
+      });
+      await shareOrCopyUrl(
+        cardUrl,
+        'Spartan Orion Screener card',
+        'Open this social card snapshot:',
+        'Social card link copied to clipboard'
+      );
     }
 
     async function downloadStandaloneHtml() {
@@ -5941,6 +6695,11 @@
     let preferredProxyDraft = 'auto';
     let isTestingAllCorsProxies = false;
     let corsProxyDraftSeed = 0;
+    var socialCardState = {
+      payload: null,
+      url: '',
+      onlyMode: false,
+    };
 
     function createCorsProxyDraftEntry(proxy) {
       corsProxyDraftSeed += 1;
@@ -7439,9 +8198,19 @@
         });
       }
       document.getElementById('copyAllBtn').addEventListener('click', copyWatchlist);
-      document.getElementById('shareScanBtn').addEventListener('click', handleShareScan);
+      document.getElementById('shareScanBtn').addEventListener('click', handleShareSetupLink);
+      document.getElementById('shareSocialCardBtn').addEventListener('click', handleShareSocialCard);
       document.getElementById('downloadFooterBtn').addEventListener('click', downloadStandaloneHtml);
       document.getElementById('aboutBtn').addEventListener('click', openAboutModal);
+      document.getElementById('socialCardClose').addEventListener('click', closeSocialCardModal);
+      document.getElementById('socialCardModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSocialCardModal();
+      });
+      document.getElementById('socialCardCopyBtn').addEventListener('click', async function() {
+        if (!socialCardState.url) return;
+        var ok = await copyTextToClipboard(socialCardState.url);
+        showToast(ok ? 'Social card link copied to clipboard' : 'Failed to copy', ok ? 'success' : 'error');
+      });
       var themeToggleBtn = document.getElementById('themeToggleBtn');
       if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', function() {
@@ -7624,9 +8393,11 @@
       }
 
       var isScreenshotMode = window.location.search.indexOf('screenshot=1') !== -1;
-      if (!isScreenshotMode) {
+      var isCardOnlyMode = isSocialCardViewRequested();
+      if (!isScreenshotMode && !isCardOnlyMode) {
         applySharedFiltersFromQuery();
       }
+      openSocialCardFromQuery();
 
       // Screenshot helper (query param only, no effect on normal usage).
       if (isScreenshotMode) {
@@ -7655,6 +8426,7 @@
           if (document.getElementById('helpPanel')?.classList.contains('visible')) {
             toggleHelp();
           }
+          closeSocialCardModal();
           closeChartPreview();
         }
       });
@@ -7691,6 +8463,8 @@
         installBtn.style.display = 'none';
         deferredPrompt = null;
       });
+
+      updateShareActionButtons();
     });
   </script>
 </body>
