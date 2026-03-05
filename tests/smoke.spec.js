@@ -6,7 +6,7 @@ test('smoke: core UI loads and actions are visible', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Spartan Orion Screener');
   await expect(page.locator('#scanBtn')).toBeVisible();
   await expect(page.locator('#themeToggleBtn')).toBeVisible();
-  await expect(page.locator('#shareScanBtn')).toBeHidden();
+  await expect(page.locator('#shareScanBtn')).toHaveCount(0);
   await expect(page.locator('#shareSocialCardBtn')).toBeVisible();
 
   const initialTheme = await page.evaluate(() => (
@@ -33,9 +33,8 @@ test('smoke: core UI loads and actions are visible', async ({ page }) => {
     renderPicks();
   });
 
-  await expect(page.locator('#shareScanBtn')).toBeVisible();
-  await expect(page.locator('#shareScanBtn')).toContainText('Share Setup Link');
   await expect(page.locator('#shareSocialCardBtn')).toBeVisible();
+  await expect(page.locator('#shareSocialCardBtn')).toContainText('Share Social Card');
 
   const actions = page.locator('.actions');
   await expect(actions).toBeVisible();

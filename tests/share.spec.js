@@ -8,20 +8,13 @@ function toBase64UrlJson(value) {
     .replace(/=+$/g, '');
 }
 
-function fromBase64UrlJson(value) {
-  const padded = value.replace(/-/g, '+').replace(/_/g, '/');
-  const normalized = padded + '='.repeat((4 - (padded.length % 4)) % 4);
-  return JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
-}
-
-test('share: setup link button is contextual and social card is available', async ({ page }) => {
+test('share: setup-link sharing removed and social-card action is available', async ({ page }) => {
   await page.goto('./');
 
-  const shareSetupBtn = page.locator('#shareScanBtn');
+  await expect(page.locator('#shareScanBtn')).toHaveCount(0);
+
   const shareCardBtn = page.locator('#shareSocialCardBtn');
-  await expect(shareSetupBtn).toBeHidden();
   await expect(shareCardBtn).toBeVisible();
-  await expect(shareCardBtn).toContainText('Share Social Card');
 
   await page.evaluate(() => {
     picks = [{
@@ -39,22 +32,10 @@ test('share: setup link button is contextual and social card is available', asyn
     renderPicks();
   });
 
-  await expect(shareSetupBtn).toBeVisible();
-  await expect(shareSetupBtn).toContainText('Share Setup Link');
-  await expect(shareCardBtn).toBeVisible();
+  await expect(shareCardBtn).toContainText('Share Social Card');
 });
 
-test('share: clicking setup link emits metric and includes encoded payload', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__sharedCalls = [];
-    Object.defineProperty(navigator, 'share', {
-      configurable: true,
-      value: async (data) => {
-        window.__sharedCalls.push(data);
-      },
-    });
-  });
-
+test('share: social-card modal uses X/Facebook intents and copy toast', async ({ page }) => {
   await page.goto('./');
 
   await page.evaluate(() => {
@@ -81,79 +62,30 @@ test('share: clicking setup link emits metric and includes encoded payload', asy
     renderPicks();
   });
 
-  await page.click('#shareScanBtn');
+  await page.click('#shareSocialCardBtn');
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
 
-  const payload = await page.evaluate(() => {
-    const call = window.__sharedCalls[0];
-    if (!call || !call.url) return null;
-    return new URL(call.url).searchParams.get('share');
-  });
+  const shareState = await page.evaluate(() => ({
+    cardUrl: socialCardState.url,
+    xHref: document.getElementById('socialCardShareXBtn')?.href || '',
+    fbHref: document.getElementById('socialCardShareFacebookBtn')?.href || '',
+  }));
 
-  expect(payload).toBeTruthy();
-  const decoded = fromBase64UrlJson(payload);
-  expect(decoded.v).toBe(1);
-  expect(decoded.filters).toMatchObject({
-    minVolume: 1500000,
-    maxVolume: 4500000,
-    minVolatility15m: 0.2,
-    minTicks5m: 350,
-    maxResults: 7,
-    excludeSymbols: ['BTC', 'ETH'],
-  });
+  expect(shareState.cardUrl).toBeTruthy();
+  const xUrl = new URL(shareState.xHref);
+  expect(xUrl.hostname).toContain('twitter.com');
+  expect(xUrl.searchParams.get('url')).toBe(shareState.cardUrl);
 
-  const counts = await page.evaluate(() => JSON.parse(localStorage.getItem('orion-screener-event-counts-v1') || '{}'));
-  expect(counts.share_clicked).toBe(1);
+  const facebookUrl = new URL(shareState.fbHref);
+  expect(facebookUrl.hostname).toContain('facebook.com');
+  expect(facebookUrl.searchParams.get('u')).toBe(shareState.cardUrl);
+
+  await page.click('#socialCardCopyBtn');
+  await expect(page.locator('#toast')).toContainText('Card link copied');
 });
 
-test('share: opening shared URL applies filters and auto-scans', async ({ page }) => {
-  const mockedResponse = JSON.stringify({
-    tickers: [
-      {
-        symbol: 'AAAUSDT',
-        baseAsset: 'AAA',
-        price: 2.5,
-        tf1h: { changePercent: 1.3 },
-        tf4h: { changePercent: 2.7 },
-        tf1d: { changePercent: 4.1, volume: 2200000 },
-        tf15m: { volatility: 0.43, trades: 900 },
-        tf5m: { trades: 420 },
-      },
-      {
-        symbol: 'ETHUSDT',
-        baseAsset: 'ETH',
-        price: 3200,
-        tf1h: { changePercent: 0.2 },
-        tf4h: { changePercent: 0.6 },
-        tf1d: { changePercent: 1.1, volume: 2800000 },
-        tf15m: { volatility: 0.5, trades: 1000 },
-        tf5m: { trades: 500 },
-      },
-      {
-        symbol: 'BBBUSDT',
-        baseAsset: 'BBB',
-        price: 0.9,
-        tf1h: { changePercent: 0.7 },
-        tf4h: { changePercent: 1.2 },
-        tf1d: { changePercent: 1.8, volume: 900000 },
-        tf15m: { volatility: 0.37, trades: 830 },
-        tf5m: { trades: 380 },
-      },
-    ],
-  });
-
-  await page.route('**/*', async (route) => {
-    const requestUrl = route.request().url();
-    if (requestUrl.includes('screener.orionterminal.com/api/screener')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: mockedResponse,
-      });
-      return;
-    }
-    await route.continue();
-  });
-
+test('share: legacy ?share query is ignored safely', async ({ page }) => {
   const shared = toBase64UrlJson({
     v: 1,
     filters: {
@@ -168,28 +100,9 @@ test('share: opening shared URL applies filters and auto-scans', async ({ page }
 
   await page.goto('./?share=' + encodeURIComponent(shared));
 
-  await expect(page.locator('#resultsContainer')).toBeVisible();
-  await expect(page.locator('#resultsCount')).toHaveText('1 active setups');
-  await expect(page.locator('#resultsList .symbol').first()).toHaveText('AAA/USDT');
-
-  await expect(page.locator('#minVolume')).toHaveValue('1500000');
-  await expect(page.locator('#maxVolume')).toHaveValue('3000000');
-  await expect(page.locator('#minVolatility')).toHaveValue('0.25');
-  await expect(page.locator('#minTicks')).toHaveValue('350');
-  await expect(page.locator('#maxResults')).toHaveValue('5');
-  await expect(page.locator('#excludeSymbols')).toHaveValue('ETH');
-
-  const counts = await page.evaluate(() => JSON.parse(localStorage.getItem('orion-screener-event-counts-v1') || '{}'));
-  expect(counts.share_opened).toBe(1);
-});
-
-test('share: invalid payload is ignored without breaking the app', async ({ page }) => {
-  await page.goto('./?share=not-valid');
-
   await expect(page.locator('h1')).toHaveText('Spartan Orion Screener');
   await expect(page.locator('#emptyState')).toBeVisible();
   await expect(page.locator('#resultsContainer')).toBeHidden();
-
-  const counts = await page.evaluate(() => JSON.parse(localStorage.getItem('orion-screener-event-counts-v1') || '{}'));
-  expect(counts.share_opened || 0).toBe(0);
+  await expect(page.locator('#minVolume')).toHaveValue('500000');
+  await expect(page.locator('#maxResults')).toHaveValue('10');
 });

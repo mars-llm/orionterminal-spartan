@@ -14,17 +14,7 @@ function fromBase64UrlJson(value) {
   return JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
 }
 
-test('social card: creates setup card payload from picks', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__sharedCalls = [];
-    Object.defineProperty(navigator, 'share', {
-      configurable: true,
-      value: async (data) => {
-        window.__sharedCalls.push(data);
-      },
-    });
-  });
-
+test('social card: creates setup card payload and social share intents', async ({ page }) => {
   await page.goto('./');
 
   await page.evaluate(() => {
@@ -83,21 +73,19 @@ test('social card: creates setup card payload from picks', async ({ page }) => {
   await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('#socialCardRoot .social-card-entry')).toHaveCount(3);
 
-  const payload = await page.evaluate(() => {
-    const call = window.__sharedCalls[0];
-    if (!call || !call.url) return null;
-    const url = new URL(call.url);
-    return {
-      view: url.searchParams.get('view'),
-      card: url.searchParams.get('card'),
-    };
-  });
+  const shareState = await page.evaluate(() => ({
+    cardUrl: socialCardState.url,
+    xHref: document.getElementById('socialCardShareXBtn')?.href || '',
+    fbHref: document.getElementById('socialCardShareFacebookBtn')?.href || '',
+  }));
 
-  expect(payload).toBeTruthy();
-  expect(payload.view).toBe('social-card');
-  expect(payload.card).toBeTruthy();
+  expect(shareState.cardUrl).toBeTruthy();
+  const cardUrl = new URL(shareState.cardUrl);
+  expect(cardUrl.searchParams.get('view')).toBe('social-card');
+  const cardPayload = cardUrl.searchParams.get('card');
+  expect(cardPayload).toBeTruthy();
 
-  const decoded = fromBase64UrlJson(payload.card);
+  const decoded = fromBase64UrlJson(cardPayload);
   expect(decoded.v).toBe(1);
   expect(decoded.type).toBe('setup');
   expect(decoded.setupSummary.count).toBe(3);
@@ -110,19 +98,17 @@ test('social card: creates setup card payload from picks', async ({ page }) => {
     maxResults: 8,
     excludeSymbols: ['BTC'],
   });
+
+  const xShare = new URL(shareState.xHref);
+  expect(xShare.hostname).toContain('twitter.com');
+  expect(xShare.searchParams.get('url')).toBe(shareState.cardUrl);
+
+  const facebookShare = new URL(shareState.fbHref);
+  expect(facebookShare.hostname).toContain('facebook.com');
+  expect(facebookShare.searchParams.get('u')).toBe(shareState.cardUrl);
 });
 
 test('social card: no picks creates filter card payload', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__sharedCalls = [];
-    Object.defineProperty(navigator, 'share', {
-      configurable: true,
-      value: async (data) => {
-        window.__sharedCalls.push(data);
-      },
-    });
-  });
-
   await page.goto('./');
   await page.evaluate(() => {
     currentFilters = {
@@ -142,9 +128,8 @@ test('social card: no picks creates filter card payload', async ({ page }) => {
   await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
 
   const cardPayload = await page.evaluate(() => {
-    const call = window.__sharedCalls[0];
-    if (!call || !call.url) return null;
-    return new URL(call.url).searchParams.get('card');
+    const url = socialCardState.url || '';
+    return url ? new URL(url).searchParams.get('card') : '';
   });
   expect(cardPayload).toBeTruthy();
 
@@ -166,7 +151,7 @@ test('social card: card-only view renders and sets ready marker', async ({ page 
   const payload = toBase64UrlJson({
     v: 1,
     type: 'setup',
-    createdAt: new Date('2026-03-05T12:00:00.000Z').toISOString(),
+    createdAt: new Date().toISOString(),
     theme: 'dark',
     filters: {
       minVolume: 1000000,
@@ -206,7 +191,7 @@ test('social card: card query without view opens modal in app shell', async ({ p
   const payload = toBase64UrlJson({
     v: 1,
     type: 'filters',
-    createdAt: new Date('2026-03-05T12:00:00.000Z').toISOString(),
+    createdAt: new Date().toISOString(),
     theme: 'dark',
     filters: {
       minVolume: 1200000,
@@ -233,4 +218,66 @@ test('social card: invalid payload shows friendly error state', async ({ page })
   await expect(page.locator('#socialCardModal')).toBeVisible();
   await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('Unable to load social card payload');
+});
+
+test('social card: expired payload shows hard-block expired state', async ({ page }) => {
+  const expiredCreatedAt = new Date(Date.now() - (4 * 24 * 60 * 60 * 1000)).toISOString();
+  const payload = toBase64UrlJson({
+    v: 1,
+    type: 'setup',
+    createdAt: expiredCreatedAt,
+    theme: 'dark',
+    filters: {
+      minVolume: 1000000,
+      maxVolume: null,
+      minVolatility15m: 0.2,
+      minTicks5m: 250,
+      maxResults: 10,
+      excludeSymbols: ['BTC'],
+    },
+    setupSummary: {
+      count: 4,
+      top: [
+        {
+          symbol: 'AAA/USDT',
+          score: 75,
+          volume24h: 3300000,
+          ticks5m: 640,
+          volatility15m: 0.61,
+          btcDelta24h: -0.9,
+        },
+      ],
+    },
+  });
+
+  await page.goto('./?view=social-card&card=' + encodeURIComponent(payload));
+  await expect(page.locator('body')).toHaveClass(/social-card-only/);
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('This card expired');
+  await expect(page.locator('#socialCardRoot .social-card-surface')).toHaveCount(0);
+});
+
+test('social card: copy link action emits success toast', async ({ page }) => {
+  await page.goto('./');
+
+  await page.evaluate(() => {
+    picks = [{
+      symbol: 'TEST/USDT',
+      exchange: 'binanceusdm',
+      price: 1.11,
+      priceChange1h: 0.3,
+      priceChange4h: 1.1,
+      priceChange24h: 1.9,
+      volume24h: 1700000,
+      volatility15m: 0.5,
+      ticks5m: 520,
+      ticks15m: 760,
+    }];
+    renderPicks();
+  });
+
+  await page.click('#shareSocialCardBtn');
+  await page.click('#socialCardCopyBtn');
+  await expect(page.locator('#toast')).toContainText('Card link copied');
 });
