@@ -101,45 +101,52 @@ test('share: clicking share emits metric and includes encoded payload', async ({
 });
 
 test('share: opening shared URL applies filters and auto-scans', async ({ page }) => {
-  await page.route('https://screener.orionterminal.com/api/screener', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        tickers: [
-          {
-            symbol: 'AAAUSDT',
-            baseAsset: 'AAA',
-            price: 2.5,
-            tf1h: { changePercent: 1.3 },
-            tf4h: { changePercent: 2.7 },
-            tf1d: { changePercent: 4.1, volume: 2200000 },
-            tf15m: { volatility: 0.43, trades: 900 },
-            tf5m: { trades: 420 },
-          },
-          {
-            symbol: 'ETHUSDT',
-            baseAsset: 'ETH',
-            price: 3200,
-            tf1h: { changePercent: 0.2 },
-            tf4h: { changePercent: 0.6 },
-            tf1d: { changePercent: 1.1, volume: 2800000 },
-            tf15m: { volatility: 0.5, trades: 1000 },
-            tf5m: { trades: 500 },
-          },
-          {
-            symbol: 'BBBUSDT',
-            baseAsset: 'BBB',
-            price: 0.9,
-            tf1h: { changePercent: 0.7 },
-            tf4h: { changePercent: 1.2 },
-            tf1d: { changePercent: 1.8, volume: 900000 },
-            tf15m: { volatility: 0.37, trades: 830 },
-            tf5m: { trades: 380 },
-          },
-        ],
-      }),
-    });
+  const mockedResponse = JSON.stringify({
+    tickers: [
+      {
+        symbol: 'AAAUSDT',
+        baseAsset: 'AAA',
+        price: 2.5,
+        tf1h: { changePercent: 1.3 },
+        tf4h: { changePercent: 2.7 },
+        tf1d: { changePercent: 4.1, volume: 2200000 },
+        tf15m: { volatility: 0.43, trades: 900 },
+        tf5m: { trades: 420 },
+      },
+      {
+        symbol: 'ETHUSDT',
+        baseAsset: 'ETH',
+        price: 3200,
+        tf1h: { changePercent: 0.2 },
+        tf4h: { changePercent: 0.6 },
+        tf1d: { changePercent: 1.1, volume: 2800000 },
+        tf15m: { volatility: 0.5, trades: 1000 },
+        tf5m: { trades: 500 },
+      },
+      {
+        symbol: 'BBBUSDT',
+        baseAsset: 'BBB',
+        price: 0.9,
+        tf1h: { changePercent: 0.7 },
+        tf4h: { changePercent: 1.2 },
+        tf1d: { changePercent: 1.8, volume: 900000 },
+        tf15m: { volatility: 0.37, trades: 830 },
+        tf5m: { trades: 380 },
+      },
+    ],
+  });
+
+  await page.route('**/*', async (route) => {
+    const requestUrl = route.request().url();
+    if (requestUrl.includes('screener.orionterminal.com/api/screener')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: mockedResponse,
+      });
+      return;
+    }
+    await route.continue();
   });
 
   const shared = toBase64UrlJson({

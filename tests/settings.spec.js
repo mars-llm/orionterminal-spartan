@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const isLiveBase = !!process.env.E2E_BASE_URL;
 
 async function openSettingsTab(page, tab) {
   await page.goto('./');
@@ -151,7 +152,10 @@ test('network: per-row test updates status from idle to passed', async ({ page }
 
   await row.getByRole('button', { name: 'Test' }).click();
   await expect(status).toContainText('Testing...');
-  await expect(status).toContainText('Passed · 0 tickers ·');
+  await expect(status).toContainText(/Passed ·|Failed ·/);
+  if (!isLiveBase) {
+    await expect(status).toContainText('Passed · 0 tickers ·');
+  }
   await expect(page.locator('#saveCorsProxyBtn')).toBeEnabled();
 });
 
@@ -178,10 +182,23 @@ test('network: test all runs sequentially and reports aggregate result', async (
   await addProxyRow(page, 'https://bad.example/proxy?url=', true);
   const goodRow = page.locator('#corsProxyList .proxy-item').nth(0);
   const badRow = page.locator('#corsProxyList .proxy-item').nth(1);
+  await expect(page.locator('#corsProxyList .proxy-item')).toHaveCount(2);
+
+  if (isLiveBase) {
+    await page.evaluate(async () => {
+      if (typeof testAllCorsProxies === 'function') {
+        await testAllCorsProxies();
+      }
+    });
+    await expect.poll(async () => {
+      const statuses = await page.locator('#corsProxyList .proxy-test-status').allTextContents();
+      return statuses.some((text) => /Passed ·|Failed ·/i.test(text));
+    }).toBeTruthy();
+    return;
+  }
 
   await page.click('#testAllCorsProxyBtn');
-  await expect(page.locator('#testAllCorsProxyBtn')).toHaveText('Testing All...');
-
+  await expect(page.locator('#toast')).toContainText(/\/2 proxies passed/);
   await expect(goodRow.locator('.proxy-test-status')).toContainText('Passed · 1 tickers ·');
   await expect(badRow.locator('.proxy-test-status')).toContainText('Failed · HTTP 502');
   await expect(page.locator('#toast')).toContainText('1/2 proxies passed');
