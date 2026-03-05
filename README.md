@@ -49,13 +49,16 @@ Live data needs an internet connection. If opening `index.html` directly causes 
 - **Share Social Card** creates a visual card:
   - If results exist, card type is **setup** (top candidates + metrics).
   - If no results exist, card type is **filters** (threshold snapshot).
+- Social copy is optimized for engagement:
+  - X intent uses concise hook + proof + CTA text.
+  - Facebook share uses URL + generated caption (`quote`) while keeping the link-first flow.
 - Query params:
   - `?card=<payload>` opens card payload in-app.
   - `?view=social-card&card=<payload>` renders clean card-only view.
-- Payload schema (`v=1`) includes:
-  - card metadata (`v`, `type`, `createdAt`, `theme`, optional `title`/`note`)
-  - sanitized `filters`
-  - optional `setupSummary` (`count` + top entries with score and key metrics)
+- Payload schema:
+  - **Current (`v=2`)** uses compact fields + compact numeric encoding to reduce URL length.
+  - **Legacy (`v=1`)** links still decode for backward compatibility.
+  - Card content still includes metadata, filter context, and optional setup summary (top entries + score/metrics).
 - Lifetime policy:
   - cards expire **3 days** after `createdAt`
   - expired cards are hard-blocked with an explicit **Card expired** state

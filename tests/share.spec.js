@@ -73,13 +73,21 @@ test('share: social-card modal uses X/Facebook intents and copy toast', async ({
   }));
 
   expect(shareState.cardUrl).toBeTruthy();
+  const cardUrl = new URL(shareState.cardUrl);
+  const cardPayload = cardUrl.searchParams.get('card') || '';
+  expect(cardPayload.length).toBeLessThan(450);
+
   const xUrl = new URL(shareState.xHref);
   expect(xUrl.hostname).toContain('twitter.com');
   expect(xUrl.searchParams.get('url')).toBe(shareState.cardUrl);
+  const xText = xUrl.searchParams.get('text') || '';
+  expect(xText).toContain('Futures setups heating up');
+  expect(xText).not.toContain('snapshot ·');
 
   const facebookUrl = new URL(shareState.fbHref);
   expect(facebookUrl.hostname).toContain('facebook.com');
   expect(facebookUrl.searchParams.get('u')).toBe(shareState.cardUrl);
+  expect(facebookUrl.searchParams.get('quote')).toContain('Top futures setups snapshot');
 
   await page.click('#socialCardCopyBtn');
   await expect(page.locator('#toast')).toContainText('Card link copied');

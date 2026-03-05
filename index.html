@@ -3001,7 +3001,7 @@
           <span>Share Social Card</span>
         </button>
         <p class="share-helper" id="shareHelperText">
-          <strong>Share Social Card</strong> creates a snapshot you can post to X/Facebook or copy as a link.
+          <strong>Share Social Card</strong> creates an engagement-ready snapshot with compact links for X, Facebook, and direct sharing.
         </p>
       </div>
 
@@ -3870,9 +3870,11 @@
     const CARD_PARAM_KEY = 'card';
     const CARD_VIEW_PARAM_KEY = 'view';
     const CARD_VIEW_MODE = 'social-card';
-    const CARD_PAYLOAD_VERSION = 1;
+    const CARD_PAYLOAD_VERSION = 2;
+    const CARD_PAYLOAD_LEGACY_VERSION = 1;
     const CARD_MAX_PARAM_LENGTH = 9000;
     const CARD_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
+    const CARD_SHARE_X_TEXT_MAX = 220;
     const EVENT_COUNTS_STORAGE_KEY = 'orion-screener-event-counts-v1';
     window.__ORION_SOCIAL_CARD_READY__ = false;
 
@@ -6097,18 +6099,114 @@
       return next;
     }
 
-    function sanitizeCardPayload(raw, options) {
-      var opts = options || {};
-      var source = raw && typeof raw === 'object' ? raw : {};
-      var version = parseInt(source.v, 10);
-      if (version !== CARD_PAYLOAD_VERSION) {
-        if (opts.allowVersionFallback) {
-          version = CARD_PAYLOAD_VERSION;
-        } else {
-          return null;
-        }
-      }
+    function getDefaultCardTitle(type) {
+      return type === 'setup' ? 'Top setup snapshot' : 'Filter setup snapshot';
+    }
 
+    function getDefaultCardNote(type) {
+      return type === 'setup'
+        ? 'Top-ranked results from the latest scan'
+        : 'Shared from Spartan Orion Screener';
+    }
+
+    function getCardCreatedAtMs(payload) {
+      if (!payload || !payload.createdAt) return NaN;
+      return Date.parse(payload.createdAt);
+    }
+
+    function encodeCompactPercent(value) {
+      return Number.isFinite(value) ? Math.round(value * 100) : 0;
+    }
+
+    function decodeCompactPercent(value) {
+      if (!Number.isFinite(value)) return 0;
+      return Number((value / 100).toFixed(2));
+    }
+
+    function normalizeCompactCardSymbol(symbol) {
+      if (!symbol) return '';
+      var normalized = String(symbol).trim().toUpperCase();
+      if (!normalized) return '';
+      if (normalized.endsWith('/USDT')) {
+        return normalized.slice(0, -5);
+      }
+      return normalized;
+    }
+
+    function expandCompactCardSymbol(symbol) {
+      if (!symbol) return '';
+      var normalized = String(symbol).trim().toUpperCase();
+      if (!normalized) return '';
+      if (normalized.indexOf('/') >= 0) return normalized;
+      return normalized + '/USDT';
+    }
+
+    function packCardFiltersV2(filters) {
+      var safe = sanitizeFilterState(filters);
+      return [
+        Math.max(0, Math.round(safe.minVolume || 0)),
+        safe.maxVolume ? Math.max(0, Math.round(safe.maxVolume)) : 0,
+        encodeCompactPercent(safe.minVolatility15m || 0),
+        Math.max(0, Math.round(safe.minTicks5m || 0)),
+        Math.max(1, Math.round(safe.maxResults || DEFAULT_FILTERS.maxResults)),
+        normalizeExcludeSymbols(safe.excludeSymbols).slice(0, 12),
+      ];
+    }
+
+    function unpackCardFiltersV2(compactFilters) {
+      var list = Array.isArray(compactFilters) ? compactFilters : [];
+      var minVolume = parseInt(list[0], 10);
+      var maxVolume = parseInt(list[1], 10);
+      var minVolatility = parseInt(list[2], 10);
+      var minTicks = parseInt(list[3], 10);
+      var maxResults = parseInt(list[4], 10);
+      var excludeSymbols = Array.isArray(list[5]) ? list[5] : [];
+      return sanitizeFilterState({
+        minVolume: Number.isFinite(minVolume) ? minVolume : DEFAULT_FILTERS.minVolume,
+        maxVolume: Number.isFinite(maxVolume) && maxVolume > 0 ? maxVolume : null,
+        minVolatility15m: decodeCompactPercent(minVolatility),
+        minTicks5m: Number.isFinite(minTicks) ? minTicks : DEFAULT_FILTERS.minTicks5m,
+        maxResults: Number.isFinite(maxResults) && maxResults > 0 ? maxResults : DEFAULT_FILTERS.maxResults,
+        excludeSymbols: normalizeExcludeSymbols(excludeSymbols),
+      });
+    }
+
+    function packCardTopEntryV2(entry) {
+      var normalized = normalizeCardTopEntry(entry);
+      if (!normalized) return null;
+      return [
+        normalizeCompactCardSymbol(normalized.symbol),
+        Number.isFinite(normalized.score) ? normalized.score : null,
+        Number.isFinite(normalized.volume24h) ? Math.max(0, Math.round(normalized.volume24h)) : 0,
+        Number.isFinite(normalized.ticks5m) ? Math.max(0, Math.round(normalized.ticks5m)) : 0,
+        encodeCompactPercent(normalized.volatility15m),
+        normalized.btcDelta24h === null ? null : encodeCompactPercent(normalized.btcDelta24h),
+      ];
+    }
+
+    function unpackCardTopEntryV2(compactEntry) {
+      if (!Array.isArray(compactEntry) || compactEntry.length === 0) return null;
+      var symbol = expandCompactCardSymbol(compactEntry[0]);
+      if (!symbol) return null;
+
+      var score = Number(compactEntry[1]);
+      var volume24h = Number(compactEntry[2]);
+      var ticks5m = Number(compactEntry[3]);
+      var volatility15m = decodeCompactPercent(Number(compactEntry[4]));
+      var btcRaw = compactEntry[5];
+
+      return normalizeCardTopEntry({
+        symbol: symbol,
+        score: Number.isFinite(score) ? score : null,
+        volume24h: Number.isFinite(volume24h) ? volume24h : null,
+        ticks5m: Number.isFinite(ticks5m) ? ticks5m : null,
+        volatility15m: volatility15m,
+        btcDelta24h: btcRaw === null || btcRaw === undefined ? null : decodeCompactPercent(Number(btcRaw)),
+      });
+    }
+
+    function sanitizeCardPayload(raw, options) {
+      var source = raw && typeof raw === 'object' ? raw : {};
       var type = source.type === 'setup' ? 'setup' : 'filters';
       var createdAt = '';
       if (source.createdAt) {
@@ -6154,10 +6252,92 @@
       return payload;
     }
 
+    function packCardPayloadV2(payload) {
+      var safe = sanitizeCardPayload(payload, { allowVersionFallback: true });
+      if (!safe) return null;
+
+      var createdAtMs = getCardCreatedAtMs(safe);
+      if (!Number.isFinite(createdAtMs)) return null;
+
+      var packed = {
+        v: CARD_PAYLOAD_VERSION,
+        t: safe.type === 'setup' ? 's' : 'f',
+        c: Math.floor(createdAtMs / 1000),
+        m: safe.theme === 'light' ? 1 : 0,
+        f: packCardFiltersV2(safe.filters),
+      };
+
+      var defaultTitle = getDefaultCardTitle(safe.type);
+      var defaultNote = getDefaultCardNote(safe.type);
+      var title = safe.title ? safe.title : '';
+      var note = safe.note ? safe.note : '';
+      if ((title && title !== defaultTitle) || (note && note !== defaultNote)) {
+        packed.i = [title || '', note || ''];
+      }
+
+      if (safe.type === 'setup' && safe.setupSummary && Array.isArray(safe.setupSummary.top)) {
+        var count = Number.isFinite(safe.setupSummary.count)
+          ? Math.max(0, Math.round(safe.setupSummary.count))
+          : safe.setupSummary.top.length;
+        var compactTop = safe.setupSummary.top
+          .map(packCardTopEntryV2)
+          .filter(function(entry) { return !!entry; })
+          .slice(0, 3);
+        if (compactTop.length) {
+          packed.h = [count].concat(compactTop);
+        } else {
+          packed.t = 'f';
+        }
+      }
+
+      return packed;
+    }
+
+    function unpackCardPayloadV2(packed) {
+      if (!packed || typeof packed !== 'object') return null;
+      var type = packed.t === 's' ? 'setup' : 'filters';
+      var createdAtSeconds = parseInt(packed.c, 10);
+      if (!Number.isFinite(createdAtSeconds)) return null;
+
+      var payload = {
+        v: CARD_PAYLOAD_VERSION,
+        type: type,
+        createdAt: new Date(createdAtSeconds * 1000).toISOString(),
+        theme: packed.m === 1 ? 'light' : 'dark',
+        filters: unpackCardFiltersV2(packed.f),
+      };
+
+      if (Array.isArray(packed.i)) {
+        var title = packed.i[0] ? String(packed.i[0]).trim().slice(0, 90) : '';
+        var note = packed.i[1] ? String(packed.i[1]).trim().slice(0, 220) : '';
+        if (title) payload.title = title;
+        if (note) payload.note = note;
+      }
+
+      if (type === 'setup') {
+        var rows = Array.isArray(packed.h) ? packed.h.slice() : [];
+        var count = parseInt(rows.shift(), 10);
+        var top = rows
+          .map(unpackCardTopEntryV2)
+          .filter(function(entry) { return !!entry; })
+          .slice(0, 3);
+        if (top.length) {
+          payload.setupSummary = {
+            count: Number.isFinite(count) && count >= 0 ? count : top.length,
+            top: top,
+          };
+        } else {
+          payload.type = 'filters';
+        }
+      }
+
+      return payload;
+    }
+
     function encodeCardPayload(payload) {
-      var sanitized = sanitizeCardPayload(payload, { allowVersionFallback: true });
-      if (!sanitized) return '';
-      return encodeBase64UrlUtf8(JSON.stringify(sanitized));
+      var packed = packCardPayloadV2(payload);
+      if (!packed) return '';
+      return encodeBase64UrlUtf8(JSON.stringify(packed));
     }
 
     function decodeCardPayload(value, options) {
@@ -6169,18 +6349,31 @@
       if (value.length > CARD_MAX_PARAM_LENGTH) {
         return { ok: false, error: 'too-large' };
       }
+
       var decoded = decodeBase64UrlUtf8(value);
       if (!decoded) return { ok: false, error: 'invalid' };
+
       try {
         var parsed = JSON.parse(decoded);
         var version = parseInt(parsed && parsed.v, 10);
-        if (version !== CARD_PAYLOAD_VERSION) {
+        var expandedPayload = null;
+        var createdAtMs = NaN;
+
+        if (version === CARD_PAYLOAD_VERSION) {
+          expandedPayload = unpackCardPayloadV2(parsed);
+          if (!expandedPayload) return { ok: false, error: 'invalid' };
+          createdAtMs = getCardCreatedAtMs(expandedPayload);
+        } else if (version === CARD_PAYLOAD_LEGACY_VERSION) {
+          expandedPayload = sanitizeCardPayload(parsed, { allowVersionFallback: false });
+          createdAtMs = Date.parse(parsed.createdAt);
+        } else {
           return { ok: false, error: 'unsupported-version' };
         }
-        var createdAtMs = Date.parse(parsed.createdAt);
+
         if (!Number.isFinite(createdAtMs)) {
           return { ok: false, error: 'invalid' };
         }
+
         var expiresAtMs = createdAtMs + CARD_MAX_AGE_MS;
         if (nowMs - createdAtMs > CARD_MAX_AGE_MS) {
           return {
@@ -6192,14 +6385,17 @@
             },
           };
         }
-        var payload = sanitizeCardPayload(parsed, { allowVersionFallback: false });
+
+        var payload = sanitizeCardPayload(expandedPayload, { allowVersionFallback: false });
         if (!payload) return { ok: false, error: 'invalid' };
+
         return {
           ok: true,
           payload: payload,
           details: {
             createdAtMs: createdAtMs,
             expiresAtMs: expiresAtMs,
+            version: version,
           },
         };
       } catch (e) {
@@ -6290,15 +6486,15 @@
         createdAt: new Date().toISOString(),
         theme: getCurrentThemeMode(),
         filters: sanitizeFilterState(currentFilters),
-        title: 'Filter setup snapshot',
-        note: 'Shared from Spartan Orion Screener',
+        title: getDefaultCardTitle('filters'),
+        note: getDefaultCardNote('filters'),
       };
 
       var topEntries = buildTopCardEntriesFromCurrentPicks();
       if (topEntries.length > 0) {
         payload.type = 'setup';
-        payload.title = 'Top setup snapshot';
-        payload.note = 'Top-ranked results from the latest scan';
+        payload.title = getDefaultCardTitle('setup');
+        payload.note = getDefaultCardNote('setup');
         payload.setupSummary = {
           count: picks.length,
           top: topEntries,
@@ -6565,7 +6761,7 @@
 
       if (shareFacebookBtn) {
         if (socialCardState.url) {
-          shareFacebookBtn.href = buildSocialCardFacebookShareUrl(socialCardState.url);
+          shareFacebookBtn.href = buildSocialCardFacebookShareUrl(socialCardState.url, socialCardState.payload);
           shareFacebookBtn.removeAttribute('aria-disabled');
         } else {
           shareFacebookBtn.href = '#';
@@ -6587,20 +6783,81 @@
       if (modal) modal.classList.remove('visible');
     }
 
+    function truncateShareText(text, maxLength) {
+      var value = String(text || '').trim();
+      if (!value) return '';
+      var limit = Number.isFinite(maxLength) ? Math.max(24, Math.round(maxLength)) : 280;
+      if (value.length <= limit) return value;
+      return value.slice(0, limit - 1).trim().replace(/[.,;:!?\\-–—\\s]+$/, '') + '…';
+    }
+
+    function buildSocialCardFilterSummary(payload) {
+      var filters = sanitizeFilterState(payload && payload.filters ? payload.filters : {});
+      var parts = [
+        'Vol ≥ $' + formatVolume(filters.minVolume || 0),
+        '5m ticks ≥ ' + (filters.minTicks5m || 0),
+        'Vol15m ≥ ' + formatPercent(filters.minVolatility15m || 0, 2),
+      ];
+      if (filters.maxResults) {
+        parts.push('Top ' + filters.maxResults);
+      }
+      if (filters.maxVolume) {
+        parts.push('Cap ≤ $' + formatVolume(filters.maxVolume));
+      }
+      if (filters.excludeSymbols && filters.excludeSymbols.length) {
+        parts.push(filters.excludeSymbols.length + ' majors excluded');
+      }
+      return parts.join(' • ');
+    }
+
+    function buildSocialCardTopSummary(payload) {
+      var top = payload && payload.setupSummary && Array.isArray(payload.setupSummary.top)
+        ? payload.setupSummary.top
+        : [];
+      return top.slice(0, 3).map(function(entry) {
+        var symbol = normalizeCompactCardSymbol(entry && entry.symbol);
+        if (!symbol) return '';
+        if (Number.isFinite(entry && entry.score)) {
+          return symbol + ' ' + Math.round(entry.score) + '/100';
+        }
+        return symbol;
+      }).filter(function(item) { return !!item; }).join(' · ');
+    }
+
+    function buildSocialCardXShareText(payload) {
+      var safe = sanitizeCardPayload(payload, { allowVersionFallback: true });
+      var filterSummary = buildSocialCardFilterSummary(safe);
+      if (safe.type === 'setup') {
+        var topSummary = buildSocialCardTopSummary(safe);
+        var setupText = '🚨 Futures setups heating up: ' + (topSummary || 'Top movers spotted') + '. ' + filterSummary + '. Full card ↓';
+        return truncateShareText(setupText, CARD_SHARE_X_TEXT_MAX);
+      }
+      var filterText = '🎯 Futures filter setup to track: ' + filterSummary + '. Run it live ↓';
+      return truncateShareText(filterText, CARD_SHARE_X_TEXT_MAX);
+    }
+
+    function buildSocialCardFacebookCaption(payload) {
+      var safe = sanitizeCardPayload(payload, { allowVersionFallback: true });
+      var filterSummary = buildSocialCardFilterSummary(safe);
+      if (safe.type === 'setup') {
+        var topSummary = buildSocialCardTopSummary(safe);
+        var setupCaption = 'Top futures setups snapshot: ' + (topSummary || 'High-activity movers') + '. ' + filterSummary + '.';
+        return truncateShareText(setupCaption, 260);
+      }
+      var filterCaption = 'Futures filter snapshot: ' + filterSummary + '.';
+      return truncateShareText(filterCaption, 260);
+    }
+
     function buildSocialCardXShareUrl(cardUrl, payload) {
       if (!cardUrl) return '#';
-      var summary = payload && payload.type === 'setup'
-        ? 'Top setups snapshot from Spartan Orion Screener'
-        : 'Filter snapshot from Spartan Orion Screener';
-      var text = payload && payload.title
-        ? payload.title + ' · ' + summary
-        : summary;
+      var text = buildSocialCardXShareText(payload);
       return 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(cardUrl);
     }
 
-    function buildSocialCardFacebookShareUrl(cardUrl) {
+    function buildSocialCardFacebookShareUrl(cardUrl, payload) {
       if (!cardUrl) return '#';
-      return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(cardUrl);
+      var caption = buildSocialCardFacebookCaption(payload);
+      return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(cardUrl) + '&quote=' + encodeURIComponent(caption);
     }
 
     function openSocialCardFromQuery() {

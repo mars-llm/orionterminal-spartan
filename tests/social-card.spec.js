@@ -14,7 +14,11 @@ function fromBase64UrlJson(value) {
   return JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
 }
 
-test('social card: creates setup card payload and social share intents', async ({ page }) => {
+async function encodeCardPayloadOnPage(page, payload) {
+  return page.evaluate((input) => encodeCardPayload(input), payload);
+}
+
+test('social card: creates v2 setup payload with optimized share intents', async ({ page }) => {
   await page.goto('./');
 
   await page.evaluate(() => {
@@ -84,13 +88,18 @@ test('social card: creates setup card payload and social share intents', async (
   expect(cardUrl.searchParams.get('view')).toBe('social-card');
   const cardPayload = cardUrl.searchParams.get('card');
   expect(cardPayload).toBeTruthy();
+  expect(cardPayload.length).toBeLessThan(450);
 
-  const decoded = fromBase64UrlJson(cardPayload);
-  expect(decoded.v).toBe(1);
-  expect(decoded.type).toBe('setup');
-  expect(decoded.setupSummary.count).toBe(3);
-  expect(decoded.setupSummary.top.length).toBe(3);
-  expect(decoded.filters).toMatchObject({
+  const rawPayload = fromBase64UrlJson(cardPayload);
+  expect(rawPayload.v).toBe(2);
+  expect(rawPayload.t).toBe('s');
+
+  const decoded = await page.evaluate((encoded) => decodeCardPayload(encoded), cardPayload);
+  expect(decoded.ok).toBe(true);
+  expect(decoded.payload.type).toBe('setup');
+  expect(decoded.payload.setupSummary.count).toBe(3);
+  expect(decoded.payload.setupSummary.top.length).toBe(3);
+  expect(decoded.payload.filters).toMatchObject({
     minVolume: 2000000,
     maxVolume: 8000000,
     minVolatility15m: 0.3,
@@ -102,13 +111,17 @@ test('social card: creates setup card payload and social share intents', async (
   const xShare = new URL(shareState.xHref);
   expect(xShare.hostname).toContain('twitter.com');
   expect(xShare.searchParams.get('url')).toBe(shareState.cardUrl);
+  const xText = xShare.searchParams.get('text') || '';
+  expect(xText).toContain('Futures setups heating up');
+  expect(xText).not.toContain('snapshot ·');
 
   const facebookShare = new URL(shareState.fbHref);
   expect(facebookShare.hostname).toContain('facebook.com');
   expect(facebookShare.searchParams.get('u')).toBe(shareState.cardUrl);
+  expect(facebookShare.searchParams.get('quote')).toContain('Top futures setups snapshot');
 });
 
-test('social card: no picks creates filter card payload', async ({ page }) => {
+test('social card: no picks creates v2 filter payload', async ({ page }) => {
   await page.goto('./');
   await page.evaluate(() => {
     currentFilters = {
@@ -133,11 +146,15 @@ test('social card: no picks creates filter card payload', async ({ page }) => {
   });
   expect(cardPayload).toBeTruthy();
 
-  const decoded = fromBase64UrlJson(cardPayload);
-  expect(decoded.v).toBe(1);
-  expect(decoded.type).toBe('filters');
-  expect(decoded.setupSummary).toBeUndefined();
-  expect(decoded.filters).toMatchObject({
+  const rawPayload = fromBase64UrlJson(cardPayload);
+  expect(rawPayload.v).toBe(2);
+  expect(rawPayload.t).toBe('f');
+
+  const decoded = await page.evaluate((encoded) => decodeCardPayload(encoded), cardPayload);
+  expect(decoded.ok).toBe(true);
+  expect(decoded.payload.type).toBe('filters');
+  expect(decoded.payload.setupSummary).toBeUndefined();
+  expect(decoded.payload.filters).toMatchObject({
     minVolume: 900000,
     maxVolume: null,
     minVolatility15m: 0.15,
@@ -148,8 +165,8 @@ test('social card: no picks creates filter card payload', async ({ page }) => {
 });
 
 test('social card: card-only view renders and sets ready marker', async ({ page }) => {
-  const payload = toBase64UrlJson({
-    v: 1,
+  await page.goto('./');
+  const payload = await encodeCardPayloadOnPage(page, {
     type: 'setup',
     createdAt: new Date().toISOString(),
     theme: 'dark',
@@ -188,8 +205,8 @@ test('social card: card-only view renders and sets ready marker', async ({ page 
 });
 
 test('social card: card query without view opens modal in app shell', async ({ page }) => {
-  const payload = toBase64UrlJson({
-    v: 1,
+  await page.goto('./');
+  const payload = await encodeCardPayloadOnPage(page, {
     type: 'filters',
     createdAt: new Date().toISOString(),
     theme: 'dark',
@@ -220,12 +237,30 @@ test('social card: invalid payload shows friendly error state', async ({ page })
   await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('Unable to load social card payload');
 });
 
-test('social card: expired payload shows hard-block expired state', async ({ page }) => {
-  const expiredCreatedAt = new Date(Date.now() - (4 * 24 * 60 * 60 * 1000)).toISOString();
+test('social card: expired v2 payload shows hard-block expired state', async ({ page }) => {
+  const expiredCreatedAtSeconds = Math.floor((Date.now() - (4 * 24 * 60 * 60 * 1000)) / 1000);
+  const payload = toBase64UrlJson({
+    v: 2,
+    t: 's',
+    c: expiredCreatedAtSeconds,
+    m: 0,
+    f: [1000000, 0, 20, 250, 10, ['BTC']],
+    h: [4, ['AAA', 75, 3300000, 640, 61, -90]],
+  });
+
+  await page.goto('./?view=social-card&card=' + encodeURIComponent(payload));
+  await expect(page.locator('body')).toHaveClass(/social-card-only/);
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('This card expired');
+  await expect(page.locator('#socialCardRoot .social-card-surface')).toHaveCount(0);
+});
+
+test('social card: legacy v1 payload still decodes and renders', async ({ page }) => {
   const payload = toBase64UrlJson({
     v: 1,
     type: 'setup',
-    createdAt: expiredCreatedAt,
+    createdAt: new Date().toISOString(),
     theme: 'dark',
     filters: {
       minVolume: 1000000,
@@ -254,8 +289,7 @@ test('social card: expired payload shows hard-block expired state', async ({ pag
   await expect(page.locator('body')).toHaveClass(/social-card-only/);
   await expect(page.locator('#socialCardModal')).toBeVisible();
   await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
-  await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('This card expired');
-  await expect(page.locator('#socialCardRoot .social-card-surface')).toHaveCount(0);
+  await expect(page.locator('#socialCardRoot .social-card-entry')).toHaveCount(1);
 });
 
 test('social card: copy link action emits success toast', async ({ page }) => {
