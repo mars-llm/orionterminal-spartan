@@ -1901,6 +1901,11 @@
       font-weight: 600;
     }
 
+    .settings-tab:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.28);
+    }
+
     .settings-tab.active {
       background: linear-gradient(135deg, rgba(245, 176, 65, 0.35), rgba(45, 212, 191, 0.25));
       color: var(--text-primary);
@@ -1929,8 +1934,8 @@
     }
 
     .settings-section {
-      margin-bottom: 1.5rem;
-      padding: 1rem;
+      margin-bottom: 1.25rem;
+      padding: 1.1rem;
       border-radius: 0.95rem;
       border: 1px solid var(--border);
       background: var(--surface-muted);
@@ -1952,7 +1957,7 @@
     }
 
     .settings-note {
-      margin: 0 0 0.95rem;
+      margin: 0;
       font-size: 0.8rem;
       color: var(--text-secondary);
       line-height: 1.5;
@@ -1972,6 +1977,67 @@
       background: rgba(226, 232, 240, 0.85);
     }
 
+    .settings-quick-guide {
+      margin-bottom: 0.9rem;
+      padding: 0.75rem;
+      border-radius: 0.8rem;
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.28);
+    }
+
+    :root[data-theme="light"] .settings-quick-guide {
+      background: rgba(248, 250, 252, 0.9);
+      border-color: rgba(148, 163, 184, 0.4);
+    }
+
+    .settings-checklist {
+      margin: 0.6rem 0 0;
+      padding-left: 1rem;
+      display: grid;
+      gap: 0.25rem;
+      font-size: 0.77rem;
+      color: var(--text-secondary);
+    }
+
+    .settings-checklist strong {
+      color: var(--text-primary);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .settings-disclosure {
+      margin-bottom: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(15, 23, 42, 0.26);
+    }
+
+    :root[data-theme="light"] .settings-disclosure {
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .settings-disclosure summary {
+      cursor: pointer;
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      outline: none;
+    }
+
+    .settings-disclosure summary:focus-visible {
+      border-radius: 0.45rem;
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.25);
+    }
+
+    .settings-disclosure p {
+      margin: 0.55rem 0 0;
+      font-size: 0.74rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
     .settings-footnote {
       margin: 0.75rem 0 0;
       font-size: 0.75rem;
@@ -1987,7 +2053,7 @@
     }
 
     .proxy-item {
-      padding: 0.85rem;
+      padding: 0.9rem;
       border-radius: 0.95rem;
       border: 1px solid var(--border);
       background: var(--surface-card);
@@ -2003,33 +2069,54 @@
     }
 
     .proxy-item-title {
-      font-size: 0.65rem;
+      font-size: 0.66rem;
       text-transform: uppercase;
       letter-spacing: 0.18em;
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
 
     .proxy-item-actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-    }
-
-    .proxy-item-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
       flex-wrap: wrap;
     }
 
+    .proxy-item-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.7rem;
+      align-items: start;
+    }
+
+    .proxy-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+
+    .proxy-field-label {
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .proxy-field-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-height: 36px;
+    }
+
     .proxy-url-input {
-      flex: 1;
-      min-width: 240px;
       width: 100%;
       background: var(--surface-input);
       border: 1px solid var(--border);
       border-radius: 0.6rem;
-      padding: 0.45rem 0.75rem;
+      min-height: 36px;
+      padding: 0.4rem 0.7rem;
       color: var(--text-primary);
       font-size: 0.8rem;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -2043,6 +2130,11 @@
 
     .proxy-url-input::placeholder {
       color: var(--text-muted);
+    }
+
+    .proxy-url-input[aria-invalid="true"] {
+      border-color: rgba(248, 113, 113, 0.85);
+      box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
     }
 
     .proxy-toggle {
@@ -2060,12 +2152,61 @@
       accent-color: var(--accent-2);
     }
 
+    .proxy-validation {
+      min-height: 1rem;
+      font-size: 0.72rem;
+      color: var(--red);
+      line-height: 1.35;
+    }
+
+    .proxy-validation:empty::before {
+      content: "\00a0";
+    }
+
     .proxy-actions {
-      margin-top: 0.8rem;
+      margin-top: 0.95rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
-      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .proxy-action-primary {
+      margin-left: auto;
+    }
+
+    .proxy-actions .btn-secondary,
+    .proxy-actions .btn-primary,
+    .proxy-item-actions .btn-secondary,
+    #settingPreferredProxy {
+      min-height: 36px;
+    }
+
+    .proxy-item-actions .btn-secondary {
+      min-width: 86px;
+    }
+
+    .proxy-actions .btn-primary {
+      box-shadow: var(--shadow-soft), var(--glow-accent);
+    }
+
+    .proxy-actions .btn-primary:disabled,
+    .proxy-actions .btn-secondary:disabled,
+    .proxy-item-actions .btn-secondary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    @media (max-width: 640px) {
+      .proxy-action-primary {
+        margin-left: 0;
+      }
+      .proxy-actions > button {
+        flex: 1 1 auto;
+      }
     }
 
     .proxy-test-status {
@@ -2579,6 +2720,17 @@
           </svg>
           <span>Copy Watchlist</span>
         </button>
+
+        <button class="btn-secondary copy-all-btn" id="shareScanBtn" style="display: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <path d="m8.59 13.51 6.83 3.98"/>
+            <path d="m15.41 6.51-6.82 3.98"/>
+          </svg>
+          <span>Share Scan</span>
+        </button>
       </div>
 
       <div class="controls-group controls-secondary">
@@ -2965,14 +3117,14 @@
         </button>
       </div>
       <div class="modal-body">
-        <div class="settings-tabs" role="tablist" aria-label="Settings sections">
-          <button class="settings-tab active" data-tab="chart" type="button" role="tab" aria-selected="true">Chart</button>
-          <button class="settings-tab" data-tab="style" type="button" role="tab" aria-selected="false">Style</button>
-          <button class="settings-tab" data-tab="display" type="button" role="tab" aria-selected="false">Display</button>
-          <button class="settings-tab" data-tab="network" type="button" role="tab" aria-selected="false">Network</button>
+        <div class="settings-tabs" id="settingsTabList" role="tablist" aria-label="Settings sections">
+          <button class="settings-tab active" id="settingsTabChart" data-tab="chart" type="button" role="tab" aria-controls="settingsPanelChart" aria-selected="true" tabindex="0">Chart</button>
+          <button class="settings-tab" id="settingsTabStyle" data-tab="style" type="button" role="tab" aria-controls="settingsPanelStyle" aria-selected="false" tabindex="-1">Style</button>
+          <button class="settings-tab" id="settingsTabDisplay" data-tab="display" type="button" role="tab" aria-controls="settingsPanelDisplay" aria-selected="false" tabindex="-1">Display</button>
+          <button class="settings-tab" id="settingsTabNetwork" data-tab="network" type="button" role="tab" aria-controls="settingsPanelNetwork" aria-selected="false" tabindex="-1">Network</button>
         </div>
 
-        <div class="settings-panel active" data-panel="chart" role="tabpanel">
+        <div class="settings-panel active" id="settingsPanelChart" data-panel="chart" role="tabpanel" aria-labelledby="settingsTabChart">
           <div class="settings-section">
             <div class="settings-section-title">Preview</div>
             <div class="setting-row">
@@ -3076,7 +3228,7 @@
           </div>
         </div>
 
-        <div class="settings-panel" data-panel="style" role="tabpanel">
+        <div class="settings-panel" id="settingsPanelStyle" data-panel="style" role="tabpanel" aria-labelledby="settingsTabStyle" hidden>
           <div class="settings-section">
             <div class="settings-subsection">
               <div class="settings-subsection-title">Candles</div>
@@ -3186,7 +3338,7 @@
           </div>
         </div>
 
-        <div class="settings-panel" data-panel="display" role="tabpanel">
+        <div class="settings-panel" id="settingsPanelDisplay" data-panel="display" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden>
           <div class="settings-section">
             <div class="settings-section-title">Display</div>
             <div class="setting-row">
@@ -3206,14 +3358,26 @@
           </div>
         </div>
 
-        <div class="settings-panel" data-panel="network" role="tabpanel">
+        <div class="settings-panel" id="settingsPanelNetwork" data-panel="network" role="tabpanel" aria-labelledby="settingsTabNetwork" hidden>
           <div class="settings-section">
             <div class="settings-section-title">CORS Proxy Fallback</div>
-            <p class="settings-note">
-              When direct API access is blocked (for example on <code>file://</code> or GitHub Pages), the app can route
-              requests through public CORS proxies. Proxies can see the requested URL. Use at your own risk. Use
-              <strong>Test</strong> to verify a proxy before saving.
-            </p>
+            <div class="settings-quick-guide">
+              <p class="settings-note">
+                Use proxy fallback only when direct Orion API access is blocked.
+              </p>
+              <ul class="settings-checklist" aria-label="Proxy setup steps">
+                <li><strong>Step 1:</strong> Add URL</li>
+                <li><strong>Step 2:</strong> Test (or Test All)</li>
+                <li><strong>Step 3:</strong> Save</li>
+              </ul>
+            </div>
+            <details class="settings-disclosure" id="networkAdvancedDetails">
+              <summary>Advanced details and risks</summary>
+              <p>
+                Public proxies may log requested URLs and may be unreliable. Use trusted endpoints, test before saving,
+                and keep a fallback list for outages.
+              </p>
+            </details>
 
             <div class="setting-row">
               <div class="setting-label">
@@ -3228,9 +3392,10 @@
             <div class="proxy-list" id="corsProxyList"></div>
 
             <div class="proxy-actions">
-              <button class="btn-secondary btn-small" id="addCorsProxyBtn" type="button">Add Proxy</button>
-              <button class="btn-secondary btn-small" id="saveCorsProxyBtn" type="button">Save</button>
-              <button class="btn-secondary btn-small" id="resetCorsProxyBtn" type="button">Reset Defaults</button>
+              <button class="btn-secondary btn-small proxy-action-secondary" id="addCorsProxyBtn" type="button">Add Proxy</button>
+              <button class="btn-secondary btn-small proxy-action-secondary" id="testAllCorsProxyBtn" type="button">Test All</button>
+              <button class="btn-secondary btn-small proxy-action-tertiary" id="resetCorsProxyBtn" type="button">Reset Defaults</button>
+              <button class="btn-primary btn-small proxy-action-primary" id="saveCorsProxyBtn" type="button">Save</button>
             </div>
 
             <p class="settings-footnote" id="corsProxyStatus"></p>
@@ -3406,6 +3571,9 @@
     const SCAN_RETRY_BASE_DELAY_MS = 1500;
     const SCAN_RETRY_MAX_DELAY_MS = 10000;
     const SCAN_TIMEOUT_MS = 15000;
+    const SHARE_PARAM_KEY = 'share';
+    const SHARE_PAYLOAD_VERSION = 1;
+    const EVENT_COUNTS_STORAGE_KEY = 'orion-screener-event-counts-v1';
 
     function isGithubPages() {
       return window.location.hostname.endsWith('github.io');
@@ -5059,6 +5227,7 @@
       const resultsCount = document.getElementById('resultsCount');
       const lastUpdated = document.getElementById('lastUpdated');
       const copyAllBtn = document.getElementById('copyAllBtn');
+      const shareScanBtn = document.getElementById('shareScanBtn');
 
       if (picks.length === 0) {
         candidateHighlights = { bySymbol: {}, topSymbols: [], total: 0 };
@@ -5066,12 +5235,14 @@
         resultsContainer.style.display = 'none';
         emptyState.style.display = 'block';
         copyAllBtn.style.display = 'none';
+        if (shareScanBtn) shareScanBtn.style.display = 'none';
         return;
       }
 
       emptyState.style.display = 'none';
       resultsContainer.style.display = 'block';
       copyAllBtn.style.display = 'inline-flex';
+      if (shareScanBtn) shareScanBtn.style.display = 'inline-flex';
 
       resultsCount.textContent = picks.length + ' active setups';
       lastUpdated.textContent = new Date().toLocaleTimeString();
@@ -5444,56 +5615,213 @@
       renderProfiles();
     }
 
-    function updateFilters() {
-      const minVolumeRaw = parseInt(document.getElementById('minVolume').value, 10);
-      const minVolume = Number.isFinite(minVolumeRaw) ? Math.max(0, minVolumeRaw) : 0;
-      const maxVolumeVal = document.getElementById('maxVolume').value;
-      const maxVolumeRaw = maxVolumeVal ? parseInt(maxVolumeVal, 10) : null;
-      let maxVolume = maxVolumeRaw !== null && Number.isFinite(maxVolumeRaw) && maxVolumeRaw > 0 ? maxVolumeRaw : null;
-      const minVolatilityRaw = parseFloat(document.getElementById('minVolatility').value);
-      const minVolatility = Number.isFinite(minVolatilityRaw) ? Math.max(0, minVolatilityRaw) : 0;
-      const minTicksRaw = parseInt(document.getElementById('minTicks').value, 10);
-      const minTicks = Number.isFinite(minTicksRaw) ? Math.max(0, minTicksRaw) : 0;
-      const maxResultsRaw = parseInt(document.getElementById('maxResults').value, 10);
-      const maxResults = Number.isFinite(maxResultsRaw) && maxResultsRaw > 0 ? maxResultsRaw : 10;
-      const excludeStr = document.getElementById('excludeSymbols').value;
-      const excludeSymbols = excludeStr
-        ? excludeStr.split(',').map(function(s) { return s.trim().toUpperCase(); }).filter(Boolean)
-        : [];
+    function normalizeExcludeSymbols(value) {
+      var list = Array.isArray(value)
+        ? value
+        : String(value || '').split(',');
+      var seen = {};
+      return list
+        .map(function(item) { return String(item || '').trim().toUpperCase(); })
+        .filter(function(item) {
+          if (!item) return false;
+          if (seen[item]) return false;
+          seen[item] = true;
+          return true;
+        })
+        .slice(0, 50);
+    }
 
+    function sanitizeFilterState(raw) {
+      var source = raw && typeof raw === 'object' ? raw : {};
+      var minVolumeRaw = parseInt(source.minVolume, 10);
+      var minVolume = Number.isFinite(minVolumeRaw) ? Math.max(0, minVolumeRaw) : DEFAULT_FILTERS.minVolume;
+
+      var maxVolumeRaw = parseInt(source.maxVolume, 10);
+      var maxVolume = Number.isFinite(maxVolumeRaw) && maxVolumeRaw > 0 ? maxVolumeRaw : null;
       if (maxVolume !== null && maxVolume < minVolume) {
         maxVolume = minVolume;
       }
 
-      currentFilters = {
+      var minVolatilityRaw = parseFloat(source.minVolatility15m);
+      var minVolatility15m = Number.isFinite(minVolatilityRaw) ? Math.max(0, minVolatilityRaw) : DEFAULT_FILTERS.minVolatility15m;
+
+      var minTicksRaw = parseInt(source.minTicks5m, 10);
+      var minTicks5m = Number.isFinite(minTicksRaw) ? Math.max(0, minTicksRaw) : DEFAULT_FILTERS.minTicks5m;
+
+      var maxResultsRaw = parseInt(source.maxResults, 10);
+      var maxResults = Number.isFinite(maxResultsRaw) && maxResultsRaw > 0 ? maxResultsRaw : DEFAULT_FILTERS.maxResults;
+
+      var excludeSymbols = normalizeExcludeSymbols(source.excludeSymbols);
+
+      return {
         minVolume: minVolume,
         maxVolume: maxVolume,
-        minVolatility15m: minVolatility,
-        minTicks5m: minTicks,
+        minVolatility15m: minVolatility15m,
+        minTicks5m: minTicks5m,
         maxResults: maxResults,
         excludeSymbols: excludeSymbols,
       };
+    }
 
-      // Check if current filters match any profile
-      var matchingProfile = getAllProfiles().find(function(p) {
-        var f = p.filters;
-        return (
-          f.minVolume === currentFilters.minVolume &&
-          f.maxVolume === currentFilters.maxVolume &&
-          f.minVolatility15m === currentFilters.minVolatility15m &&
-          f.minTicks5m === currentFilters.minTicks5m &&
-          f.maxResults === currentFilters.maxResults &&
-          JSON.stringify((f.excludeSymbols || []).slice().sort()) === JSON.stringify((currentFilters.excludeSymbols || []).slice().sort())
-        );
+    function filtersEqual(a, b) {
+      if (!a || !b) return false;
+      return (
+        a.minVolume === b.minVolume &&
+        a.maxVolume === b.maxVolume &&
+        a.minVolatility15m === b.minVolatility15m &&
+        a.minTicks5m === b.minTicks5m &&
+        a.maxResults === b.maxResults &&
+        JSON.stringify((a.excludeSymbols || []).slice().sort()) === JSON.stringify((b.excludeSymbols || []).slice().sort())
+      );
+    }
+
+    function findMatchingProfileId(filters) {
+      var matching = getAllProfiles().find(function(profile) {
+        return filtersEqual(profile.filters, filters);
       });
+      return matching ? matching.id : null;
+    }
 
-      activeProfileId = matchingProfile ? matchingProfile.id : null;
+    function applySharedFilters(filters) {
+      currentFilters = sanitizeFilterState(filters);
+      activeProfileId = findMatchingProfileId(currentFilters);
+      updateFilterInputs();
+      updateEmptyStateHint();
+      renderProfiles();
+    }
+
+    function updateFilters() {
+      currentFilters = sanitizeFilterState({
+        minVolume: document.getElementById('minVolume').value,
+        maxVolume: document.getElementById('maxVolume').value,
+        minVolatility15m: document.getElementById('minVolatility').value,
+        minTicks5m: document.getElementById('minTicks').value,
+        maxResults: document.getElementById('maxResults').value,
+        excludeSymbols: document.getElementById('excludeSymbols').value,
+      });
+      activeProfileId = findMatchingProfileId(currentFilters);
       updateEmptyStateHint();
       renderProfiles();
     }
 
     function resetFilters() {
       selectProfile('default');
+    }
+
+    function incrementEventCount(eventName) {
+      if (!eventName) return 0;
+      try {
+        var raw = localStorage.getItem(EVENT_COUNTS_STORAGE_KEY);
+        var counts = raw ? JSON.parse(raw) : {};
+        if (!counts || typeof counts !== 'object') counts = {};
+        var next = (Number.isFinite(counts[eventName]) ? counts[eventName] : 0) + 1;
+        counts[eventName] = next;
+        localStorage.setItem(EVENT_COUNTS_STORAGE_KEY, JSON.stringify(counts));
+        return next;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function trackEvent(eventName, payload) {
+      var count = incrementEventCount(eventName);
+      console.log('[orion-metric]', {
+        event: eventName,
+        count: count,
+        timestamp: Date.now(),
+        payload: payload || {},
+      });
+      return count;
+    }
+
+    function encodeBase64UrlUtf8(value) {
+      var utf8 = encodeURIComponent(value).replace(/%([0-9A-F]{2})/g, function(match, hex) {
+        return String.fromCharCode(parseInt(hex, 16));
+      });
+      return btoa(utf8)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+    }
+
+    function decodeBase64UrlUtf8(value) {
+      if (!value || typeof value !== 'string') return null;
+      try {
+        var base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4 !== 0) {
+          base64 += '=';
+        }
+        var binary = atob(base64);
+        var encoded = '';
+        for (var i = 0; i < binary.length; i += 1) {
+          encoded += '%' + binary.charCodeAt(i).toString(16).padStart(2, '0');
+        }
+        return decodeURIComponent(encoded);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function encodeSharePayload(filters) {
+      var payload = {
+        v: SHARE_PAYLOAD_VERSION,
+        filters: sanitizeFilterState(filters),
+      };
+      return encodeBase64UrlUtf8(JSON.stringify(payload));
+    }
+
+    function decodeSharePayload(value) {
+      var decoded = decodeBase64UrlUtf8(value);
+      if (!decoded) return null;
+      try {
+        var parsed = JSON.parse(decoded);
+        var version = parseInt(parsed && parsed.v, 10);
+        if (!parsed || version !== SHARE_PAYLOAD_VERSION || typeof parsed.filters !== 'object') {
+          return null;
+        }
+        return sanitizeFilterState(parsed.filters);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function buildShareScanUrl(filters) {
+      var encodedPayload = encodeSharePayload(filters);
+      try {
+        var url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set(SHARE_PARAM_KEY, encodedPayload);
+        return url.toString();
+      } catch (e) {
+        var base = window.location.href.split('#')[0].split('?')[0];
+        return base + '?' + SHARE_PARAM_KEY + '=' + encodeURIComponent(encodedPayload);
+      }
+    }
+
+    function applySharedFiltersFromQuery() {
+      var shareValue = '';
+      try {
+        shareValue = new URLSearchParams(window.location.search).get(SHARE_PARAM_KEY) || '';
+      } catch (e) {
+        shareValue = '';
+      }
+      if (!shareValue) return false;
+
+      var sharedFilters = decodeSharePayload(shareValue);
+      if (!sharedFilters) {
+        console.warn('Invalid shared setup ignored.');
+        return false;
+      }
+
+      applySharedFilters(sharedFilters);
+      trackEvent('share_opened', {
+        maxResults: currentFilters.maxResults,
+        excludeCount: currentFilters.excludeSymbols.length,
+      });
+      showToast('Shared setup loaded');
+      handleScan();
+      return true;
     }
 
     async function copySymbol(symbol) {
@@ -5522,6 +5850,43 @@
         var success = await copyTextToClipboard(watchlist);
         if (success) {
           showToast('Watchlist copied to clipboard');
+        } else {
+          showToast('Failed to copy', 'error');
+        }
+      } catch (e) {
+        showToast('Failed to copy', 'error');
+      }
+    }
+
+    async function handleShareScan() {
+      if (picks.length === 0) return;
+
+      var shareUrl = buildShareScanUrl(currentFilters);
+      trackEvent('share_clicked', {
+        picks: picks.length,
+        maxResults: currentFilters.maxResults,
+      });
+
+      if (navigator.share && typeof navigator.share === 'function') {
+        try {
+          await navigator.share({
+            title: 'Spartan Orion Screener setup',
+            text: 'Open this shared screener setup:',
+            url: shareUrl,
+          });
+          showToast('Share sheet opened');
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            return;
+          }
+        }
+      }
+
+      try {
+        var success = await copyTextToClipboard(shareUrl);
+        if (success) {
+          showToast('Share link copied to clipboard');
         } else {
           showToast('Failed to copy', 'error');
         }
@@ -5574,10 +5939,25 @@
     let currentSettingsTab = 'chart';
     let corsProxyDraft = null;
     let preferredProxyDraft = 'auto';
+    let isTestingAllCorsProxies = false;
+    let corsProxyDraftSeed = 0;
+
+    function createCorsProxyDraftEntry(proxy) {
+      corsProxyDraftSeed += 1;
+      return {
+        url: proxy && proxy.url ? String(proxy.url) : '',
+        encode: !!(proxy && proxy.encode),
+        _id: 'proxy-' + corsProxyDraftSeed,
+        _touched: false,
+        _validation: null,
+        _test: null,
+        _testAbort: null,
+      };
+    }
 
     function copyCorsProxyList(list) {
       return (Array.isArray(list) ? list : []).map(function(proxy) {
-        return { url: proxy.url, encode: !!proxy.encode, _test: null, _testAbort: null };
+        return createCorsProxyDraftEntry(proxy);
       });
     }
 
@@ -5592,6 +5972,62 @@
         if (lower.startsWith('http://')) raw = raw.slice(7);
         return raw.slice(0, 38);
       }
+    }
+
+    function validateCorsProxyDraftEntry(proxy, options) {
+      var opts = options || {};
+      var force = !!opts.force;
+      var url = proxy && proxy.url ? String(proxy.url).trim() : '';
+
+      if (!url) {
+        return {
+          valid: false,
+          show: force || !!(proxy && proxy._touched),
+          message: 'Proxy URL is required.',
+        };
+      }
+
+      var lower = url.toLowerCase();
+      if (!(lower.startsWith('https://') || lower.startsWith('http://'))) {
+        return {
+          valid: false,
+          show: true,
+          message: 'Proxy URL must start with http:// or https://',
+        };
+      }
+
+      return { valid: true, show: false, message: '' };
+    }
+
+    function refreshCorsProxyValidation(proxy, options) {
+      proxy._validation = validateCorsProxyDraftEntry(proxy, options);
+      return proxy._validation;
+    }
+
+    function getCorsProxyDraftValidationSummary(force) {
+      var summary = { hasInvalid: false, firstMessage: '' };
+      (corsProxyDraft || []).forEach(function(proxy) {
+        var validation = refreshCorsProxyValidation(proxy, { force: !!force });
+        if (!validation.valid) {
+          summary.hasInvalid = true;
+          if (!summary.firstMessage) summary.firstMessage = validation.message;
+        }
+      });
+      return summary;
+    }
+
+    function abortCorsProxyTest(proxy) {
+      if (proxy && proxy._testAbort) {
+        proxy._testAbort.abort();
+        proxy._testAbort = null;
+      }
+    }
+
+    function abortAllCorsProxyDraftTests() {
+      (corsProxyDraft || []).forEach(function(proxy) {
+        abortCorsProxyTest(proxy);
+      });
+      isTestingAllCorsProxies = false;
     }
 
     function getStoredPreferredProxyDraft() {
@@ -5611,10 +6047,11 @@
       if (!statusEl) return;
 
       var directBlocked = isDirectApiBlocked();
+      var summary = getCorsProxyDraftValidationSummary(false);
       var statusParts = [];
       statusParts.push(directBlocked
-        ? 'Direct Orion API access is blocked here; scans will use proxy fallback.'
-        : 'Direct Orion API access is available; proxies are used only when needed.'
+        ? 'Direct Orion API access is blocked here, so scan requests will use proxy fallback.'
+        : 'Direct Orion API access is available, so proxies are used only when needed.'
       );
 
       var isCustom = false;
@@ -5623,8 +6060,11 @@
       } catch (e) {
         isCustom = false;
       }
-      statusParts.push('Proxy list: ' + (isCustom ? 'custom' : 'default') + ' (' + CORS_PROXIES.length + ').');
-      statusParts.push('Changes apply after clicking Save.');
+      statusParts.push('Active list: ' + (isCustom ? 'custom' : 'default') + ' (' + CORS_PROXIES.length + ').');
+      statusParts.push(summary.hasInvalid
+        ? 'Resolve highlighted URL errors before saving.'
+        : 'Run Test or Test All before Save.'
+      );
       statusEl.textContent = statusParts.join(' ');
     }
 
@@ -5665,48 +6105,127 @@
       return null;
     }
 
-    async function testCorsProxy(proxy) {
-      if (!proxy) return;
-      if (proxy._testAbort) {
-        proxy._testAbort.abort();
+    function updateCorsProxyActionButtons() {
+      var addBtn = document.getElementById('addCorsProxyBtn');
+      var testAllBtn = document.getElementById('testAllCorsProxyBtn');
+      var resetBtn = document.getElementById('resetCorsProxyBtn');
+      var saveBtn = document.getElementById('saveCorsProxyBtn');
+      var hasRows = Array.isArray(corsProxyDraft) && corsProxyDraft.length > 0;
+      var summary = getCorsProxyDraftValidationSummary(false);
+
+      if (addBtn) addBtn.disabled = isTestingAllCorsProxies;
+      if (resetBtn) resetBtn.disabled = isTestingAllCorsProxies;
+      if (testAllBtn) {
+        testAllBtn.disabled = isTestingAllCorsProxies || !hasRows;
+        testAllBtn.textContent = isTestingAllCorsProxies ? 'Testing All...' : 'Test All';
       }
+      if (saveBtn) {
+        saveBtn.disabled = isTestingAllCorsProxies || !hasRows || summary.hasInvalid;
+        saveBtn.title = summary.hasInvalid ? 'Fix invalid proxy URLs before saving.' : 'Save network settings';
+      }
+    }
+
+    function applyProxyValidationToDom(proxy, inputEl, messageEl) {
+      var validation = proxy && proxy._validation ? proxy._validation : { valid: true, show: false, message: '' };
+      if (inputEl) {
+        inputEl.setAttribute('aria-invalid', (!validation.valid && validation.show) ? 'true' : 'false');
+      }
+      if (messageEl) {
+        messageEl.textContent = validation.show ? validation.message : '';
+      }
+    }
+
+    async function testCorsProxy(proxy, options) {
+      var opts = options || {};
+      if (!proxy) return false;
+      abortCorsProxyTest(proxy);
+
+      var validation = refreshCorsProxyValidation(proxy, { force: true });
+      if (!validation.valid) {
+        proxy._test = { state: 'error', message: 'Failed · ' + validation.message };
+        if (!opts.skipRender) renderCorsProxySettingsUi();
+        return false;
+      }
+
       proxy._testAbort = new AbortController();
       var signal = proxy._testAbort.signal;
-
       var normalized = normalizeCorsProxyEntry(proxy);
       if (!normalized) {
-        proxy._test = { state: 'error', message: 'Failed · Invalid proxy URL (must start with http/https).' };
+        proxy._test = { state: 'error', message: 'Failed · Invalid proxy URL' };
         proxy._testAbort = null;
-        renderCorsProxySettingsUi();
-        return;
+        if (!opts.skipRender) renderCorsProxySettingsUi();
+        return false;
       }
 
       var requestUrl = normalized.url + (normalized.encode ? encodeURIComponent(ORION_API) : ORION_API);
-      proxy._test = { state: 'testing', message: 'Testing…' };
-      renderCorsProxySettingsUi();
+      proxy._test = { state: 'testing', message: 'Testing...' };
+      if (!opts.skipRender) renderCorsProxySettingsUi();
 
       var startedAt = Date.now();
       try {
         var result = await fetchJsonOrThrow(requestUrl, signal);
         var tickerCount = getOrionApiTickerCount(result && result.data ? result.data : null);
         if (!Number.isFinite(tickerCount)) {
-          throw new Error('Unexpected response (expected tickers array).');
+          throw new Error('Unexpected response (missing tickers array).');
         }
-
         var latency = Math.max(0, Date.now() - startedAt);
         proxy._test = {
           state: 'success',
-          message: 'OK · ' + tickerCount + ' tickers · ' + latency + 'ms',
+          message: 'Passed · ' + tickerCount + ' tickers · ' + latency + 'ms',
         };
+        return true;
       } catch (err) {
-        if (err && err.name === 'AbortError') return;
+        if (err && err.name === 'AbortError') {
+          proxy._test = null;
+          return false;
+        }
         var msg = err && err.message ? err.message : 'Unknown error';
         proxy._test = { state: 'error', message: 'Failed · ' + msg };
+        return false;
       } finally {
-        if (proxy._testAbort) {
-          proxy._testAbort = null;
+        proxy._testAbort = null;
+        if (!opts.skipRender) renderCorsProxySettingsUi();
+      }
+    }
+
+    async function testAllCorsProxies() {
+      if (isTestingAllCorsProxies) return;
+      if (!corsProxyDraft || corsProxyDraft.length === 0) {
+        showToast('Add at least one proxy first', 'error');
+        return;
+      }
+
+      isTestingAllCorsProxies = true;
+      renderCorsProxySettingsUi();
+      var snapshot = corsProxyDraft.slice();
+      var passed = 0;
+      var tested = 0;
+
+      try {
+        for (var i = 0; i < snapshot.length; i += 1) {
+          if (!isTestingAllCorsProxies) break;
+          var proxy = snapshot[i];
+          if (!corsProxyDraft.includes(proxy)) continue;
+          tested += 1;
+          var ok = await testCorsProxy(proxy, { skipRender: false });
+          if (ok) passed += 1;
+          if (i < snapshot.length - 1) {
+            await sleep(120);
+          }
         }
+      } finally {
+        isTestingAllCorsProxies = false;
         renderCorsProxySettingsUi();
+      }
+
+      if (tested === 0) {
+        showToast('No proxies to test', 'error');
+        return;
+      }
+      if (passed === tested) {
+        showToast(passed + '/' + tested + ' proxies passed');
+      } else {
+        showToast(passed + '/' + tested + ' proxies passed. Review failures.', 'error');
       }
     }
 
@@ -5743,10 +6262,8 @@
         var testBtn = document.createElement('button');
         testBtn.type = 'button';
         testBtn.className = 'btn-secondary btn-small';
-        testBtn.textContent = proxy._test && proxy._test.state === 'testing' ? 'Testing…' : 'Test';
-        if (proxy._test && proxy._test.state === 'testing') {
-          testBtn.disabled = true;
-        }
+        testBtn.textContent = proxy._test && proxy._test.state === 'testing' ? 'Testing...' : 'Test';
+        testBtn.disabled = isTestingAllCorsProxies || (proxy._test && proxy._test.state === 'testing');
         testBtn.addEventListener('click', function() {
           testCorsProxy(proxy);
         });
@@ -5757,10 +6274,7 @@
         removeBtn.className = 'btn-secondary btn-small';
         removeBtn.textContent = 'Remove';
         removeBtn.addEventListener('click', function() {
-          if (proxy._testAbort) {
-            proxy._testAbort.abort();
-            proxy._testAbort = null;
-          }
+          abortCorsProxyTest(proxy);
           corsProxyDraft.splice(idx, 1);
           if (preferredProxyDraft !== 'auto') {
             var preferredIndex = parseInt(preferredProxyDraft, 10);
@@ -5776,44 +6290,95 @@
         top.appendChild(title);
         top.appendChild(actions);
 
-        var controls = document.createElement('div');
-        controls.className = 'proxy-item-controls';
+        var fields = document.createElement('div');
+        fields.className = 'proxy-item-fields';
+        var inputId = 'proxy-url-' + proxy._id;
+        var validationId = 'proxy-url-validation-' + proxy._id;
+        var encodeId = 'proxy-encode-' + proxy._id;
+        var statusId = 'proxy-status-' + proxy._id;
 
+        var urlField = document.createElement('div');
+        urlField.className = 'proxy-field';
+        var urlLabel = document.createElement('label');
+        urlLabel.className = 'proxy-field-label';
+        urlLabel.setAttribute('for', inputId);
+        urlLabel.textContent = 'Proxy URL';
+        urlField.appendChild(urlLabel);
         var input = document.createElement('input');
         input.type = 'text';
+        input.id = inputId;
         input.className = 'proxy-url-input';
         input.placeholder = 'https://example.com/proxy?url=';
         input.value = proxy.url || '';
+        input.setAttribute('aria-describedby', validationId);
+        var validationMessage = document.createElement('div');
+        validationMessage.id = validationId;
+        validationMessage.className = 'proxy-validation';
+        validationMessage.setAttribute('role', 'status');
+        validationMessage.setAttribute('aria-live', 'polite');
         input.addEventListener('input', function() {
-          if (proxy._testAbort) {
-            proxy._testAbort.abort();
-            proxy._testAbort = null;
-          }
+          abortCorsProxyTest(proxy);
           proxy._test = null;
           proxy.url = this.value;
+          if (String(this.value || '').trim().length > 0) proxy._touched = true;
+          refreshCorsProxyValidation(proxy, { force: false });
+          applyProxyValidationToDom(proxy, input, validationMessage);
+          title.textContent = 'Proxy ' + (idx + 1) + ' · ' + getCorsProxyLabel(proxy);
+          renderPreferredProxySelect();
+          updateCorsProxyActionButtons();
+          updateCorsProxyStatusFootnote();
         });
-        controls.appendChild(input);
+        input.addEventListener('blur', function() {
+          proxy._touched = true;
+          refreshCorsProxyValidation(proxy, { force: false });
+          applyProxyValidationToDom(proxy, input, validationMessage);
+          title.textContent = 'Proxy ' + (idx + 1) + ' · ' + getCorsProxyLabel(proxy);
+          renderPreferredProxySelect();
+          updateCorsProxyActionButtons();
+          updateCorsProxyStatusFootnote();
+        });
+        urlField.appendChild(input);
+        urlField.appendChild(validationMessage);
+        fields.appendChild(urlField);
 
+        var encodeField = document.createElement('div');
+        encodeField.className = 'proxy-field';
+        var encodeFieldLabel = document.createElement('label');
+        encodeFieldLabel.className = 'proxy-field-label';
+        encodeFieldLabel.setAttribute('for', encodeId);
+        encodeFieldLabel.textContent = 'Encode URL';
+        encodeField.appendChild(encodeFieldLabel);
+        var encodeInline = document.createElement('div');
+        encodeInline.className = 'proxy-field-inline';
         var encodeLabel = document.createElement('label');
         encodeLabel.className = 'proxy-toggle';
         var encodeInput = document.createElement('input');
         encodeInput.type = 'checkbox';
+        encodeInput.id = encodeId;
         encodeInput.checked = !!proxy.encode;
         encodeInput.addEventListener('change', function() {
-          if (proxy._testAbort) {
-            proxy._testAbort.abort();
-            proxy._testAbort = null;
-          }
+          abortCorsProxyTest(proxy);
           proxy._test = null;
           proxy.encode = this.checked;
+          renderPreferredProxySelect();
+          updateCorsProxyActionButtons();
         });
         var encodeText = document.createElement('span');
-        encodeText.textContent = 'Encode URL';
+        encodeText.textContent = 'Encode target URL';
         encodeLabel.appendChild(encodeInput);
         encodeLabel.appendChild(encodeText);
-        controls.appendChild(encodeLabel);
+        encodeInline.appendChild(encodeLabel);
+        encodeField.appendChild(encodeInline);
+        fields.appendChild(encodeField);
 
+        var statusField = document.createElement('div');
+        statusField.className = 'proxy-field';
+        var statusLabel = document.createElement('div');
+        statusLabel.className = 'proxy-field-label';
+        statusLabel.textContent = 'Test Status';
+        statusField.appendChild(statusLabel);
         var status = document.createElement('div');
+        status.id = statusId;
         status.className = 'proxy-test-status';
         status.setAttribute('role', 'status');
         status.setAttribute('aria-live', 'polite');
@@ -5825,13 +6390,17 @@
           status.classList.add(proxy._test.state);
           statusText.textContent = proxy._test.message;
         } else {
-          statusText.textContent = 'Not tested yet.';
+          statusText.textContent = 'Not tested';
         }
         status.appendChild(statusText);
+        statusField.appendChild(status);
+        fields.appendChild(statusField);
+
+        refreshCorsProxyValidation(proxy, { force: false });
+        applyProxyValidationToDom(proxy, input, validationMessage);
 
         item.appendChild(top);
-        item.appendChild(controls);
-        item.appendChild(status);
+        item.appendChild(fields);
         container.appendChild(item);
       });
     }
@@ -5839,10 +6408,12 @@
     function renderCorsProxySettingsUi() {
       renderPreferredProxySelect();
       renderCorsProxyList();
+      updateCorsProxyActionButtons();
       updateCorsProxyStatusFootnote();
     }
 
     function syncCorsProxySettingsUi() {
+      abortAllCorsProxyDraftTests();
       corsProxyDraft = copyCorsProxyList(CORS_PROXIES);
       preferredProxyDraft = getStoredPreferredProxyDraft();
       renderCorsProxySettingsUi();
@@ -5850,7 +6421,7 @@
 
     function addCorsProxyDraftRow() {
       if (!corsProxyDraft) corsProxyDraft = copyCorsProxyList(CORS_PROXIES);
-      corsProxyDraft.push({ url: '', encode: true, _test: null, _testAbort: null });
+      corsProxyDraft.push(createCorsProxyDraftEntry({ url: '', encode: true }));
       renderCorsProxySettingsUi();
       setTimeout(function() {
         var container = document.getElementById('corsProxyList');
@@ -5861,6 +6432,15 @@
     }
 
     function saveCorsProxyDraft() {
+      if (isTestingAllCorsProxies) return;
+
+      var summary = getCorsProxyDraftValidationSummary(true);
+      if (summary.hasInvalid) {
+        renderCorsProxySettingsUi();
+        showToast(summary.firstMessage || 'Fix invalid proxy URLs before saving.', 'error');
+        return;
+      }
+
       var preferredEntry = null;
       var nextPreferred = preferredProxyDraft || 'auto';
       if (nextPreferred !== 'auto') {
@@ -5913,7 +6493,7 @@
       return currentSettingsTab;
     }
 
-    function setActiveSettingsTab(tabId, persist) {
+    function setActiveSettingsTab(tabId, persist, focusTab) {
       var tabs = document.querySelectorAll('.settings-tab');
       var panels = document.querySelectorAll('.settings-panel');
       if (!tabs.length || !panels.length) return;
@@ -5929,10 +6509,14 @@
         var isActive = tab.getAttribute('data-tab') === nextTab;
         tab.classList.toggle('active', isActive);
         tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        if (isActive && focusTab) tab.focus();
       });
 
       panels.forEach(function(panel) {
-        panel.classList.toggle('active', panel.getAttribute('data-panel') === nextTab);
+        var isActive = panel.getAttribute('data-panel') === nextTab;
+        panel.classList.toggle('active', isActive);
+        panel.hidden = !isActive;
       });
 
       if (persist) {
@@ -5941,6 +6525,41 @@
         } catch (e) {
           // Ignore storage errors
         }
+      }
+    }
+
+    function activateSettingsTabByOffset(currentTab, offset) {
+      var tabs = Array.from(document.querySelectorAll('.settings-tab'));
+      if (!tabs.length) return;
+      var currentIndex = tabs.indexOf(currentTab);
+      if (currentIndex < 0) return;
+      var nextIndex = (currentIndex + offset + tabs.length) % tabs.length;
+      var nextTab = tabs[nextIndex];
+      if (!nextTab) return;
+      setActiveSettingsTab(nextTab.getAttribute('data-tab'), true, true);
+    }
+
+    function handleSettingsTabListKeydown(e) {
+      if (!e || !e.target || !e.target.classList || !e.target.classList.contains('settings-tab')) return;
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        activateSettingsTabByOffset(e.target, 1);
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        activateSettingsTabByOffset(e.target, -1);
+        return;
+      }
+
+      if (e.key === 'Home' || e.key === 'End') {
+        var tabs = Array.from(document.querySelectorAll('.settings-tab'));
+        if (!tabs.length) return;
+        e.preventDefault();
+        var nextTab = e.key === 'Home' ? tabs[0] : tabs[tabs.length - 1];
+        setActiveSettingsTab(nextTab.getAttribute('data-tab'), true, true);
       }
     }
 
@@ -5957,7 +6576,7 @@
       document.getElementById('settingSR1h').checked = chartSettings.showSR1h;
       document.getElementById('settingSR4h').checked = chartSettings.showSR4h;
       document.getElementById('settingSR1d').checked = chartSettings.showSR1d;
-      setActiveSettingsTab(getStoredSettingsTab(), false);
+      setActiveSettingsTab(getStoredSettingsTab(), false, true);
       syncChartStyleInputs();
       syncCorsProxySettingsUi();
     }
@@ -5965,6 +6584,7 @@
     function closeSettingsModal() {
       var modal = document.getElementById('settingsModal');
       modal.classList.remove('visible');
+      abortAllCorsProxyDraftTests();
     }
 
     function openAboutModal() {
@@ -6819,6 +7439,7 @@
         });
       }
       document.getElementById('copyAllBtn').addEventListener('click', copyWatchlist);
+      document.getElementById('shareScanBtn').addEventListener('click', handleShareScan);
       document.getElementById('downloadFooterBtn').addEventListener('click', downloadStandaloneHtml);
       document.getElementById('aboutBtn').addEventListener('click', openAboutModal);
       var themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -6854,9 +7475,13 @@
       document.querySelectorAll('.settings-tab').forEach(function(tab) {
         tab.addEventListener('click', function() {
           var tabId = this.getAttribute('data-tab');
-          setActiveSettingsTab(tabId, true);
+          setActiveSettingsTab(tabId, true, false);
         });
       });
+      var settingsTabList = document.getElementById('settingsTabList');
+      if (settingsTabList) {
+        settingsTabList.addEventListener('keydown', handleSettingsTabListKeydown);
+      }
 
       if (!storedTheme && window.matchMedia) {
         var themeMedia = window.matchMedia('(prefers-color-scheme: light)');
@@ -6905,6 +7530,10 @@
       if (addCorsProxyBtn) {
         addCorsProxyBtn.addEventListener('click', addCorsProxyDraftRow);
       }
+      var testAllCorsProxyBtn = document.getElementById('testAllCorsProxyBtn');
+      if (testAllCorsProxyBtn) {
+        testAllCorsProxyBtn.addEventListener('click', testAllCorsProxies);
+      }
       var saveCorsProxyBtn = document.getElementById('saveCorsProxyBtn');
       if (saveCorsProxyBtn) {
         saveCorsProxyBtn.addEventListener('click', saveCorsProxyDraft);
@@ -6912,6 +7541,7 @@
       var resetCorsProxyBtn = document.getElementById('resetCorsProxyBtn');
       if (resetCorsProxyBtn) {
         resetCorsProxyBtn.addEventListener('click', function() {
+          abortAllCorsProxyDraftTests();
           resetCorsProxiesToDefault();
           syncCorsProxySettingsUi();
           showToast('Proxy list reset');
@@ -6993,8 +7623,13 @@
         });
       }
 
+      var isScreenshotMode = window.location.search.indexOf('screenshot=1') !== -1;
+      if (!isScreenshotMode) {
+        applySharedFiltersFromQuery();
+      }
+
       // Screenshot helper (query param only, no effect on normal usage).
-      if (window.location.search.indexOf('screenshot=1') !== -1) {
+      if (isScreenshotMode) {
         chartSettings.enabled = true;
         chartSettings.timeframe = '1m';
         chartSettings.showSR15m = true;

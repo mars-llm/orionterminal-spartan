@@ -3,8 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "playwright test",
-    "test:smoke": "playwright test"
+    "test": "npm run test:e2e",
+    "test:e2e": "playwright test",
+    "test:e2e:live": "E2E_BASE_URL=https://mars-llm.github.io/orionterminal-spartan/ playwright test",
+    "test:release-gate": "npm run test:e2e && npm run test:e2e:live",
+    "test:smoke": "playwright test tests/smoke.spec.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

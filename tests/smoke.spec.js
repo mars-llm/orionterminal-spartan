@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 test('smoke: core UI loads and actions are visible', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
 
   await expect(page.locator('h1')).toHaveText('Spartan Orion Screener');
   await expect(page.locator('#scanBtn')).toBeVisible();
@@ -45,7 +45,7 @@ test('smoke: core UI loads and actions are visible', async ({ page }) => {
 });
 
 test('highlights: top candidates show badges in results and chart modal', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
 
   const topSymbols = await page.evaluate(() => {
     latestBtcChange24h = 2.25;
@@ -135,4 +135,39 @@ test('highlights: top candidates show badges in results and chart modal', async 
   await page.locator('#chartPreviewCandidateBadge').hover();
   await expect(page.locator('#chartPreviewCandidateTooltip')).toBeVisible();
   await expect(page.locator('#chartPreviewCandidateTooltip .candidate-tooltip-title')).toBeVisible();
+});
+
+test('live deployment: scan market yields results or graceful error', async ({ page }) => {
+  test.skip(!process.env.E2E_BASE_URL, 'Live deployment gate only');
+
+  await page.goto('./');
+  await page.click('#scanBtn');
+
+  let outcome = 'pending';
+  await expect.poll(async () => {
+    const cards = await page.locator('#resultsList .pick-card').count();
+    if (cards > 0) {
+      outcome = 'results';
+      return outcome;
+    }
+
+    const scanDisabled = await page.locator('#scanBtn').isDisabled();
+    const toastText = ((await page.locator('#toast').textContent()) || '').trim();
+    const errorVisible = await page.locator('#error').isVisible();
+    const errorText = errorVisible ? (((await page.locator('#errorText').textContent()) || '').trim()) : '';
+    if (!scanDisabled && (toastText.length > 0 || errorText.length > 0)) {
+      outcome = 'graceful-error';
+      return outcome;
+    }
+    outcome = 'pending';
+    return outcome;
+  }, { timeout: 60000, intervals: [500, 1000, 1500] }).not.toBe('pending');
+
+  expect(['results', 'graceful-error']).toContain(outcome);
+
+  if (outcome === 'graceful-error') {
+    const toastText = ((await page.locator('#toast').textContent()) || '').trim();
+    const errorText = ((await page.locator('#errorText').textContent()) || '').trim();
+    expect(toastText.length > 0 || errorText.length > 0).toBeTruthy();
+  }
 });
