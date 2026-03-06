@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage.fixture');
 
 function toBase64UrlJson(value) {
   return Buffer.from(JSON.stringify(value), 'utf8')
@@ -235,6 +235,38 @@ test('social card: invalid payload shows friendly error state', async ({ page })
   await expect(page.locator('#socialCardModal')).toBeVisible();
   await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('Unable to load social card payload');
+});
+
+test('social card: oversized payload shows explicit too-large state', async ({ page }) => {
+  const oversized = 'a'.repeat(9101);
+
+  await page.goto('./?view=social-card&card=' + oversized);
+
+  await expect(page.locator('body')).toHaveClass(/social-card-only/);
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('payload is too large');
+});
+
+test('social card: malformed v2 compact arrays fall back to filters safely', async ({ page }) => {
+  const payload = toBase64UrlJson({
+    v: 2,
+    t: 's',
+    c: Math.floor(Date.now() / 1000),
+    m: 0,
+    f: 'bad-filters',
+    h: [3, 'bad-entry'],
+  });
+
+  await page.goto('./?view=social-card&card=' + encodeURIComponent(payload));
+
+  await expect(page.locator('body')).toHaveClass(/social-card-only/);
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#socialCardRoot .social-card-error')).toHaveCount(0);
+  await expect(page.locator('#socialCardRoot .social-card-surface')).toHaveCount(1);
+  await expect(page.locator('#socialCardRoot .social-card-entry')).toHaveCount(0);
+  await expect(page.locator('#socialCardRoot .social-card-footer')).toContainText('Filter-focused card');
 });
 
 test('social card: expired v2 payload shows hard-block expired state', async ({ page }) => {

@@ -1,96 +1,73 @@
 # Spartan Orion Screener
 
-A single-file market scanner for Binance USDT‑M futures. Finds high-activity setups, highlights the best candidates, and shows instant chart previews with auto S/R levels.
+Single-file market scanner for Binance USDT-M futures. It pulls Orion Terminal setups, ranks the strongest candidates, shows instant chart previews, and shares compact social cards without any signup or API keys.
+
+**[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/index.html) · [GitHub](https://github.com/mars-llm/orionterminal-spartan)
 
 ![Spartan Orion Screener](screenshot.png)
 
-**[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/index.html)
+## What You Get
 
-**Socials:** [X (@marsmensch)](https://x.com/marsmensch) · [GitHub](https://github.com/mars-llm)
-
----
-
-## UI Preview
-
-<table>
-  <tr>
-    <td><img src="screenshot.png" alt="Desktop dark mode overview" width="460"></td>
-    <td><img src="screenshot-light.png" alt="Desktop light mode expanded chart" width="460"></td>
-  </tr>
-</table>
-
-## Features
-
-- **One-click scan** — no signup, no API keys, no install
-- **Top candidates** — pins **Top 1–3** with a score badge + metric breakdown (hover/tap)
-- **Instant chart previews** — hover any row to see a 1m chart
-- **Expanded chart view** — VolUSD histogram, MA, and S/R overlays
-- **Futures extras** — funding rate + open interest in the chart header (prefetch for Top 1–3; on-hover for others)
-- **BTC Δ signal** — asset 24h % minus BTC 24h %
-- **Auto S/R levels** — 15m, 1h, 4h, and 1d candle high/low
-- **Filter presets** — Default, High Volume Majors, Low Cap Gems, Scalping
-- **Style controls** — customize chart colors and overlays
-- **Social card sharing** — share visual snapshots of top setups or active filters
-- **PWA support** — install as an app on desktop or mobile
-- **Downloadable HTML** — run locally, with live data when connected
+- One-click scans with ranked `Top 1-3` candidates and metric tooltips
+- Instant chart previews plus a larger modal with S/R overlays, MA, volume, funding, and open interest
+- Built-in presets for majors, low caps, scalping, and the default mid-cap flow
+- Settings for chart appearance, display behavior, and CORS/proxy management
+- Social-card-only sharing for either the current top setups or the active filter state
+- PWA install support and a downloadable `index.html` for local use
 
 ## Quick Start
 
-1. Open the [live app](https://mars-llm.github.io/orionterminal-spartan/) or download `index.html`
-2. Click **Scan Market**
-3. Hover rows to preview charts (use **Expand** for the full modal)
-4. Hover/tap the **Top** badge to see why it ranked
-5. Use **Share Social Card** from the top controls
+1. Open the [live app](https://mars-llm.github.io/orionterminal-spartan/) or download `index.html`.
+2. Click **Scan Market**.
+3. Hover a result row for the chart preview, or expand it for the full modal.
+4. Use **Share Social Card** to create a visual share link.
 
-Live data needs an internet connection. If opening `index.html` directly causes scan requests to fail, serve it locally (for example: `python3 -m http.server`) and open `http://localhost:8000`.
+If direct requests fail when opening `index.html` from `file://`, serve the folder locally and open it in the browser:
+
+```bash
+python3 -m http.server 8000
+```
+
+Install as an app from Chrome/Edge via the install icon, or from iOS Safari via **Share -> Add to Home Screen**.
 
 ## Sharing
 
-- **Share Social Card** creates a visual card:
-  - If results exist, card type is **setup** (top candidates + metrics).
-  - If no results exist, card type is **filters** (threshold snapshot).
-- Social copy is optimized for engagement:
-  - X intent uses concise hook + proof + CTA text.
-  - Facebook share uses URL + generated caption (`quote`) while keeping the link-first flow.
-- Query params:
-  - `?card=<payload>` opens card payload in-app.
-  - `?view=social-card&card=<payload>` renders clean card-only view.
-- Payload schema:
-  - **Current (`v=2`)** uses compact fields + compact numeric encoding to reduce URL length.
-  - **Legacy (`v=1`)** links still decode for backward compatibility.
-  - Card content still includes metadata, filter context, and optional setup summary (top entries + score/metrics).
-- Lifetime policy:
-  - cards expire **3 days** after `createdAt`
-  - expired cards are hard-blocked with an explicit **Card expired** state
-  - no backend storage is used; all card data is embedded in the URL payload
-
-## Filter Presets
-
-| Preset | Focus |
-|--------|-------|
-| **Default** | Mid-cap alts with high activity |
-| **High Volume Majors** | Large caps, lower volatility threshold |
-| **Low Cap Gems** | Small caps under $10M volume |
-| **Scalping** | High tick count for quick entries |
-
-## Install as App
-
-- **Chrome/Edge** — click the install icon in the address bar
-- **iOS Safari** — Share → Add to Home Screen
-
-## Data Sources
-
-- [Orion Terminal](https://orionterminal.com) — screener data
-- [Binance Futures](https://www.binance.com) — chart candles + futures extras (funding/open interest)
-- Spot / fallback chart sources — Binance Vision, Coinbase, Kraken (when needed)
-- Public CORS proxies — used when direct API access is blocked (for example `file://` or GitHub Pages). You can review and customize the proxy list in Settings → Network.
-- [Lightweight Charts](https://tradingview.github.io/lightweight-charts/) — charting library
+- Sharing is social-card-only. Setup-link sharing is intentionally not part of the product anymore.
+- If results exist, the card captures the top setups. If results are empty, it captures the active filter thresholds.
+- Supported URLs are `?card=<payload>` and `?view=social-card&card=<payload>`.
+- New links use compact `v2` payloads. Legacy `v1` payloads still decode.
+- Cards expire after 3 days and expired cards are explicitly blocked.
+- There is no backend storage; the full card payload lives in the URL.
 
 ## Development
 
-- `npm install`
-- `npm test` (Playwright)
+This is a single-file-first frontend app centered on `index.html`.
 
----
+```bash
+npm install
+npm run sync:build-meta
+npm test
+```
+
+Useful commands:
+
+- `npm run test:e2e` runs the local Playwright suite.
+- `npm run test:e2e:live` runs the live GitHub Pages gate.
+- `npm run test:coverage` writes browser coverage summaries to `coverage/`.
+- `npm run test:social-card` focuses on social-card regressions.
+
+## Deployment Verification
+
+- `npm run sync:build-meta` generates `build-meta.json`.
+- The app exposes build metadata in the footer, on the root HTML element, and through `window.__ORION_BUILD_INFO__`.
+- Runtime checks can verify `data-app-build`, `data-build-date`, `data-card-payload-version`, `data-service-worker-cache`, `data-runtime-channel`, and `data-build-source`.
+
+## Data Sources
+
+- [Orion Terminal](https://orionterminal.com) for screener data
+- [Binance Futures](https://www.binance.com) for candles, funding, and open interest
+- Binance Vision, Coinbase, and Kraken as chart fallbacks when needed
+- Public CORS proxies when direct Orion access is blocked
+- [Lightweight Charts](https://tradingview.github.io/lightweight-charts/) for chart rendering
 
 MIT License

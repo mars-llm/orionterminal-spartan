@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage.fixture');
 
 test('smoke: core UI loads and actions are visible', async ({ page }) => {
   await page.goto('./');
@@ -47,6 +47,51 @@ test('smoke: core UI loads and actions are visible', async ({ page }) => {
   const visibleButtons = page.locator('.actions .action-btn:not(.mobile-chart-btn)');
   await expect(visibleButtons).toHaveCount(2);
   await expect(visibleButtons.first()).toBeVisible();
+});
+
+test('build marker: exposes deploy metadata in DOM and runtime', async ({ page }) => {
+  await page.goto('./');
+
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__ORION_BUILD_INFO__ && window.__ORION_BUILD_INFO__.source);
+  }).toBe('build-meta.json');
+
+  const buildInfo = await page.evaluate(async () => {
+    const response = await fetch('build-meta.json', { cache: 'no-store' });
+    const buildMeta = await response.json();
+    return {
+      runtime: window.__ORION_BUILD_INFO__,
+      file: buildMeta,
+    };
+  });
+  expect(buildInfo.runtime).toBeTruthy();
+  expect(buildInfo.runtime.commit).toBe(buildInfo.file.commit);
+  expect(buildInfo.runtime.date).toBe(buildInfo.file.date);
+  expect(buildInfo.runtime.cardPayloadVersion).toBe(buildInfo.file.cardPayloadVersion);
+  expect(buildInfo.runtime.serviceWorkerCache).toBe(buildInfo.file.serviceWorkerCache);
+  expect(buildInfo.runtime.commit).toMatch(/^[0-9a-f]{7,40}$/);
+  expect(buildInfo.runtime.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  expect(buildInfo.runtime.cardPayloadVersion).toBe(2);
+  expect(buildInfo.runtime.serviceWorkerCache).toMatch(/^v\d+$/);
+  expect(['file', 'github-pages', 'local', 'custom']).toContain(buildInfo.runtime.runtimeChannel);
+
+  await expect(page.locator('#appBuildMeta')).toContainText(buildInfo.runtime.commit);
+  await expect(page.locator('#appBuildMeta')).toContainText('card v' + buildInfo.runtime.cardPayloadVersion);
+  await expect(page.locator('html')).toHaveAttribute('data-app-build', buildInfo.runtime.commit);
+  await expect(page.locator('html')).toHaveAttribute('data-build-date', buildInfo.runtime.date);
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-card-payload-version',
+    String(buildInfo.runtime.cardPayloadVersion)
+  );
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-service-worker-cache',
+    buildInfo.runtime.serviceWorkerCache
+  );
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-runtime-channel',
+    buildInfo.runtime.runtimeChannel
+  );
+  await expect(page.locator('html')).toHaveAttribute('data-build-source', 'build-meta.json');
 });
 
 test('highlights: top candidates show badges in results and chart modal', async ({ page }) => {

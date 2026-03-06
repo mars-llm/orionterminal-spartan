@@ -2481,6 +2481,15 @@
       flex-wrap: wrap;
     }
 
+    .build-meta {
+      margin-top: 0.75rem;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
     .btn-small {
       padding: 0.4rem 0.75rem;
       font-size: 0.75rem;
@@ -3305,6 +3314,7 @@
       <p style="margin-top: 0.375rem;">
         Please use responsibly.
       </p>
+      <p class="build-meta" id="appBuildMeta" aria-label="Build marker"></p>
       <div class="footer-actions">
         <button class="btn-secondary" id="installPwaBtn" style="display: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3827,6 +3837,7 @@
         });
       }
       CORS_PROXIES = sanitized;
+      pruneStoredProxyHealthState();
       if (persist) {
         try {
           localStorage.setItem(CORS_PROXIES_STORAGE_KEY, JSON.stringify(CORS_PROXIES));
@@ -3863,7 +3874,10 @@
     const CHART_STYLE_STORAGE_KEY = 'orion-screener-chart-style';
     const DIRECT_API_STATUS_KEY = 'orion-screener-direct-api-status';
     const PROXY_STATUS_KEY = 'orion-screener-proxy-index';
+    const PROXY_HEALTH_STORAGE_KEY = 'orion-screener-proxy-health-v1';
     const DIRECT_API_BLOCK_TTL = 12 * 60 * 60 * 1000;
+    const PROXY_FAILURE_COOLDOWN_BASE_MS = 15000;
+    const PROXY_FAILURE_COOLDOWN_MAX_MS = 5 * 60 * 1000;
     const SCAN_RETRY_BASE_DELAY_MS = 1500;
     const SCAN_RETRY_MAX_DELAY_MS = 10000;
     const SCAN_TIMEOUT_MS = 15000;
@@ -3876,10 +3890,105 @@
     const CARD_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
     const CARD_SHARE_X_TEXT_MAX = 220;
     const EVENT_COUNTS_STORAGE_KEY = 'orion-screener-event-counts-v1';
+    const APP_BUILD_META_URL = 'build-meta.json';
     window.__ORION_SOCIAL_CARD_READY__ = false;
+    window.__ORION_BUILD_INFO__ = null;
 
     function isGithubPages() {
       return window.location.hostname.endsWith('github.io');
+    }
+
+    function getAppRuntimeChannel() {
+      if (window.location.protocol === 'file:') return 'file';
+      if (isGithubPages()) return 'github-pages';
+      if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        return 'local';
+      }
+      return 'custom';
+    }
+
+    function getFallbackBuildDate() {
+      var parsed = Date.parse(document.lastModified || '');
+      if (!Number.isFinite(parsed)) return '';
+      return new Date(parsed).toISOString().slice(0, 10);
+    }
+
+    function getAppBuildInfo(buildMeta) {
+      var raw = buildMeta && typeof buildMeta === 'object' ? buildMeta : {};
+      var commit = raw.commit ? String(raw.commit).trim() : '';
+      var date = raw.date ? String(raw.date).trim() : '';
+      var cardPayloadVersion = parseInt(raw.cardPayloadVersion, 10);
+      var serviceWorkerCache = raw.serviceWorkerCache ? String(raw.serviceWorkerCache).trim() : '';
+      var buildSource = raw.source ? String(raw.source).trim() : 'fallback';
+
+      if (!commit) {
+        commit = window.location.protocol === 'file:' ? 'local-file' : 'unknown';
+      }
+      if (!date) {
+        date = getFallbackBuildDate();
+      }
+      if (!Number.isFinite(cardPayloadVersion) || cardPayloadVersion <= 0) {
+        cardPayloadVersion = CARD_PAYLOAD_VERSION;
+      }
+      if (!serviceWorkerCache) {
+        serviceWorkerCache = 'unavailable';
+      }
+
+      return {
+        commit: commit,
+        date: date,
+        cardPayloadVersion: cardPayloadVersion,
+        serviceWorkerCache: serviceWorkerCache,
+        runtimeChannel: getAppRuntimeChannel(),
+        source: buildSource,
+      };
+    }
+
+    function getAppBuildStamp(buildInfo) {
+      var info = buildInfo || getAppBuildInfo();
+      return info.commit + ' · card v' + info.cardPayloadVersion + ' · sw ' + info.serviceWorkerCache;
+    }
+
+    function renderBuildMeta(buildMeta) {
+      var info = getAppBuildInfo(buildMeta);
+      var buildStamp = getAppBuildStamp(info);
+      window.__ORION_BUILD_INFO__ = info;
+
+      document.documentElement.setAttribute('data-app-build', info.commit);
+      document.documentElement.setAttribute('data-build-date', info.date);
+      document.documentElement.setAttribute('data-card-payload-version', String(info.cardPayloadVersion));
+      document.documentElement.setAttribute('data-service-worker-cache', info.serviceWorkerCache);
+      document.documentElement.setAttribute('data-runtime-channel', info.runtimeChannel);
+      document.documentElement.setAttribute('data-build-source', info.source);
+
+      var buildMetaEl = document.getElementById('appBuildMeta');
+      if (!buildMetaEl) return;
+      buildMetaEl.textContent = 'Build ' + buildStamp + ' · ' + info.runtimeChannel + (info.date ? ' · ' + info.date : '');
+      buildMetaEl.title = info.date
+        ? 'Commit ' + info.commit + ' deployed on ' + info.date + ' (' + info.runtimeChannel + ')'
+        : 'Build ' + buildStamp + ' (' + info.runtimeChannel + ')';
+    }
+
+    async function loadAppBuildMeta() {
+      if (window.location.protocol === 'file:') {
+        renderBuildMeta({ source: 'fallback' });
+        return window.__ORION_BUILD_INFO__;
+      }
+
+      try {
+        var response = await fetch(APP_BUILD_META_URL, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status);
+        }
+        var payload = await response.json();
+        payload.source = APP_BUILD_META_URL;
+        renderBuildMeta(payload);
+      } catch (e) {
+        console.warn('Build metadata load failed:', e);
+        renderBuildMeta({ source: 'fallback' });
+      }
+
+      return window.__ORION_BUILD_INFO__;
     }
 
     function isDirectApiBlocked() {
@@ -3936,6 +4045,159 @@
       } catch (e) {
         // Ignore storage errors
       }
+    }
+
+    function getProxyHealthKey(proxy) {
+      var normalized = normalizeCorsProxyEntry(proxy);
+      if (!normalized) return '';
+      return normalized.url + '|' + (normalized.encode ? '1' : '0');
+    }
+
+    function sanitizeProxyHealthEntry(entry) {
+      var source = entry && typeof entry === 'object' ? entry : {};
+      var failureStreak = parseInt(source.failureStreak, 10);
+      var cooldownUntil = parseInt(source.cooldownUntil, 10);
+      var lastSuccessAt = parseInt(source.lastSuccessAt, 10);
+      var lastFailureAt = parseInt(source.lastFailureAt, 10);
+      var lastLatencyMs = parseInt(source.lastLatencyMs, 10);
+      return {
+        failureStreak: Number.isFinite(failureStreak) ? Math.max(0, failureStreak) : 0,
+        cooldownUntil: Number.isFinite(cooldownUntil) ? Math.max(0, cooldownUntil) : 0,
+        lastSuccessAt: Number.isFinite(lastSuccessAt) ? Math.max(0, lastSuccessAt) : 0,
+        lastFailureAt: Number.isFinite(lastFailureAt) ? Math.max(0, lastFailureAt) : 0,
+        lastLatencyMs: Number.isFinite(lastLatencyMs) ? Math.max(0, lastLatencyMs) : 0,
+      };
+    }
+
+    function pruneProxyHealthState(state) {
+      var allowedKeys = {};
+      CORS_PROXIES.forEach(function(proxy) {
+        var key = getProxyHealthKey(proxy);
+        if (key) allowedKeys[key] = true;
+      });
+
+      var next = {};
+      Object.keys(state && typeof state === 'object' ? state : {}).forEach(function(key) {
+        if (!allowedKeys[key]) return;
+        next[key] = sanitizeProxyHealthEntry(state[key]);
+      });
+      return next;
+    }
+
+    function readProxyHealthState() {
+      try {
+        var raw = sessionStorage.getItem(PROXY_HEALTH_STORAGE_KEY);
+        var parsed = raw ? JSON.parse(raw) : {};
+        return pruneProxyHealthState(parsed);
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function writeProxyHealthState(state) {
+      var next = pruneProxyHealthState(state);
+      try {
+        if (!Object.keys(next).length) {
+          sessionStorage.removeItem(PROXY_HEALTH_STORAGE_KEY);
+          return;
+        }
+        sessionStorage.setItem(PROXY_HEALTH_STORAGE_KEY, JSON.stringify(next));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function pruneStoredProxyHealthState() {
+      writeProxyHealthState(readProxyHealthState());
+    }
+
+    function getProxyHealth(index) {
+      if (!Number.isFinite(index) || index < 0 || index >= CORS_PROXIES.length) {
+        return sanitizeProxyHealthEntry(null);
+      }
+      var key = getProxyHealthKey(CORS_PROXIES[index]);
+      if (!key) return sanitizeProxyHealthEntry(null);
+      var state = readProxyHealthState();
+      return sanitizeProxyHealthEntry(state[key]);
+    }
+
+    function recordProxyHealthSuccess(index, latencyMs) {
+      if (!Number.isFinite(index) || index < 0 || index >= CORS_PROXIES.length) return;
+      var key = getProxyHealthKey(CORS_PROXIES[index]);
+      if (!key) return;
+      var state = readProxyHealthState();
+      var now = Date.now();
+      state[key] = {
+        failureStreak: 0,
+        cooldownUntil: 0,
+        lastSuccessAt: now,
+        lastFailureAt: 0,
+        lastLatencyMs: Number.isFinite(latencyMs) ? Math.max(0, Math.round(latencyMs)) : 0,
+      };
+      writeProxyHealthState(state);
+    }
+
+    function recordProxyHealthFailure(index) {
+      if (!Number.isFinite(index) || index < 0 || index >= CORS_PROXIES.length) return;
+      var key = getProxyHealthKey(CORS_PROXIES[index]);
+      if (!key) return;
+
+      var state = readProxyHealthState();
+      var prev = sanitizeProxyHealthEntry(state[key]);
+      var now = Date.now();
+      var nextFailureStreak = Math.min(prev.failureStreak + 1, 8);
+      var cooldown = Math.min(
+        PROXY_FAILURE_COOLDOWN_BASE_MS * Math.pow(2, Math.max(0, nextFailureStreak - 1)),
+        PROXY_FAILURE_COOLDOWN_MAX_MS
+      );
+
+      state[key] = {
+        failureStreak: nextFailureStreak,
+        cooldownUntil: now + cooldown,
+        lastSuccessAt: prev.lastSuccessAt,
+        lastFailureAt: now,
+        lastLatencyMs: prev.lastLatencyMs,
+      };
+      writeProxyHealthState(state);
+    }
+
+    function getRankedProxyIndexes(startIndex) {
+      var base = [];
+      if (!CORS_PROXIES.length) return base;
+
+      var normalizedStart = Number.isFinite(startIndex) && startIndex >= 0
+        ? startIndex % CORS_PROXIES.length
+        : 0;
+
+      for (var offset = 0; offset < CORS_PROXIES.length; offset += 1) {
+        base.push((normalizedStart + offset) % CORS_PROXIES.length);
+      }
+
+      var basePosition = {};
+      base.forEach(function(index, order) {
+        basePosition[index] = order;
+      });
+
+      var now = Date.now();
+      return base.slice().sort(function(a, b) {
+        var aHealth = getProxyHealth(a);
+        var bHealth = getProxyHealth(b);
+        var aCoolingDown = aHealth.cooldownUntil > now ? 1 : 0;
+        var bCoolingDown = bHealth.cooldownUntil > now ? 1 : 0;
+        if (aCoolingDown !== bCoolingDown) return aCoolingDown - bCoolingDown;
+        if (aHealth.failureStreak !== bHealth.failureStreak) {
+          return aHealth.failureStreak - bHealth.failureStreak;
+        }
+        if (aHealth.lastSuccessAt !== bHealth.lastSuccessAt) {
+          return bHealth.lastSuccessAt - aHealth.lastSuccessAt;
+        }
+        if (aHealth.lastLatencyMs !== bHealth.lastLatencyMs) {
+          if (!aHealth.lastLatencyMs) return 1;
+          if (!bHealth.lastLatencyMs) return -1;
+          return aHealth.lastLatencyMs - bHealth.lastLatencyMs;
+        }
+        return basePosition[a] - basePosition[b];
+      });
     }
 
     // Try direct first (works if served from localhost), then fall back to proxies
@@ -4994,8 +5256,9 @@
 
     async function fetchWithProxy(proxyIndex) {
       var startIndex = Number.isFinite(proxyIndex) ? proxyIndex : 0;
-      for (var offset = 0; offset < CORS_PROXIES.length; offset += 1) {
-        var index = (startIndex + offset) % CORS_PROXIES.length;
+      var rankedIndexes = getRankedProxyIndexes(startIndex);
+      for (var offset = 0; offset < rankedIndexes.length; offset += 1) {
+        var index = rankedIndexes[offset];
         const url = getApiUrl(index);
         if (!url) continue;
 
@@ -5003,11 +5266,14 @@
         console.log('Trying proxy: ' + proxyName);
 
         try {
+          const startedAt = Date.now();
           const data = await fetchJsonWithTimeout(url);
+          recordProxyHealthSuccess(index, Date.now() - startedAt);
           console.log('Success via ' + proxyName);
           setPreferredProxyIndex(index);
           return data;
         } catch (err) {
+          recordProxyHealthFailure(index);
           console.warn('Proxy failed: ' + proxyName + ' (' + err.message + ')');
         }
       }
@@ -7119,6 +7385,7 @@
         isCustom = false;
       }
       statusParts.push('Active list: ' + (isCustom ? 'custom' : 'default') + ' (' + CORS_PROXIES.length + ').');
+      statusParts.push('Runtime health memory deprioritizes failing proxies for this tab.');
       statusParts.push(summary.hasInvalid
         ? 'Resolve highlighted URL errors before saving.'
         : 'Run Test or Test All before Save.'
@@ -7509,6 +7776,7 @@
       }
 
       applyCorsProxies(corsProxyDraft, true);
+      pruneStoredProxyHealthState();
 
       var list = CORS_PROXIES;
       if (nextPreferred === 'auto') {
@@ -8455,6 +8723,8 @@
       var storedTheme = getStoredTheme();
       applyTheme(storedTheme || getPreferredTheme(), false);
       loadChartStyleOverrides();
+      renderBuildMeta({ source: 'fallback' });
+      loadAppBuildMeta();
 
       renderProfiles();
       updateFilterInputs();
@@ -8738,7 +9008,20 @@
       });
 
       if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
-        navigator.serviceWorker.register('service-worker.js').catch(function(err) {
+        var hadServiceWorkerController = !!navigator.serviceWorker.controller;
+        var serviceWorkerRefreshing = false;
+
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          if (!hadServiceWorkerController || serviceWorkerRefreshing) return;
+          serviceWorkerRefreshing = true;
+          window.location.reload();
+        });
+
+        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+          return registration.update().catch(function(err) {
+            console.warn('Service worker update check failed:', err);
+          });
+        }).catch(function(err) {
           console.warn('Service worker registration failed:', err);
         });
       }

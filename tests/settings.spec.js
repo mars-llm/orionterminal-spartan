@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage.fixture');
 const isLiveBase = !!process.env.E2E_BASE_URL;
 
 async function openSettingsTab(page, tab) {
@@ -202,6 +202,74 @@ test('network: test all runs sequentially and reports aggregate result', async (
   await expect(goodRow.locator('.proxy-test-status')).toContainText('Passed · 1 tickers ·');
   await expect(badRow.locator('.proxy-test-status')).toContainText('Failed · HTTP 502');
   await expect(page.locator('#toast')).toContainText('1/2 proxies passed');
+});
+
+test('network: runtime proxy health demotes recent failures during the same session', async ({ page }) => {
+  await page.goto('./');
+
+  const result = await page.evaluate(async () => {
+    applyCorsProxies([
+      { url: 'https://proxy-a.example/?url=', encode: true },
+      { url: 'https://proxy-b.example/?url=', encode: true },
+      { url: 'https://proxy-c.example/?url=', encode: true },
+    ], false);
+
+    try {
+      localStorage.removeItem(PROXY_STATUS_KEY);
+      sessionStorage.removeItem(PROXY_HEALTH_STORAGE_KEY);
+    } catch (e) {
+      // Ignore storage errors in test setup.
+    }
+
+    const originalFetch = window.fetch;
+    const sequences = [];
+    let currentSequence = [];
+
+    window.fetch = async (url) => {
+      const target = String(url);
+      currentSequence.push(target);
+      if (target.includes('proxy-a.example')) {
+        throw new Error('HTTP 502');
+      }
+      return {
+        ok: true,
+        json: async () => ({ tickers: [] }),
+      };
+    };
+
+    try {
+      await fetchWithProxy(0);
+      sequences.push(currentSequence.slice());
+      currentSequence = [];
+
+      await fetchWithProxy(0);
+      sequences.push(currentSequence.slice());
+
+      return {
+        sequences,
+        preferred: getPreferredProxyIndex(),
+        healthA: getProxyHealth(0),
+        healthB: getProxyHealth(1),
+      };
+    } finally {
+      window.fetch = originalFetch;
+      try {
+        sessionStorage.removeItem(PROXY_HEALTH_STORAGE_KEY);
+        localStorage.removeItem(PROXY_STATUS_KEY);
+      } catch (e) {
+        // Ignore storage cleanup errors.
+      }
+    }
+  });
+
+  expect(result.sequences).toHaveLength(2);
+  expect(result.sequences[0][0]).toContain('proxy-a.example');
+  expect(result.sequences[0][1]).toContain('proxy-b.example');
+  expect(result.sequences[1][0]).toContain('proxy-b.example');
+  expect(result.preferred).toBe(1);
+  expect(result.healthA.failureStreak).toBeGreaterThan(0);
+  expect(result.healthB.failureStreak).toBe(0);
+  expect(result.healthB.lastSuccessAt).toBeGreaterThan(0);
 });
 
 test('network: save and reopen preserves proxy draft + preferred proxy', async ({ page }) => {

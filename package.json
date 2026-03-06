@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "npm run test:e2e",
-    "test:e2e": "playwright test",
-    "test:e2e:live": "E2E_BASE_URL=https://mars-llm.github.io/orionterminal-spartan/ playwright test",
-    "test:release-gate": "npm run test:e2e && npm run test:e2e:live",
-    "test:smoke": "playwright test tests/smoke.spec.js",
-    "test:social-card": "playwright test tests/social-card.spec.js"
+    "sync:build-meta": "node scripts/sync-build-meta.mjs",
+    "test": "npm run test:e2e && npm run test:coverage",
+    "test:e2e": "npm run sync:build-meta && playwright test",
+    "test:e2e:live": "npm run sync:build-meta && E2E_BASE_URL=https://mars-llm.github.io/orionterminal-spartan/ playwright test",
+    "test:release-gate": "npm test && npm run test:e2e:live",
+    "test:smoke": "npm run sync:build-meta && playwright test tests/smoke.spec.js",
+    "test:social-card": "npm run sync:build-meta && playwright test tests/social-card.spec.js",
+    "test:coverage": "npm run sync:build-meta && node scripts/run-coverage.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

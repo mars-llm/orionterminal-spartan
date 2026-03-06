@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage.fixture');
 
 function toBase64UrlJson(value) {
   return Buffer.from(JSON.stringify(value), 'utf8')
@@ -113,4 +113,44 @@ test('share: legacy ?share query is ignored safely', async ({ page }) => {
   await expect(page.locator('#resultsContainer')).toBeHidden();
   await expect(page.locator('#minVolume')).toHaveValue('500000');
   await expect(page.locator('#maxResults')).toHaveValue('10');
+});
+
+test('share: card query still wins when a legacy share param is also present', async ({ page }) => {
+  await page.goto('./');
+
+  const cardPayload = await page.evaluate(() => encodeCardPayload({
+    type: 'filters',
+    createdAt: new Date().toISOString(),
+    theme: 'dark',
+    title: 'Priority card payload',
+    filters: {
+      minVolume: 2100000,
+      maxVolume: null,
+      minVolatility15m: 0.22,
+      minTicks5m: 320,
+      maxResults: 6,
+      excludeSymbols: ['BTC'],
+    },
+  }));
+
+  const legacyShare = toBase64UrlJson({
+    v: 1,
+    filters: {
+      minVolume: 1500000,
+      maxVolume: 3000000,
+      minVolatility15m: 0.25,
+      minTicks5m: 350,
+      maxResults: 5,
+      excludeSymbols: ['ETH'],
+    },
+  });
+
+  await page.goto(
+    './?view=social-card&share=' + encodeURIComponent(legacyShare) + '&card=' + encodeURIComponent(cardPayload)
+  );
+
+  await expect(page.locator('body')).toHaveClass(/social-card-only/);
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#socialCardRoot .social-card-title')).toContainText('Priority card payload');
 });
