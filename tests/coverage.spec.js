@@ -126,6 +126,12 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
 
     let chartResult;
     let extrasResult;
+    let invalidProfileCreate = null;
+    let validProfileCreate = null;
+    let profileCountAfterCreate = 0;
+    let profileCountAfterDelete = 0;
+    let proxyStatusText = '';
+    let storedProxiesAfterReset = 'missing';
     try {
       applyCorsProxies([
         { url: 'https://proxy-a.example/?url=', encode: true },
@@ -142,6 +148,20 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
       extrasResult = await getFuturesExtras('ALPHA/USDT');
       await fetchWithProxy(0);
       updateCorsProxyStatusFootnote();
+      markDirectApiBlocked();
+      localStorage.setItem(CORS_PROXIES_STORAGE_KEY, JSON.stringify([
+        { url: 'https://proxy-c.example/?url=', encode: true },
+      ]));
+      resetCorsProxiesToDefault();
+      updateCorsProxyStatusFootnote();
+      proxyStatusText = document.getElementById('corsProxyStatus')?.textContent || '';
+      storedProxiesAfterReset = localStorage.getItem(CORS_PROXIES_STORAGE_KEY);
+      clearDirectApiBlocked();
+      invalidProfileCreate = createCustomProfile('   ');
+      validProfileCreate = createCustomProfile('Coverage custom preset');
+      profileCountAfterCreate = getAllProfiles().length;
+      deleteCustomProfile(activeProfileId);
+      profileCountAfterDelete = getAllProfiles().length;
       prefetchHoverExtras('ALPHA/USDT');
       prefetchTopCandidateExtras();
       abortExtrasPrefetch();
@@ -180,6 +200,12 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
       unsupportedMessage,
       missingMessage,
       invalidMessage,
+      invalidProfileCreate,
+      validProfileCreate,
+      profileCountAfterCreate,
+      profileCountAfterDelete,
+      proxyStatusText,
+      storedProxiesAfterReset,
       buildStamp: getAppBuildStamp(window.__ORION_BUILD_INFO__),
       runtimeSource: window.__ORION_BUILD_INFO__ && window.__ORION_BUILD_INFO__.source,
     };
@@ -195,6 +221,13 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
   expect(result.unsupportedMessage).toContain('not supported');
   expect(result.missingMessage).toContain('No social card payload');
   expect(result.invalidMessage).toContain('Unable to load social card payload');
+  expect(result.invalidProfileCreate).toBe(false);
+  expect(result.validProfileCreate).toBe(true);
+  expect(result.profileCountAfterCreate).toBe(5);
+  expect(result.profileCountAfterDelete).toBe(4);
+  expect(result.proxyStatusText).toContain('Direct Orion API access is blocked here');
+  expect(result.proxyStatusText).toContain('Active list: default');
+  expect(result.storedProxiesAfterReset).toBe(null);
   expect(result.buildStamp).toContain('card v2');
   expect(['build-meta.json', 'fallback']).toContain(result.runtimeSource);
 });
