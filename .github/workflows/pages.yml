@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - README.md
+      - ROADMAP.md
+      - NEXT_CHAT_HANDOFF.md
+      - LICENSE
+      - screenshot.png
+      - screenshot-light.png
   workflow_dispatch:
 
 permissions:
@@ -27,9 +34,9 @@ jobs:
           node-version: 20
           cache: npm
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
       - name: Run smoke tests
         run: npm test
 
