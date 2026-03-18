@@ -3,5 +3,7 @@ playwright-report/
 test-results/
 coverage/
 screenshots/
+.claude/
 .codex/
+NEXT_CHAT_HANDOFF.md
 .DS_Store
