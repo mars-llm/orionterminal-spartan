@@ -48,16 +48,22 @@
     }
   </script>
 
-  <!-- Lightweight Charts for custom charting -->
-  <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"
-    integrity="sha384-rcCMiCptH4kTlEbg0euOTUKWe72TESbrjElatnG+9BfbmUIV268UK/Pro5biJdGm"
-    crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap"
+    media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap">
+  </noscript>
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0b101a">
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
-
     :root {
       --font-display: 'Orbitron', 'Exo 2', sans-serif;
       --font-body: 'Exo 2', 'Segoe UI', sans-serif;
@@ -1484,6 +1490,18 @@
       height: 16px;
       display: block;
       color: inherit;
+    }
+
+    .chart-preview-link-glyph {
+      align-items: center;
+      display: inline-flex;
+      font-family: var(--font-display);
+      font-size: 0.54rem;
+      font-weight: 700;
+      justify-content: center;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-transform: uppercase;
     }
 
     .chart-preview-link-icon path,
@@ -3743,10 +3761,10 @@
             </svg>
           </a>
           <a class="chart-preview-link" data-brand="binance" id="chartPreviewBinanceLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Binance Futures" aria-label="Open in Binance Futures">
-            <img class="chart-preview-link-icon" src="data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvN6Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrzty668wgAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzfAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/MuuvM8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvNcLrrzCAAAAAAAAAAAAAAAAC668zguuvPxLrrzty668wgAAAAAAAAAAAAAAAAuuvM6LrrzOgAAAAAAAAAAAAAAAC668wguuvO3Lrrz8S668zoAAAAAAAAAAAAAAAAuuvMILrrzXAAAAAAAAAAAAAAAAAAAAAAAAAAALrrzgS668/8uuvO3LrrzCAAAAAAAAAAAAAAAAC668y4uuvMIAAAAAAAAAAAAAAAALrrzOi668/EuuvPzLrrzPAAAAAAAAAAAAAAAAC668wguuvMuAAAAAAAAAAAAAAAALrrzCC6687UuuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAuuvOBLrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvM6Lrrz8S668/8uuvP/Lrrz/y668/8uuvPzLrrzPgAAAAAAAAAAAAAAAAAAAAAuuvMILrrztS668/8uuvP/Lrrz/y668/8uuvP/Lrrzgy6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y6687cuuvMIAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvP/Lrrz/y668/MuuvM+AAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAC6684EuuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zouuvPxLrrz/y668/8uuvPzLrrzPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAC6684EuuvP/Lrrzty668wgAAAAAAAAAAAAAAAAuuvMuLrrzCAAAAAAAAAAAAAAAAC668zouuvPxLrrz8y668zwAAAAAAAAAAAAAAAAuuvMILrrzLgAAAAAAAAAAAAAAAC668wguuvO1Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAC6681wuuvMIAAAAAAAAAAAAAAAALrrzOC668/EuuvO3LrrzCAAAAAAAAAAAAAAAAC668zouuvM+AAAAAAAAAAAAAAAALrrzCC6687cuuvPxLrrzOgAAAAAAAAAAAAAAAC668wguuvNcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668zguuvPxLrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC668wguuvO3Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuuvM4Lrrz8S668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAAAAAAAAAAAAAuuvMILrrzty668/8uuvP/Lrrz/y668/8uuvPxLrrzOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6683ouuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCAAAAAAAAAAALrrzCC6687cuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvN8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3LrrzCC668wguuvO3Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvO3Lrrzty668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/Lrrz/y668/8uuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y668/8uuvP/LrrzgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvP/Lrrz/y6684MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6684EuuvODAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//5////8P///+B////AP///gB///wAP//4AB//8AAP/+AYB//gPAf/4H4H//D/D//5/5/8f+f+OD/D/BAfgfgAH4H4CD/D/Bx/5/4/+f+f//D/D//gfgf/4DwH/+AYB//wAA//+AAf//wAP//+AH///wD///+B////w////+f/8=" alt="" />
+            <span class="chart-preview-link-icon chart-preview-link-glyph" aria-hidden="true">BN</span>
           </a>
           <a class="chart-preview-link" data-brand="bitunix" id="chartPreviewBitunixLink" href="#" target="_blank" rel="noopener noreferrer" title="Open in Bitunix Futures" aria-label="Open in Bitunix Futures">
-            <img class="chart-preview-link-icon" src="data:image/png;base64,AAABAAEAMDAAAAEACAB6AgAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAAlwSFlzAAAD6AAAA+gBtXtSawAAAixJREFUeJztmjGuwjAMhjlBFbNUsLAgMXaGBdERdaMH6PoklrdHXKUDJ2DkDGycg7lrnyxRFPWVxE4TShCDB4oI/2f7T9Oko+zndxRyjNoXoigCIYQUQlzi6bgCgHrIiKfjCrWgJtSmBRBCbN9BNOhhtp0A+MXQAoEYKsSjbd4589BRiaadmuzLoUUBvwpSBbgECHB5AITUPnAP1PwAGFoMWMYXADTZSVaTOs1n9W4/7xXJavLaChSHRV1el/W52jiJ8rp8HUCTdTXz8pj0ApLH5D08gLMGVud0W7MAisPCP4CaeTXwenuKxs+YVSpAms/8AKA4FELJKLYQZlKFQWEnwm919yhrABRj088oGH1BhSg1BrYG4JSfYszdfm5lYCsA28ybxMknSdEZmA2APe9KfNug8XRcdbWSzsBsABeto+tx2TG+aZHJAuDO39wqpPmMZWAWQHtwlyEVL6hJMhmYBeDSvLo2KpUlh8nALAAf/a8GdPyPycAsAJerSypATHhKJAHgQD7Fn27rfwAUA5MBfBr4/GQqpfQ/GcCngc+t2QZhsCLUTQYSgG8DF/dsN62qLvacAPg2cKrcyChzPxvgVQaOLfamjAA+FnDP+h8swgigW6u7yH6i2TJxAuDTwByzgi2ADwO3HyvBJ4DrJTRWtG/bAAcApzacp/sEZhvH8bEDnn13p8FtRsG2AsEfcIjQj5hE6Id8UejHrFnoB93ZJ7xqkH3Cyx5ZgPEHCAfghSQKZFcAAAAASUVORK5CYII=" alt="" />
+            <span class="chart-preview-link-icon chart-preview-link-glyph" aria-hidden="true">BU</span>
           </a>
         </div>
           <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Expand for full data view" aria-label="Expand for full data view">
@@ -3891,8 +3909,75 @@
     const CARD_SHARE_X_TEXT_MAX = 220;
     const EVENT_COUNTS_STORAGE_KEY = 'orion-screener-event-counts-v1';
     const APP_BUILD_META_URL = 'build-meta.json';
+    const LIGHTWEIGHT_CHARTS_SRC = 'https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js';
+    const LIGHTWEIGHT_CHARTS_INTEGRITY = 'sha384-rcCMiCptH4kTlEbg0euOTUKWe72TESbrjElatnG+9BfbmUIV268UK/Pro5biJdGm';
     window.__ORION_SOCIAL_CARD_READY__ = false;
     window.__ORION_BUILD_INFO__ = null;
+    let chartLibraryPromise = null;
+
+    function ensureChartLibraryLoaded() {
+      if (window.LightweightCharts) {
+        return Promise.resolve(window.LightweightCharts);
+      }
+      if (chartLibraryPromise) {
+        return chartLibraryPromise;
+      }
+
+      chartLibraryPromise = new Promise(function(resolve, reject) {
+        var script = document.querySelector('script[data-lightweight-charts="true"]');
+        if (!script) {
+          script = document.createElement('script');
+          script.src = LIGHTWEIGHT_CHARTS_SRC;
+          script.integrity = LIGHTWEIGHT_CHARTS_INTEGRITY;
+          script.crossOrigin = 'anonymous';
+          script.async = true;
+          script.dataset.lightweightCharts = 'true';
+          document.head.appendChild(script);
+        }
+
+        var timeoutId = null;
+
+        function cleanup() {
+          clearTimeout(timeoutId);
+          script.removeEventListener('load', handleLoad);
+          script.removeEventListener('error', handleError);
+        }
+
+        function fail(message) {
+          cleanup();
+          chartLibraryPromise = null;
+          reject(new Error(message));
+        }
+
+        function handleLoad() {
+          cleanup();
+          if (window.LightweightCharts) {
+            resolve(window.LightweightCharts);
+            return;
+          }
+          chartLibraryPromise = null;
+          reject(new Error('Chart library unavailable'));
+        }
+
+        function handleError() {
+          fail('Chart library failed to load');
+        }
+
+        if (window.LightweightCharts) {
+          cleanup();
+          resolve(window.LightweightCharts);
+          return;
+        }
+
+        script.addEventListener('load', handleLoad);
+        script.addEventListener('error', handleError);
+        timeoutId = window.setTimeout(function() {
+          fail('Chart library timed out');
+        }, 12000);
+      });
+
+      return chartLibraryPromise;
+    }
 
     function isGithubPages() {
       return window.location.hostname.endsWith('github.io');
@@ -5044,9 +5129,7 @@
         }
       }
 
-      if (currentPreviewSymbol && currentPreviewCard) {
-        showChartPreview(currentPreviewSymbol, currentPreviewCard);
-      }
+      refreshOpenChartPreviewAppearance();
     }
 
     function normalizeHexColor(value) {
@@ -5088,9 +5171,7 @@
         }
       }
 
-      if (currentPreviewSymbol && currentPreviewCard) {
-        showChartPreview(currentPreviewSymbol, currentPreviewCard);
-      }
+      refreshOpenChartPreviewAppearance();
     }
 
     function loadChartStyleOverrides() {
@@ -5828,8 +5909,18 @@
 
       candidateHighlights = evaluateCandidateHighlights(picks);
       picks = pinTopCandidates(picks, candidateHighlights);
-      updateChartPreviewCandidateBadge(currentPreviewSymbol || '');
-      updateChartPreviewStats(currentPreviewSymbol || '', chartPreviewRequestId, chartPreviewAbortController ? chartPreviewAbortController.signal : null);
+      var preview = document.getElementById('chartPreview');
+      var previewVisible = !!(preview && preview.classList.contains('visible'));
+      updateChartPreviewCandidateBadge(previewVisible ? (currentPreviewSymbol || '') : '');
+      if (previewVisible) {
+        updateChartPreviewStats(
+          currentPreviewSymbol || '',
+          chartPreviewRequestId,
+          chartPreviewAbortController ? chartPreviewAbortController.signal : null
+        );
+      } else {
+        clearChartPreviewStats();
+      }
 
       picks.forEach(function(pick, index) {
         var highlight = candidateHighlights.bySymbol[pick.symbol];
@@ -8113,6 +8204,59 @@
       };
     }
 
+    function refreshOpenChartPreviewAppearance() {
+      if (!chartInstance) return;
+
+      var chartTheme = getChartThemeColors();
+      var volUsdColors = getVolUsdColors();
+      var candleUp = getCssVar('--candle-up', '#22c55e');
+      var candleDown = getCssVar('--candle-down', '#ef4444');
+
+      chartInstance.applyOptions({
+        layout: {
+          background: { type: 'solid', color: chartTheme.background },
+          textColor: chartTheme.text,
+        },
+        grid: {
+          vertLines: { color: chartTheme.grid },
+          horzLines: { color: chartTheme.grid },
+        },
+        rightPriceScale: {
+          borderColor: chartTheme.border,
+        },
+        timeScale: {
+          borderColor: chartTheme.border,
+        },
+      });
+
+      if (chartCandleSeries) {
+        chartCandleSeries.applyOptions({
+          upColor: candleUp,
+          downColor: candleDown,
+          borderUpColor: candleUp,
+          borderDownColor: candleDown,
+          wickUpColor: candleUp,
+          wickDownColor: candleDown,
+        });
+      }
+
+      if (chartVolumeSeries) {
+        chartVolumeSeries.applyOptions({
+          color: volUsdColors.barUp,
+        });
+      }
+      if (chartVolMaSeries) {
+        chartVolMaSeries.applyOptions({
+          color: volUsdColors.ma,
+        });
+      }
+      if (chartVolExtremeSeries) {
+        chartVolExtremeSeries.applyOptions({
+          color: volUsdColors.extreme,
+        });
+      }
+    }
+
     function updateChartPreviewBadge(source) {
       var badge = document.getElementById('chartPreviewBadge');
       if (!badge) return;
@@ -8550,6 +8694,8 @@
       updateChartPreviewBadge(null);
 
       try {
+        await ensureChartLibraryLoaded();
+
         // Fetch candle data
         var intervalConfig = BINANCE_INTERVALS[resolvedTimeframe] || BINANCE_INTERVALS['15m'];
         var chartResult = await fetchChartCandles(symbol, resolvedTimeframe, intervalConfig.limit, signal);
@@ -8580,51 +8726,43 @@
           if (chartVolExtremeSeries) chartVolExtremeSeries.setData(volSeries.extreme);
         }
 
-        // Fetch and display S/R levels
-        var showLegend = false;
-
-        if (chartSettings.showSR15m) {
-          var sr15m = await fetchSRLevels(symbol, '15m', signal, source);
-          if (requestId !== chartPreviewRequestId) return;
-          addSRLinesToChart(sr15m, srColors.sr15m, '15m', isChartMaximized);
-          legend15m.style.display = sr15m.length > 0 ? 'flex' : 'none';
-          if (sr15m.length > 0) showLegend = true;
-        } else {
-          legend15m.style.display = 'none';
-        }
-
-        if (chartSettings.showSR1h) {
-          var sr1h = await fetchSRLevels(symbol, '1h', signal, source);
-          if (requestId !== chartPreviewRequestId) return;
-          addSRLinesToChart(sr1h, srColors.sr1h, '1h', isChartMaximized);
-          legend1h.style.display = sr1h.length > 0 ? 'flex' : 'none';
-          if (sr1h.length > 0) showLegend = true;
-        } else {
-          legend1h.style.display = 'none';
-        }
-
-        if (chartSettings.showSR4h) {
-          var sr4h = await fetchSRLevels(symbol, '4h', signal, source);
-          if (requestId !== chartPreviewRequestId) return;
-          addSRLinesToChart(sr4h, srColors.sr4h, '4h', isChartMaximized);
-          legend4h.style.display = sr4h.length > 0 ? 'flex' : 'none';
-          if (sr4h.length > 0) showLegend = true;
-        } else {
-          legend4h.style.display = 'none';
-        }
-
-        if (chartSettings.showSR1d) {
-          var sr1d = await fetchSRLevels(symbol, '1d', signal, source);
-          if (requestId !== chartPreviewRequestId) return;
-          addSRLinesToChart(sr1d, srColors.sr1d, '1d', isChartMaximized);
-          legend1d.style.display = sr1d.length > 0 ? 'flex' : 'none';
-          if (sr1d.length > 0) showLegend = true;
-        } else {
-          legend1d.style.display = 'none';
-        }
-
-        legend.style.display = showLegend ? 'flex' : 'none';
         loading.classList.add('hidden');
+        legend.style.display = 'none';
+        [legend15m, legend1h, legend4h, legend1d].forEach(function(item) {
+          item.style.display = 'none';
+        });
+
+        [
+          { enabled: chartSettings.showSR15m, interval: '15m', color: srColors.sr15m, label: '15m', legendItem: legend15m },
+          { enabled: chartSettings.showSR1h, interval: '1h', color: srColors.sr1h, label: '1h', legendItem: legend1h },
+          { enabled: chartSettings.showSR4h, interval: '4h', color: srColors.sr4h, label: '4h', legendItem: legend4h },
+          { enabled: chartSettings.showSR1d, interval: '1d', color: srColors.sr1d, label: '1d', legendItem: legend1d },
+        ].forEach(function(config) {
+          if (!config.enabled) return;
+          fetchSRLevels(symbol, config.interval, signal, source).then(function(levels) {
+            if (requestId !== chartPreviewRequestId) return;
+            addSRLinesToChart(levels, config.color, config.label, isChartMaximized);
+            config.legendItem.style.display = levels.length > 0 ? 'flex' : 'none';
+            legend.style.display =
+              legend15m.style.display === 'flex' ||
+              legend1h.style.display === 'flex' ||
+              legend4h.style.display === 'flex' ||
+              legend1d.style.display === 'flex'
+                ? 'flex'
+                : 'none';
+          }).catch(function(err) {
+            if (requestId !== chartPreviewRequestId) return;
+            if (err && err.name === 'AbortError') return;
+            config.legendItem.style.display = 'none';
+            legend.style.display =
+              legend15m.style.display === 'flex' ||
+              legend1h.style.display === 'flex' ||
+              legend4h.style.display === 'flex' ||
+              legend1d.style.display === 'flex'
+                ? 'flex'
+                : 'none';
+          });
+        });
 
       } catch (err) {
         if (requestId !== chartPreviewRequestId) return;

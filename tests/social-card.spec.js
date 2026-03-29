@@ -238,7 +238,9 @@ test('social card: invalid payload shows friendly error state', async ({ page })
 });
 
 test('social card: oversized payload shows explicit too-large state', async ({ page }) => {
-  const oversized = 'a'.repeat(9101);
+  await page.goto('./');
+  const maxParamLength = await page.evaluate(() => CARD_MAX_PARAM_LENGTH);
+  const oversized = 'a'.repeat(maxParamLength + 1);
 
   await page.goto('./?view=social-card&card=' + oversized);
 

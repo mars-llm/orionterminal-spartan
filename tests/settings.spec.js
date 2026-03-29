@@ -105,6 +105,33 @@ test('settings: tabs support click + keyboard navigation', async ({ page }) => {
   await expect(page.locator('#settingsPanelChart')).toBeVisible();
 });
 
+test('theme toggle does not reopen a hidden preview or trigger chart fetches', async ({ page }) => {
+  await page.goto('./');
+
+  await page.evaluate(() => {
+    const preview = document.getElementById('chartPreview');
+    preview.classList.remove('visible');
+    currentPreviewSymbol = 'ALPHA/USDT';
+    currentPreviewCard = document.createElement('div');
+    window.__themeToggleFetchCount = 0;
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = function(...args) {
+      window.__themeToggleFetchCount += 1;
+      return originalFetch(...args);
+    };
+  });
+
+  await page.click('#themeToggleBtn');
+
+  const result = await page.evaluate(() => ({
+    visible: document.getElementById('chartPreview').classList.contains('visible'),
+    fetchCount: window.__themeToggleFetchCount,
+  }));
+
+  expect(result.visible).toBe(false);
+  expect(result.fetchCount).toBe(0);
+});
+
 test('network: progressive guidance and advanced details render', async ({ page }) => {
   await openSettingsTab(page, 'network');
 
