@@ -1,5 +1,7 @@
 const { test, expect } = require('./coverage.fixture');
 
+const isLiveBase = !!process.env.E2E_BASE_URL;
+
 function toBase64UrlJson(value) {
   return Buffer.from(JSON.stringify(value), 'utf8')
     .toString('base64')
@@ -237,7 +239,18 @@ test('social card: invalid payload shows friendly error state', async ({ page })
   await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('Unable to load social card payload');
 });
 
+test('social card: missing payload shows explicit missing state', async ({ page }) => {
+  await page.goto('./?view=social-card');
+
+  await expect(page.locator('body')).toHaveClass(/social-card-only/);
+  await expect(page.locator('#socialCardModal')).toBeVisible();
+  await expect(page.locator('#socialCardRoot')).toHaveAttribute('data-ready', 'true');
+  await expect(page.locator('#socialCardRoot .social-card-error')).toContainText('No social card payload was provided');
+});
+
 test('social card: oversized payload shows explicit too-large state', async ({ page }) => {
+  test.skip(isLiveBase, 'Live GitHub Pages can drop oversized query strings before app decode.');
+
   await page.goto('./');
   const maxParamLength = await page.evaluate(() => CARD_MAX_PARAM_LENGTH);
   const oversized = 'a'.repeat(maxParamLength + 1);
