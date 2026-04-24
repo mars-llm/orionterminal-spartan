@@ -1,116 +1,134 @@
 # Spartan Orion Screener Roadmap
 
-Last updated: March 6, 2026 (Europe/Berlin)
+Last updated: April 24, 2026 (Europe/Berlin)
 
-This file is the single roadmap for near-term product and release work. Items are ordered by current priority and include enough specification to execute without reopening discovery.
+This file is the current source of truth for near-term product, release, and documentation priorities.
 
-## 1. Deployment Freshness and Cache Safety
+## 1. Current Product Posture
 
-Status: In progress (local implementation complete; awaiting next deployed live verification)
+- GitHub Pages hosts the production demonstration build.
+- The app remains single-file-first, centered on `index.html`.
+- The product is a market scanner and chart-preview tool, not a backend service.
+- Public sharing is social-card-only. Setup-link sharing is intentionally out of scope.
 
-Problem:
-- The live GitHub Pages gate now passes, but the current PWA/service-worker design can still strand returning users on stale `index.html` after a new deploy.
-- The risk is highest on GitHub Pages because the app is single-file-first, so one stale shell response can hide all new product behavior.
+## 2. Non-Negotiable Guardrails
 
-Scope:
-- Change the service worker to use network-first handling for navigation/document requests.
-- Keep offline fallback for the app shell so the site still opens without a network connection.
-- Limit long-lived cache behavior to static shell assets instead of all same-origin GET requests.
-- Trigger an explicit service-worker update check on boot and reload once when an existing controller is replaced.
+- Preserve the local gate: `npm test` must pass with browser coverage at or above `80%`.
+- Preserve the live gate: `npm run test:e2e:live` must pass against the deployed GitHub Pages build.
+- Protect deployment freshness so returning GitHub Pages users get updated HTML after deploys.
+- Keep boot-path performance strong. Do not reintroduce render-blocking chart or font loads.
+- Keep social-card behavior stable:
+  - compact `v2` payloads stay
+  - legacy `v1` decode stays
+  - 3-day expiry stays
+  - no backend storage stays
+- Never expose private details in public artifacts, docs, UI metadata, or shared URLs.
+- Public build metadata may expose safe release facts only:
+  - git commit
+  - commit date
+  - card payload version
+  - service-worker cache version
+- Public artifacts must never expose:
+  - local filesystem paths
+  - usernames
+  - machine-specific details
+  - secrets, tokens, or credentials
 
-Files:
-- `/Users/mars/code/ZCT/orion-screener/service-worker.js`
-- `/Users/mars/code/ZCT/orion-screener/index.html`
+## 3. Verified Baseline
 
-Acceptance criteria:
-- Returning GitHub Pages users fetch fresh HTML after deploys instead of staying pinned to a cache-first shell.
-- Offline fallback still opens the app shell.
-- Local Playwright E2E passes after the change.
-- No product behavior changes outside deployment/cache freshness.
+Validated on April 24, 2026:
 
-Progress so far:
-- Switched the service worker to network-first handling for HTML/navigation requests.
-- Limited persistent runtime caching to static shell assets.
-- Added an explicit service-worker update check on boot plus one-time reload when an existing controller is replaced.
-- Verified locally with `npm run test:e2e` on March 6, 2026 (`21 passed`, `1 skipped`).
+- `npm test`
+  - `29 passed`
+  - `1 skipped`
+  - browser coverage `81.63%`
+  - threshold `80%`
+- `npm run test:e2e:live`
+  - `84 passed`
+  - `6 skipped`
+  - `0 failed`
 
-## 2. Live Deployment Observability
+Known operational nuance:
 
-Status: Completed locally
+- `npm run sync:build-meta`
+- `npm run test:e2e`
+- `npm run test:e2e:live`
+- `npm run test:coverage`
+- `npm test`
 
-Problem:
-- We can verify live behavior today by inspecting source and running Playwright, but there is no explicit build/deploy fingerprint in the UI or DOM for quick triage.
+all rewrite `build-meta.json`.
 
-Scope:
-- Add a lightweight build marker or commit/deploy stamp that is safe to expose in the client.
-- Make the marker easy to inspect in live HTML and Playwright without changing the visible product layout.
-- Document the verification flow in repo docs or handoff notes.
+## 4. Current Priorities
 
-Files:
-- `/Users/mars/code/ZCT/orion-screener/index.html`
-- `/Users/mars/code/ZCT/orion-screener/README.md`
-- `/Users/mars/code/ZCT/orion-screener/tests/smoke.spec.js`
+### Priority 1: Keep the deployed Pages build trustworthy
 
-Acceptance criteria:
-- A tester can confirm the deployed build identity from the rendered app or DOM without source-diving.
-- The marker is stable enough for automation and does not expose secrets.
+Success means:
 
-Progress so far:
-- Added a lightweight build marker to the footer plus matching runtime/DOM metadata attributes.
-- Exposed build metadata through `window.__ORION_BUILD_INFO__` for fast live checks and Playwright assertions.
-- Documented the verification flow in the README.
-- Verified locally with `npm run test:smoke` on March 6, 2026 (`3 passed`, `1 skipped`).
+- fresh deploys are visible to returning users
+- service-worker behavior stays predictable
+- the deployed production demonstration build continues to pass the live gate
 
-## 3. Proxy Fallback Resilience
+Files most likely to matter:
 
-Status: Completed locally
+- `index.html`
+- `service-worker.js`
+- `tests/smoke.spec.js`
+- `tests/social-card.spec.js`
+- `playwright.config.js`
 
-Problem:
-- The network/proxy UX is much better, but the runtime still treats proxy ordering and failures fairly bluntly.
-- A weak public proxy can stay sticky longer than it should and degrade scan reliability.
+### Priority 2: Protect boot performance and preview responsiveness
 
-Scope:
-- Track recent proxy success/failure outcomes more explicitly.
-- Prefer healthy proxies automatically when direct access is blocked.
-- Demote or skip repeatedly failing proxies during scan retries without breaking the current settings UX.
+Success means:
 
-Files:
-- `/Users/mars/code/ZCT/orion-screener/index.html`
-- `/Users/mars/code/ZCT/orion-screener/tests/settings.spec.js`
-- `/Users/mars/code/ZCT/orion-screener/tests/smoke.spec.js`
+- app boot stays lightweight
+- chart preview work is deferred until needed
+- hidden preview states do not keep doing unnecessary work
+- additional UI polish does not regress load timing
 
-Acceptance criteria:
-- Failed proxies do not remain the de facto first choice during the same session.
-- Existing settings controls, validation, and Test/Test All behavior stay intact.
+Files most likely to matter:
 
-Progress so far:
-- Added per-proxy runtime health memory with failure streaks, success timestamps, and bounded cooldowns.
-- Updated runtime proxy selection to rank healthier proxies ahead of recently failing ones during retries.
-- Preserved the existing settings flow while clarifying the footnote copy about runtime failover behavior.
-- Verified locally with `npx playwright test tests/settings.spec.js` on March 6, 2026 (`9 passed`).
+- `index.html`
+- `tests/smoke.spec.js`
+- `tests/coverage.spec.js`
 
-## 4. Social Card Regression Harness
+### Priority 3: Keep social-card sharing stable and public-safe
 
-Status: Completed locally
+Success means:
 
-Problem:
-- The social-card system now supports compact `v2`, legacy `v1`, and hard expiry rules, but its edge-case coverage is still concentrated in a few scenario tests.
+- compact payloads keep working locally and on Pages
+- expiry, missing-payload, invalid-payload, and oversized-payload behavior stays covered
+- the product does not regress back to setup-link sharing
+- shared URLs stay self-contained and public-safe
 
-Scope:
-- Add explicit regression cases for payload-size boundaries, malformed compact arrays, and mixed query-mode entry points.
-- Keep the social-card-only product behavior unchanged.
-- Preserve 3-day expiry and legacy `v1` decode support.
+Files most likely to matter:
 
-Files:
-- `/Users/mars/code/ZCT/orion-screener/tests/social-card.spec.js`
-- `/Users/mars/code/ZCT/orion-screener/tests/share.spec.js`
-- `/Users/mars/code/ZCT/orion-screener/index.html`
+- `index.html`
+- `tests/share.spec.js`
+- `tests/social-card.spec.js`
 
-Acceptance criteria:
-- Core compact-payload and expiry behaviors are protected by targeted tests, not only broad end-to-end flows.
-- No setup-link sharing is reintroduced.
+### Priority 4: Keep documentation current and safe to publish
 
-Progress so far:
-- Added regression coverage for oversized payload handling, malformed compact `v2` arrays, and mixed query-mode entry points.
-- Kept the social-card-only behavior unchanged, including 3-day expiry and legacy `v1` decode support.
-- Verified locally with `npx playwright test tests/social-card.spec.js tests/share.spec.js` on March 6, 2026 (`14 passed`).
+Success means:
+
+- README and roadmap stay aligned with shipped behavior
+- no stale instructions remain as the main execution guide
+- public docs avoid local-only or machine-specific details
+
+Files most likely to matter:
+
+- `README.md`
+- `ROADMAP.md`
+- `.github/workflows/pages.yml`
+
+## 5. Working Rules For Future Changes
+
+- Read the full target files before editing high-risk surfaces such as `index.html`, `service-worker.js`, or Playwright tests.
+- Prefer the smallest change that preserves behavior and the quality gates.
+- If a change affects deployment, sharing, cache behavior, or public metadata, run both local and live validation before calling it done.
+- If a change adds any new exposed metadata, explicitly check that it is safe for a public GitHub Pages deployment.
+
+## 6. Current Repo Notes
+
+- The tracked dependency baseline currently includes `@playwright/test` `^1.58.2`.
+- `build-meta.json` is generated and commonly drifts after validation runs.
+- The local-only handoff file `NEXT_CHAT_HANDOFF.md` is intentionally ignored and should not be treated as public documentation.

@@ -1,6 +1,6 @@
 # Spartan Orion Screener
 
-Single-file market scanner for Binance USDT-M futures. It pulls Orion Terminal setups, ranks the strongest candidates, shows instant chart previews, and shares compact social cards without any signup or API keys.
+Single-file market scanner for Binance USDT-M futures. It pulls Orion Terminal setups, ranks the strongest candidates, shows instant chart previews, and shares compact social cards without any signup or API keys. GitHub Pages hosts the production demonstration build.
 
 **[Launch App](https://mars-llm.github.io/orionterminal-spartan/)** · [Download HTML](https://raw.githubusercontent.com/mars-llm/orionterminal-spartan/main/index.html) · [GitHub](https://github.com/mars-llm/orionterminal-spartan)
 
@@ -17,7 +17,7 @@ Single-file market scanner for Binance USDT-M futures. It pulls Orion Terminal s
 
 ## Quick Start
 
-1. Open the [live app](https://mars-llm.github.io/orionterminal-spartan/) or download `index.html`.
+1. Open the [live production demonstration build](https://mars-llm.github.io/orionterminal-spartan/) or download `index.html`.
 2. Click **Scan Market**.
 3. Hover a result row for the chart preview, or expand it for the full modal.
 4. Use **Share Social Card** to create a visual share link.
@@ -38,6 +38,7 @@ Install as an app from Chrome/Edge via the install icon, or from iOS Safari via 
 - New links use compact `v2` payloads. Legacy `v1` payloads still decode.
 - Cards expire after 3 days and expired cards are explicitly blocked.
 - There is no backend storage; the full card payload lives in the URL.
+- Social-card URLs are public by design, so never add private details to shared captions, filters, or derived metadata.
 
 ## Development
 
@@ -61,6 +62,7 @@ Useful commands:
 - `npm run sync:build-meta` generates `build-meta.json`.
 - The app exposes build metadata in the footer, on the root HTML element, and through `window.__ORION_BUILD_INFO__`.
 - Runtime checks can verify `data-app-build`, `data-build-date`, `data-card-payload-version`, `data-service-worker-cache`, `data-runtime-channel`, and `data-build-source`.
+- Public build metadata must stay release-safe: never expose local paths, usernames, tokens, or other private machine details.
 
 ## Data Sources
 
