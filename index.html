@@ -6,7 +6,7 @@
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
   <meta name="description" content="Binance Futures screener for high-activity setups with instant chart previews, auto S/R levels, and relative performance vs BTC. Free, no signup required.">
   <meta name="keywords" content="binance futures, crypto screener, market scanner, trading tools, cryptocurrency, technical analysis, support resistance, volatility scanner">
-  <meta name="author" content="marsmensch">
+  <meta name="author" content="Spartan Orion Screener">
   <meta name="robots" content="index, follow">
   <meta name="application-name" content="Spartan Orion Screener">
   <meta name="apple-mobile-web-app-title" content="Spartan Orion Screener">
@@ -44,7 +44,7 @@
       "url": "https://mars-llm.github.io/orionterminal-spartan/",
       "description": "Binance Futures screener for high-activity setups with instant chart previews, auto S/R levels, and BTC-relative performance.",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "creator": { "@type": "Person", "name": "marsmensch" }
+      "creator": { "@type": "Organization", "name": "Spartan Orion Screener" }
     }
   </script>
 
@@ -3422,7 +3422,7 @@
           </p>
         </div>
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
-          marsmensch 2026, MIT
+          Spartan Orion Screener 2026, MIT
         </p>
       </div>
     </div>
@@ -3814,11 +3814,15 @@
     // CORS proxies for environments where direct API requests are blocked (ex: file://, GitHub Pages).
     // Users can review/customize this list in Settings → Network.
     const CORS_PROXIES_STORAGE_KEY = 'orion-screener-cors-proxies-v1';
-    const DEFAULT_CORS_PROXIES = [
+    const LEGACY_DEFAULT_CORS_PROXIES = [
       { url: 'https://api.codetabs.com/v1/proxy?quest=', encode: false },
       { url: 'https://api.allorigins.win/raw?url=', encode: true },
       { url: 'https://corsproxy.io/?', encode: true },
     ];
+    const DEFAULT_CORS_PROXIES = [
+      { url: 'https://r.jina.ai/http://', encode: false },
+      { url: 'https://r.jina.ai/http://r.jina.ai/http://', encode: false },
+    ].concat(LEGACY_DEFAULT_CORS_PROXIES);
     let CORS_PROXIES = DEFAULT_CORS_PROXIES.map(function(proxy) {
       return { url: proxy.url, encode: proxy.encode };
     });
@@ -3847,6 +3851,21 @@
       return next.slice(0, 10);
     }
 
+    function getCorsProxyEntryKey(proxy) {
+      var normalized = normalizeCorsProxyEntry(proxy);
+      return normalized ? normalized.url + '|' + (normalized.encode ? '1' : '0') : '';
+    }
+
+    function corsProxyListsMatch(a, b) {
+      var left = sanitizeCorsProxyList(a);
+      var right = sanitizeCorsProxyList(b);
+      if (left.length !== right.length) return false;
+      for (var i = 0; i < left.length; i += 1) {
+        if (getCorsProxyEntryKey(left[i]) !== getCorsProxyEntryKey(right[i])) return false;
+      }
+      return true;
+    }
+
     function applyCorsProxies(nextList, persist) {
       var sanitized = sanitizeCorsProxyList(nextList);
       if (!sanitized.length) {
@@ -3870,6 +3889,10 @@
         var raw = localStorage.getItem(CORS_PROXIES_STORAGE_KEY);
         if (!raw) return;
         var parsed = JSON.parse(raw);
+        if (corsProxyListsMatch(parsed, LEGACY_DEFAULT_CORS_PROXIES)) {
+          applyCorsProxies(DEFAULT_CORS_PROXIES, true);
+          return;
+        }
         applyCorsProxies(parsed, false);
       } catch (e) {
         // Ignore parse errors and fall back to defaults.
@@ -3888,6 +3911,7 @@
     loadCorsProxies();
     const ORION_API = 'https://screener.orionterminal.com/api/screener';
     const FETCH_TIMEOUT_MS = 12000;
+    const SCAN_PROXY_FETCH_TIMEOUT_MS = 4500;
     const THEME_STORAGE_KEY = 'orion-screener-theme';
     const CHART_STYLE_STORAGE_KEY = 'orion-screener-chart-style';
     const DIRECT_API_STATUS_KEY = 'orion-screener-direct-api-status';
@@ -4667,6 +4691,53 @@
       return candles;
     }
 
+    function parseJsonResponseText(text) {
+      var raw = String(text || '').trim();
+      if (!raw) throw new Error('Empty JSON response');
+
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        var marker = 'Markdown Content:';
+        var markerIndex = raw.indexOf(marker);
+        if (markerIndex < 0) {
+          throw new Error('Invalid JSON response');
+        }
+
+        var markdownContent = raw.slice(markerIndex + marker.length).trim();
+        if (markdownContent.indexOf('```') === 0) {
+          markdownContent = markdownContent
+            .replace(/^```(?:json)?\s*/i, '')
+            .replace(/\s*```$/i, '')
+            .trim();
+        }
+        return JSON.parse(markdownContent);
+      }
+    }
+
+    function normalizeParsedJsonPayload(data) {
+      if (data && typeof data === 'object' && typeof data.contents === 'string') {
+        return parseJsonResponseText(data.contents);
+      }
+      if (data && typeof data === 'object' && data.data && Array.isArray(data.data.tickers)) {
+        return data.data;
+      }
+      if (data && typeof data === 'object' && data.data && typeof data.data.content === 'string') {
+        return parseJsonResponseText(data.data.content);
+      }
+      return data;
+    }
+
+    async function parseJsonResponseBody(response) {
+      if (response && typeof response.text === 'function') {
+        return normalizeParsedJsonPayload(parseJsonResponseText(await response.text()));
+      }
+      if (response && typeof response.json === 'function') {
+        return normalizeParsedJsonPayload(await response.json());
+      }
+      throw new Error('Invalid JSON response');
+    }
+
     async function fetchJsonOrThrow(url, signal, timeoutMs) {
       var controller = new AbortController();
       var didTimeout = false;
@@ -4688,7 +4759,7 @@
           err.status = response.status;
           throw err;
         }
-        var data = await response.json();
+        var data = await parseJsonResponseBody(response);
         return { response: response, data: data };
       } catch (err) {
         if (didTimeout && err && err.name === 'AbortError') {
@@ -5314,9 +5385,23 @@
       }
     }
 
-    async function fetchJsonWithTimeout(url) {
+    function assertScreenerPayload(data) {
+      if (data && Array.isArray(data.tickers)) return;
+      if (data && data.data && Array.isArray(data.data.tickers)) return;
+      if (data && typeof data === 'object') {
+        var keys = Object.keys(data);
+        if (keys.some(function(key) { return /\/USDT-/.test(key); })) return;
+      }
+      throw new Error('Unexpected screener response');
+    }
+
+    async function fetchJsonWithTimeout(url, timeoutMs) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      let didTimeout = false;
+      const timeoutId = setTimeout(() => {
+        didTimeout = true;
+        controller.abort();
+      }, timeoutMs || FETCH_TIMEOUT_MS);
 
       try {
         const response = await fetch(url, {
@@ -5329,7 +5414,14 @@
           throw new Error('HTTP ' + response.status);
         }
 
-        return await response.json();
+        return await parseJsonResponseBody(response);
+      } catch (err) {
+        if (didTimeout && err && err.name === 'AbortError') {
+          var timeoutErr = new Error('Request timed out');
+          timeoutErr.name = 'TimeoutError';
+          throw timeoutErr;
+        }
+        throw err;
       } finally {
         clearTimeout(timeoutId);
       }
@@ -5348,7 +5440,8 @@
 
         try {
           const startedAt = Date.now();
-          const data = await fetchJsonWithTimeout(url);
+          const data = await fetchJsonWithTimeout(url, SCAN_PROXY_FETCH_TIMEOUT_MS);
+          assertScreenerPayload(data);
           recordProxyHealthSuccess(index, Date.now() - startedAt);
           console.log('Success via ' + proxyName);
           setPreferredProxyIndex(index);

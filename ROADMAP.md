@@ -131,4 +131,3 @@ Files most likely to matter:
 
 - The tracked dependency baseline currently includes `@playwright/test` `^1.58.2`.
 - `build-meta.json` is generated and commonly drifts after validation runs.
-- The local-only handoff file `NEXT_CHAT_HANDOFF.md` is intentionally ignored and should not be treated as public documentation.

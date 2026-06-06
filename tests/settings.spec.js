@@ -299,6 +299,90 @@ test('network: runtime proxy health demotes recent failures during the same sess
   expect(result.healthB.lastSuccessAt).toBeGreaterThan(0);
 });
 
+test('network: reader proxy fallback unwraps Orion JSON after public proxy failure', async ({ page }) => {
+  await page.goto('./');
+
+  const result = await page.evaluate(async () => {
+    applyCorsProxies([
+      { url: 'https://proxy-a.example/?url=', encode: true },
+      { url: 'https://r.jina.ai/http://', encode: false },
+    ], false);
+
+    try {
+      localStorage.removeItem(PROXY_STATUS_KEY);
+      sessionStorage.removeItem(PROXY_HEALTH_STORAGE_KEY);
+    } catch (e) {
+      // Ignore storage errors in test setup.
+    }
+
+    const originalFetch = window.fetch;
+    const seen = [];
+
+    window.fetch = async (url) => {
+      const target = String(url);
+      seen.push(target);
+      if (target.includes('proxy-a.example')) {
+        return {
+          ok: false,
+          status: 413,
+          text: async () => 'Content Too Large',
+        };
+      }
+      if (target.includes('r.jina.ai')) {
+        return {
+          ok: true,
+          text: async () => [
+            JSON.stringify({
+              code: 200,
+              status: 20000,
+              data: {
+                content: JSON.stringify({
+                  tickers: [
+                    {
+                      symbol: 'BTCUSDT',
+                      price: 1,
+                      tf1d: { volume: 1 },
+                    },
+                  ],
+                }),
+              },
+            }),
+          ].join('\n'),
+        };
+      }
+      throw new Error('Unexpected URL ' + target);
+    };
+
+    try {
+      const data = await fetchWithProxy(0);
+      return {
+        seen,
+        tickerCount: data.tickers.length,
+        preferred: getPreferredProxyIndex(),
+        healthA: getProxyHealth(0),
+        healthReader: getProxyHealth(1),
+      };
+    } finally {
+      window.fetch = originalFetch;
+      try {
+        sessionStorage.removeItem(PROXY_HEALTH_STORAGE_KEY);
+        localStorage.removeItem(PROXY_STATUS_KEY);
+      } catch (e) {
+        // Ignore storage cleanup errors.
+      }
+    }
+  });
+
+  expect(result.seen).toHaveLength(2);
+  expect(result.seen[0]).toContain('proxy-a.example');
+  expect(result.seen[1]).toContain('r.jina.ai');
+  expect(result.tickerCount).toBe(1);
+  expect(result.preferred).toBe(1);
+  expect(result.healthA.failureStreak).toBeGreaterThan(0);
+  expect(result.healthReader.failureStreak).toBe(0);
+  expect(result.healthReader.lastSuccessAt).toBeGreaterThan(0);
+});
+
 test('network: save and reopen preserves proxy draft + preferred proxy', async ({ page }) => {
   await openSettingsTab(page, 'network');
   await clearProxyRows(page);

@@ -5,5 +5,6 @@ coverage/
 screenshots/
 .claude/
 .codex/
+.state/
 NEXT_CHAT_HANDOFF.md
 .DS_Store
