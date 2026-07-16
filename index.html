@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-luuyuQFzUG8LmoMqg8NYbk9N1lthPnmlQE8sZChlGxQ='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
   <meta name="description" content="Binance Futures screener for high-activity setups with instant chart previews, auto S/R levels, and relative performance vs BTC. Free, no signup required.">
@@ -53,9 +55,9 @@
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preload" as="style"
     href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet"
+  <link rel="stylesheet" id="appFontStylesheet"
     href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap"
-    media="print" onload="this.media='all'">
+    media="print">
   <noscript>
     <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap">
@@ -232,25 +234,29 @@
 
     header.hero {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.2rem;
-      align-items: start;
-      margin-bottom: 1.2rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 0.85rem;
       animation: riseIn 0.7s ease both;
+    }
+
+    .hero-left {
+      min-width: 0;
     }
 
     .hero-left h1 {
       font-family: var(--font-display);
       font-size: clamp(1.6rem, 2vw, 2.1rem);
       letter-spacing: 0.03em;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.35rem;
     }
 
     .hero-left p {
       color: var(--text-secondary);
       font-size: 0.9rem;
       line-height: 1.6;
-      max-width: 520px;
+      max-width: 680px;
     }
 
     .hero-eyebrow {
@@ -295,11 +301,32 @@
       animation: pulse 2.4s ease-in-out infinite;
     }
 
-    .hero-meta {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-top: 0.6rem;
+    .hero-session {
+      min-width: 210px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: center;
+      padding-left: 1.15rem;
+      border-left: 1px solid var(--border-strong);
+    }
+
+    .hero-session-copy {
+      display: grid;
+      gap: 0.1rem;
+    }
+
+    .hero-session-copy strong {
+      font-family: var(--font-display);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .hero-session-copy span {
+      font-size: 0.7rem;
+      color: var(--text-muted);
     }
 
     .hero-right {
@@ -310,18 +337,6 @@
     .hero-right .hero-card {
       width: 100%;
       max-width: 420px;
-    }
-
-    .meta-pill {
-      padding: 0.3rem 0.65rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--bg-tertiary);
-      color: var(--text-secondary);
-      font-size: 0.63rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 600;
     }
 
     .hero-card {
@@ -820,6 +835,7 @@
     }
 
     .profile-wrapper:hover .profile-delete-btn,
+    .profile-wrapper:focus-within .profile-delete-btn,
     .profile-delete-btn:hover {
       opacity: 1;
     }
@@ -908,6 +924,18 @@
       font-size: 0.85rem;
       margin-bottom: 1rem;
       box-shadow: 0 10px 30px rgba(248, 113, 113, 0.15);
+      flex-wrap: wrap;
+    }
+
+    .error-box #errorText {
+      flex: 1 1 260px;
+    }
+
+    .error-retry {
+      margin-left: auto;
+      border-color: rgba(248, 113, 113, 0.45);
+      background: rgba(127, 29, 29, 0.2);
+      color: currentColor;
     }
 
     .empty-state {
@@ -1476,7 +1504,7 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
     }
 
     .chart-preview-link:hover {
@@ -1720,6 +1748,13 @@
       box-shadow: var(--glow-cool);
     }
 
+    .action-btn:focus-visible,
+    .chart-preview-link:focus-visible,
+    footer a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     .action-btn.tv:hover {
       color: var(--cyan);
     }
@@ -1728,9 +1763,9 @@
       color: var(--cyan);
     }
 
-    /* Hidden by default, shown on mobile */
+    /* Explicit chart action supports touch and keyboard users. */
     .mobile-chart-btn {
-      display: none;
+      display: inline-flex;
     }
 
     .copy-all-btn {
@@ -1840,13 +1875,17 @@
       z-index: 2000;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.2s, visibility 0.2s;
+      transition: opacity 0.2s;
       backdrop-filter: blur(6px);
     }
 
     .modal-overlay.visible {
       opacity: 1;
       visibility: visible;
+    }
+
+    body.dialog-open {
+      overflow: hidden;
     }
 
     :root[data-theme="light"] .modal-overlay {
@@ -1929,7 +1968,7 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
       font-weight: 600;
     }
 
@@ -2330,6 +2369,18 @@
     }
 
     @media (max-width: 900px) {
+      header.hero {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .hero-session {
+        width: 100%;
+        padding: 0.65rem 0 0;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+
       .hero-right {
         justify-content: flex-start;
       }
@@ -2439,6 +2490,10 @@
 
     .toggle input:checked + .toggle-slider::before {
       transform: translateX(20px);
+    }
+
+    .toggle input:focus-visible + .toggle-slider {
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.25);
     }
 
     .toggle input:disabled + .toggle-slider {
@@ -2910,7 +2965,7 @@
       }
 
       header.hero {
-        margin-bottom: 1.2rem;
+        margin-bottom: 0.85rem;
       }
 
       /* Tighter card spacing */
@@ -2961,31 +3016,19 @@
         </div>
         <h1>Spartan Orion Screener</h1>
         <p>Find high-activity trading setups on Binance Futures in seconds with instant chart previews and auto S/R levels.</p>
-        <div class="hero-meta">
-          <span class="meta-pill">No signup</span>
-          <span class="meta-pill">Instant previews</span>
-          <span class="meta-pill">Local presets</span>
-        </div>
       </div>
-      <div class="hero-right">
-        <div class="hero-card">
-          <div class="hero-card-title">Scan Playbook</div>
-          <ol class="hero-steps">
-            <li><span>1</span><div class="hero-step-text"><strong>Scan Market</strong> pulls the most active futures pairs.</div></li>
-            <li><span>2</span><div class="hero-step-text">Hover a row for a 1-minute momentum snapshot.</div></li>
-            <li><span>3</span><div class="hero-step-text">Copy a watchlist or jump to TradingView.</div></li>
-          </ol>
-          <div class="hero-card-footer">
-            <span class="status-dot" aria-hidden="true"></span>
-            Optimized for fast sessions and quick validation.
-          </div>
+      <div class="hero-session" aria-label="Screener status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <div class="hero-session-copy">
+          <strong id="heroStatusTitle">Ready to scan</strong>
+          <span id="heroStatusDetail">Live data · local settings</span>
         </div>
       </div>
     </header>
 
     <div class="controls">
       <div class="controls-group controls-primary">
-        <button class="btn-primary" id="scanBtn">
+        <button class="btn-primary" id="scanBtn" aria-controls="resultsContainer error" aria-busy="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
@@ -2995,7 +3038,7 @@
           <span>Scan Market</span>
         </button>
 
-        <button class="btn-secondary" id="filtersBtn">
+        <button class="btn-secondary" id="filtersBtn" aria-expanded="false" aria-controls="filtersPanel">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" x2="4" y1="21" y2="14"/>
             <line x1="4" x2="4" y1="10" y2="3"/>
@@ -3052,7 +3095,7 @@
           <span class="theme-label theme-label-dark">Night Mode</span>
         </button>
 
-        <button class="btn-secondary" id="aboutBtn" title="About">
+        <button class="btn-secondary" id="aboutBtn" title="About" aria-haspopup="dialog" aria-controls="aboutModal">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" x2="12" y1="16" y2="12"/>
@@ -3061,14 +3104,14 @@
           <span>About</span>
         </button>
 
-        <button class="btn-secondary" id="settingsBtn" title="Settings">
+        <button class="btn-secondary" id="settingsBtn" title="Settings" aria-haspopup="dialog" aria-controls="settingsModal">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
           <span>Settings</span>
         </button>
-        <button class="btn-secondary" id="helpBtn" title="Help">
+        <button class="btn-secondary" id="helpBtn" title="Help" aria-haspopup="dialog" aria-expanded="false" aria-controls="helpPanel">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 2-3 4"/>
@@ -3082,7 +3125,7 @@
     <div class="filters-panel" id="filtersPanel" style="display: none;">
       <div class="filters-header">
         <h3>Screener Filters</h3>
-        <button class="close-btn" id="closeFiltersBtn">
+        <button class="close-btn" id="closeFiltersBtn" aria-label="Close filters">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/>
             <path d="m6 6 12 12"/>
@@ -3094,32 +3137,32 @@
 
       <div class="filter-grid">
         <div class="filter-group">
-          <label>Min Volume (USD)</label>
-          <input type="number" id="minVolume" value="500000">
+          <label for="minVolume">Min Volume (USD)</label>
+          <input type="number" id="minVolume" value="500000" min="0" inputmode="numeric">
           <div class="hint">24h trading volume (tf1d.volume)</div>
         </div>
         <div class="filter-group">
-          <label>Max Volume (USD)</label>
-          <input type="number" id="maxVolume" placeholder="No limit">
+          <label for="maxVolume">Max Volume (USD)</label>
+          <input type="number" id="maxVolume" placeholder="No limit" min="0" inputmode="numeric">
           <div class="hint">Exclude mega caps</div>
         </div>
         <div class="filter-group">
-          <label>Min Volatility (15m %)</label>
-          <input type="number" id="minVolatility" step="0.01" min="0" value="0.1">
+          <label for="minVolatility">Min Volatility (15m %)</label>
+          <input type="number" id="minVolatility" step="0.01" min="0" max="10000" value="0.1" inputmode="decimal">
           <div class="hint">15m range % (Orion: tf15m.volatility). Example: 0.5 = 0.5%</div>
         </div>
         <div class="filter-group">
-          <label>Min Ticks (5m)</label>
-          <input type="number" id="minTicks" value="200">
+          <label for="minTicks">Min Ticks (5m)</label>
+          <input type="number" id="minTicks" value="200" min="0" max="1000000000" inputmode="numeric">
           <div class="hint">Trade count (tf5m.trades)</div>
         </div>
         <div class="filter-group">
-          <label>Max Results</label>
-          <input type="number" id="maxResults" value="10">
+          <label for="maxResults">Max Results</label>
+          <input type="number" id="maxResults" value="10" min="1" max="100" inputmode="numeric">
           <div class="hint">Limit displayed picks</div>
         </div>
         <div class="filter-group">
-          <label>Exclude Symbols</label>
+          <label for="excludeSymbols">Exclude Symbols</label>
           <input type="text" id="excludeSymbols" placeholder="BTC, ETH, SOL" value="BTC, ETH, BNB, SOL, XRP, DOGE">
           <div class="hint">Comma-separated base assets</div>
         </div>
@@ -3136,7 +3179,7 @@
       </div>
     </div>
 
-    <div class="help-panel" id="helpPanel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="help-panel" id="helpPanel" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-hidden="true">
       <div class="help-panel-inner">
         <div class="help-header">
           <div>
@@ -3289,13 +3332,14 @@
       </div>
     </div>
 
-    <div id="error" class="error-box" style="display: none;">
+    <div id="error" class="error-box" role="alert" aria-live="assertive" aria-atomic="true" style="display: none;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
         <line x1="12" x2="12" y1="8" y2="12"/>
         <line x1="12" x2="12.01" y1="16" y2="16"/>
       </svg>
       <span id="errorText"></span>
+      <button class="btn-secondary btn-small error-retry" id="retryScanBtn" type="button">Retry scan</button>
     </div>
 
     <div id="emptyState" class="empty-state">
@@ -3314,7 +3358,7 @@
       <p class="hint" id="emptyHint">Vol &gt; 500K, 15m &gt; 0.10%, 5m Ticks &gt; 200</p>
     </div>
 
-    <div id="resultsContainer" style="display: none;">
+    <div id="resultsContainer" style="display: none;" aria-live="polite" aria-busy="false">
       <div class="results-header">
         <span id="resultsCount"></span>
         <span id="lastUpdated"></span>
@@ -3352,10 +3396,10 @@
     </footer>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Social Card Modal -->
-  <div class="modal-overlay" id="socialCardModal" role="dialog" aria-modal="true" aria-labelledby="socialCardTitle">
+  <div class="modal-overlay" id="socialCardModal" role="dialog" aria-modal="true" aria-labelledby="socialCardTitle" aria-hidden="true">
     <div class="modal social-card-modal">
       <div class="modal-header">
         <h2 id="socialCardTitle">Social Card</h2>
@@ -3364,7 +3408,7 @@
           <a class="btn-secondary btn-small social-card-share-link" id="socialCardShareFacebookBtn" href="#" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
           <button class="btn-secondary btn-small" id="socialCardCopyBtn" type="button">Copy Link</button>
         </div>
-        <button class="modal-close social-card-dismiss" id="socialCardClose">
+        <button class="modal-close social-card-dismiss" id="socialCardClose" aria-label="Close social card">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/>
             <path d="m6 6 12 12"/>
@@ -3378,11 +3422,11 @@
   </div>
 
   <!-- About Modal -->
-  <div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
         <h2 id="aboutTitle">About Spartan Orion Screener</h2>
-        <button class="modal-close" id="aboutModalClose">
+        <button class="modal-close" id="aboutModalClose" aria-label="Close about dialog">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/>
             <path d="m6 6 12 12"/>
@@ -3429,11 +3473,11 @@
   </div>
 
   <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
         <h2 id="settingsTitle">Settings</h2>
-        <button class="modal-close" id="settingsModalClose">
+        <button class="modal-close" id="settingsModalClose" aria-label="Close settings">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/>
             <path d="m6 6 12 12"/>
@@ -3458,7 +3502,7 @@
               </div>
               <div class="setting-control">
                 <label class="toggle">
-                  <input type="checkbox" id="settingChartEnabled" checked>
+                  <input type="checkbox" id="settingChartEnabled" checked aria-label="Enable chart preview">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -3470,7 +3514,7 @@
                 <small>Chart candle interval</small>
               </div>
               <div class="setting-control">
-                <select id="settingChartTimeframe">
+                <select id="settingChartTimeframe" aria-label="Default chart timeframe">
                   <option value="1m" selected>1 minute</option>
                   <option value="5m">5 minutes</option>
                   <option value="15m">15 minutes</option>
@@ -3487,7 +3531,7 @@
                 <small>Popup dimensions</small>
               </div>
               <div class="setting-control">
-                <select id="settingChartSize">
+                <select id="settingChartSize" aria-label="Chart preview size">
                   <option value="small">Small (280×180)</option>
                   <option value="medium" selected>Medium (320×220)</option>
                   <option value="large">Large (400×280)</option>
@@ -3505,7 +3549,7 @@
               </div>
               <div class="setting-control">
                 <label class="toggle">
-                  <input type="checkbox" id="settingSR15m">
+                  <input type="checkbox" id="settingSR15m" aria-label="Show 15 minute support and resistance levels">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -3518,7 +3562,7 @@
               </div>
               <div class="setting-control">
                 <label class="toggle">
-                  <input type="checkbox" id="settingSR1h">
+                  <input type="checkbox" id="settingSR1h" aria-label="Show 1 hour support and resistance levels">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -3531,7 +3575,7 @@
               </div>
               <div class="setting-control">
                 <label class="toggle">
-                  <input type="checkbox" id="settingSR4h">
+                  <input type="checkbox" id="settingSR4h" aria-label="Show 4 hour support and resistance levels">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -3544,7 +3588,7 @@
               </div>
               <div class="setting-control">
                 <label class="toggle">
-                  <input type="checkbox" id="settingSR1d">
+                  <input type="checkbox" id="settingSR1d" aria-label="Show previous day support and resistance levels">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -3562,7 +3606,7 @@
                   <small>Bullish candle color</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingCandleUp">
+                  <input type="color" id="settingCandleUp" aria-label="Bullish candle color">
                 </div>
               </div>
               <div class="setting-row">
@@ -3571,7 +3615,7 @@
                   <small>Bearish candle color</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingCandleDown">
+                  <input type="color" id="settingCandleDown" aria-label="Bearish candle color">
                 </div>
               </div>
             </div>
@@ -3584,7 +3628,7 @@
                   <small>Histogram color</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingVolUsdBars">
+                  <input type="color" id="settingVolUsdBars" aria-label="Volume bars color">
                 </div>
               </div>
               <div class="setting-row">
@@ -3593,7 +3637,7 @@
                   <small>Adaptive MA line</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingVolUsdMa">
+                  <input type="color" id="settingVolUsdMa" aria-label="Volume moving average color">
                 </div>
               </div>
               <div class="setting-row">
@@ -3602,7 +3646,7 @@
                   <small>Extreme limit line</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingVolUsdExtreme">
+                  <input type="color" id="settingVolUsdExtreme" aria-label="Volume extreme line color">
                 </div>
               </div>
             </div>
@@ -3615,7 +3659,7 @@
                   <small>15m levels</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingSr15mColor">
+                  <input type="color" id="settingSr15mColor" aria-label="15 minute support and resistance color">
                 </div>
               </div>
               <div class="setting-row">
@@ -3624,7 +3668,7 @@
                   <small>1h levels</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingSr1hColor">
+                  <input type="color" id="settingSr1hColor" aria-label="1 hour support and resistance color">
                 </div>
               </div>
               <div class="setting-row">
@@ -3633,7 +3677,7 @@
                   <small>4h levels</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingSr4hColor">
+                  <input type="color" id="settingSr4hColor" aria-label="4 hour support and resistance color">
                 </div>
               </div>
               <div class="setting-row">
@@ -3642,7 +3686,7 @@
                   <small>Previous day levels</small>
                 </div>
                 <div class="setting-control">
-                  <input type="color" id="settingSr1dColor">
+                  <input type="color" id="settingSr1dColor" aria-label="Previous day support and resistance color">
                 </div>
               </div>
             </div>
@@ -3671,7 +3715,7 @@
                 <small>Time before chart appears</small>
               </div>
               <div class="setting-control">
-                <select id="settingHoverDelay">
+                <select id="settingHoverDelay" aria-label="Chart hover delay">
                   <option value="0">Instant</option>
                   <option value="150">Fast (150ms)</option>
                   <option value="300" selected>Normal (300ms)</option>
@@ -3709,7 +3753,7 @@
                 <small>First proxy tried for Orion API scans</small>
               </div>
               <div class="setting-control">
-                <select id="settingPreferredProxy"></select>
+                <select id="settingPreferredProxy" aria-label="Preferred scan proxy"></select>
               </div>
             </div>
 
@@ -3743,7 +3787,7 @@
         </div>
         <div class="chart-preview-actions">
           <span class="chart-preview-timeframe" id="chartPreviewTimeframe">1m</span>
-          <select class="chart-preview-timeframe-select" id="chartPreviewTimeframeSelect">
+          <select class="chart-preview-timeframe-select" id="chartPreviewTimeframeSelect" aria-label="Chart timeframe">
             <option value="1m">1m</option>
             <option value="5m">5m</option>
             <option value="15m">15m</option>
@@ -3767,7 +3811,7 @@
             <span class="chart-preview-link-icon chart-preview-link-glyph" aria-hidden="true">BU</span>
           </a>
         </div>
-          <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Expand for full data view" aria-label="Expand for full data view">
+          <button class="chart-preview-maximize" id="chartPreviewMaximize" title="Expand for full data view" aria-label="Expand for full data view" aria-expanded="false" aria-controls="chartPreviewBody">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 3 21 3 21 9"/>
             <polyline points="9 21 3 21 3 15"/>
@@ -3777,7 +3821,7 @@
           <span class="chart-preview-maximize-label long">Expand for details</span>
           <span class="chart-preview-maximize-label short">Expand</span>
           </button>
-          <button class="chart-preview-close" id="chartPreviewClose" title="Close chart">Close</button>
+          <button class="chart-preview-close" id="chartPreviewClose" title="Close chart" aria-label="Close chart preview">Close</button>
         </div>
       </div>
       <div class="chart-preview-stats" id="chartPreviewStats"></div>
@@ -3823,18 +3867,49 @@
       { url: 'https://r.jina.ai/http://', encode: false },
       { url: 'https://r.jina.ai/http://r.jina.ai/http://', encode: false },
     ].concat(LEGACY_DEFAULT_CORS_PROXIES);
+    const LOOPBACK_PROXY_HOSTS = new Set(['localhost', '127.0.0.1']);
     let CORS_PROXIES = DEFAULT_CORS_PROXIES.map(function(proxy) {
       return { url: proxy.url, encode: proxy.encode };
     });
 
+    function inspectCorsProxyUrl(value) {
+      var url = String(value || '').trim();
+      if (!url) {
+        return { valid: false, url: '', message: 'Proxy URL is required.' };
+      }
+
+      var parsed;
+      try {
+        parsed = new URL(url);
+      } catch (e) {
+        return { valid: false, url: url, message: 'Proxy URL must be a valid http:// or https:// URL.' };
+      }
+
+      if (parsed.username || parsed.password) {
+        return { valid: false, url: url, message: 'Proxy URL must not contain credentials.' };
+      }
+      if (parsed.hash) {
+        return { valid: false, url: url, message: 'Proxy URL must not contain a fragment (#).' };
+      }
+      if (parsed.protocol === 'https:') {
+        return { valid: true, url: url, message: '' };
+      }
+      if (parsed.protocol === 'http:' && LOOPBACK_PROXY_HOSTS.has(parsed.hostname.toLowerCase())) {
+        return { valid: true, url: url, message: '' };
+      }
+      return {
+        valid: false,
+        url: url,
+        message: 'Proxy URL must use HTTPS. HTTP is allowed only for local development.',
+      };
+    }
+
     function normalizeCorsProxyEntry(entry) {
       if (!entry || typeof entry !== 'object') return null;
       if (!entry.url) return null;
-      var url = String(entry.url).trim();
-      if (!url) return null;
-      var lower = url.toLowerCase();
-      if (!(lower.startsWith('https://') || lower.startsWith('http://'))) return null;
-      return { url: url, encode: !!entry.encode };
+      var inspected = inspectCorsProxyUrl(entry.url);
+      if (!inspected.valid) return null;
+      return { url: inspected.url, encode: !!entry.encode };
     }
 
     function sanitizeCorsProxyList(list) {
@@ -3931,6 +4006,8 @@
     const CARD_MAX_PARAM_LENGTH = 9000;
     const CARD_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
     const CARD_SHARE_X_TEXT_MAX = 220;
+    const MAX_JSON_RESPONSE_LENGTH = 5 * 1024 * 1024;
+    const MAX_SCREENER_RECORDS = 20000;
     const EVENT_COUNTS_STORAGE_KEY = 'orion-screener-event-counts-v1';
     const APP_BUILD_META_URL = 'build-meta.json';
     const LIGHTWEIGHT_CHARTS_SRC = 'https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js';
@@ -3938,6 +4015,13 @@
     window.__ORION_SOCIAL_CARD_READY__ = false;
     window.__ORION_BUILD_INFO__ = null;
     let chartLibraryPromise = null;
+
+    function getSafeFetchOptions(options) {
+      return Object.assign({}, options || {}, {
+        credentials: 'omit',
+        referrerPolicy: 'no-referrer',
+      });
+    }
 
     function ensureChartLibraryLoaded() {
       if (window.LightweightCharts) {
@@ -3954,6 +4038,7 @@
           script.src = LIGHTWEIGHT_CHARTS_SRC;
           script.integrity = LIGHTWEIGHT_CHARTS_INTEGRITY;
           script.crossOrigin = 'anonymous';
+          script.referrerPolicy = 'no-referrer';
           script.async = true;
           script.dataset.lightweightCharts = 'true';
           document.head.appendChild(script);
@@ -4085,7 +4170,7 @@
       }
 
       try {
-        var response = await fetch(APP_BUILD_META_URL, { cache: 'no-store' });
+        var response = await fetch(APP_BUILD_META_URL, getSafeFetchOptions({ cache: 'no-store' }));
         if (!response.ok) {
           throw new Error('HTTP ' + response.status);
         }
@@ -4385,12 +4470,33 @@
     let customProfiles = [];
     const MAX_CUSTOM_PROFILES = 3;
 
+    function sanitizeCustomProfiles(value) {
+      if (!Array.isArray(value)) return [];
+      var seen = {};
+      return value.map(function(profile) {
+        if (!profile || typeof profile !== 'object') return null;
+        var id = profile.id ? String(profile.id).trim().slice(0, 80) : '';
+        var name = profile.name ? String(profile.name).trim().slice(0, 20) : '';
+        if (!/^custom-[A-Za-z0-9-]+$/.test(id) || !name || seen[id]) return null;
+        if (BUILTIN_PROFILES.some(function(item) { return item.id === id; })) return null;
+        seen[id] = true;
+        return {
+          id: id,
+          name: name,
+          filters: sanitizeFilterState(profile.filters),
+          isBuiltin: false,
+        };
+      }).filter(function(profile) {
+        return !!profile;
+      }).slice(0, MAX_CUSTOM_PROFILES);
+    }
+
     // Load custom profiles from localStorage
     function loadCustomProfiles() {
       try {
         var saved = localStorage.getItem('orion-screener-custom-profiles');
         if (saved) {
-          customProfiles = JSON.parse(saved);
+          customProfiles = sanitizeCustomProfiles(JSON.parse(saved));
         }
       } catch (e) {
         console.warn('Failed to load custom profiles:', e);
@@ -4401,6 +4507,7 @@
     // Save custom profiles to localStorage
     function saveCustomProfiles() {
       try {
+        customProfiles = sanitizeCustomProfiles(customProfiles);
         localStorage.setItem('orion-screener-custom-profiles', JSON.stringify(customProfiles));
       } catch (e) {
         console.warn('Failed to save custom profiles:', e);
@@ -4468,7 +4575,7 @@
       '1d': { interval: '1d', limit: 100 },
     };
 
-    let chartSettings = {
+    const DEFAULT_CHART_SETTINGS = {
       enabled: true,
       timeframe: '1m',
       size: 'medium',
@@ -4478,6 +4585,29 @@
       showSR4h: false,
       showSR1d: false,
     };
+    let chartSettings = { ...DEFAULT_CHART_SETTINGS };
+
+    function sanitizeChartSettings(value) {
+      var source = value && typeof value === 'object' ? value : {};
+      var hoverDelay = parseInt(source.hoverDelay, 10);
+      var allowedHoverDelays = [0, 150, 300, 500];
+      return {
+        enabled: typeof source.enabled === 'boolean' ? source.enabled : DEFAULT_CHART_SETTINGS.enabled,
+        timeframe: Object.prototype.hasOwnProperty.call(BINANCE_INTERVALS, source.timeframe)
+          ? source.timeframe
+          : DEFAULT_CHART_SETTINGS.timeframe,
+        size: Object.prototype.hasOwnProperty.call(CHART_SIZES, source.size)
+          ? source.size
+          : DEFAULT_CHART_SETTINGS.size,
+        hoverDelay: allowedHoverDelays.includes(hoverDelay)
+          ? hoverDelay
+          : DEFAULT_CHART_SETTINGS.hoverDelay,
+        showSR15m: typeof source.showSR15m === 'boolean' ? source.showSR15m : DEFAULT_CHART_SETTINGS.showSR15m,
+        showSR1h: typeof source.showSR1h === 'boolean' ? source.showSR1h : DEFAULT_CHART_SETTINGS.showSR1h,
+        showSR4h: typeof source.showSR4h === 'boolean' ? source.showSR4h : DEFAULT_CHART_SETTINGS.showSR4h,
+        showSR1d: typeof source.showSR1d === 'boolean' ? source.showSR1d : DEFAULT_CHART_SETTINGS.showSR1d,
+      };
+    }
 
     const VOLUSD_SETTINGS = {
       maLength: 20,
@@ -4639,7 +4769,7 @@
 
     function normalizeBinanceCandles(data) {
       if (!Array.isArray(data)) return [];
-      return data.map(function(k) {
+      return sanitizeCandles(data.map(function(k) {
         return {
           time: Math.floor(k[0] / 1000),
           open: parseFloat(k[1]),
@@ -4648,12 +4778,12 @@
           close: parseFloat(k[4]),
           volume: parseFloat(k[5]),
         };
-      });
+      }));
     }
 
     function normalizeCoinbaseCandles(data, limit) {
       if (!Array.isArray(data)) return [];
-      var candles = data.map(function(c) {
+      var candles = sanitizeCandles(data.map(function(c) {
         return {
           time: Number(c[0]),
           open: parseFloat(c[3]),
@@ -4662,8 +4792,7 @@
           close: parseFloat(c[4]),
           volume: parseFloat(c[5]),
         };
-      });
-      candles.sort(function(a, b) { return a.time - b.time; });
+      }));
       if (limit && candles.length > limit) {
         candles = candles.slice(candles.length - limit);
       }
@@ -4675,7 +4804,7 @@
       var key = Object.keys(result).find(function(k) { return k !== 'last'; });
       var rows = key ? result[key] : [];
       if (!Array.isArray(rows)) return [];
-      var candles = rows.map(function(c) {
+      var candles = sanitizeCandles(rows.map(function(c) {
         return {
           time: Number(c[0]),
           open: parseFloat(c[1]),
@@ -4684,15 +4813,47 @@
           close: parseFloat(c[4]),
           volume: parseFloat(c[6]),
         };
-      });
+      }));
       if (limit && candles.length > limit) {
         candles = candles.slice(candles.length - limit);
       }
       return candles;
     }
 
+    function sanitizeCandles(candles) {
+      var byTime = {};
+      (Array.isArray(candles) ? candles : []).forEach(function(candle) {
+        var time = Number(candle && candle.time);
+        var open = Number(candle && candle.open);
+        var high = Number(candle && candle.high);
+        var low = Number(candle && candle.low);
+        var close = Number(candle && candle.close);
+        var volume = Number(candle && candle.volume);
+        var isFiniteCandle = [time, open, high, low, close, volume].every(Number.isFinite);
+        if (!isFiniteCandle || time <= 0 || open <= 0 || high <= 0 || low <= 0 || close <= 0 || volume < 0) return;
+        if (high < Math.max(open, close) || low > Math.min(open, close) || high < low) return;
+        byTime[String(time)] = {
+          time: time,
+          open: open,
+          high: high,
+          low: low,
+          close: close,
+          volume: volume,
+        };
+      });
+      return Object.keys(byTime).map(function(key) {
+        return byTime[key];
+      }).sort(function(a, b) {
+        return a.time - b.time;
+      });
+    }
+
     function parseJsonResponseText(text) {
-      var raw = String(text || '').trim();
+      var rawInput = String(text || '');
+      if (rawInput.length > MAX_JSON_RESPONSE_LENGTH) {
+        throw new Error('JSON response exceeds the safe size limit');
+      }
+      var raw = rawInput.trim();
       if (!raw) throw new Error('Empty JSON response');
 
       try {
@@ -4729,6 +4890,12 @@
     }
 
     async function parseJsonResponseBody(response) {
+      if (response && response.headers && typeof response.headers.get === 'function') {
+        var contentLength = parseInt(response.headers.get('content-length'), 10);
+        if (Number.isFinite(contentLength) && contentLength > MAX_JSON_RESPONSE_LENGTH) {
+          throw new Error('JSON response exceeds the safe size limit');
+        }
+      }
       if (response && typeof response.text === 'function') {
         return normalizeParsedJsonPayload(parseJsonResponseText(await response.text()));
       }
@@ -4753,7 +4920,7 @@
       }
 
       try {
-        var response = await fetch(url, { signal: controller.signal });
+        var response = await fetch(url, getSafeFetchOptions({ signal: controller.signal }));
         if (!response.ok) {
           var err = new Error('HTTP ' + response.status);
           err.status = response.status;
@@ -5142,8 +5309,7 @@
       try {
         var saved = localStorage.getItem('orion-screener-settings');
         if (saved) {
-          var parsed = JSON.parse(saved);
-          chartSettings = { ...chartSettings, ...parsed };
+          chartSettings = sanitizeChartSettings(JSON.parse(saved));
         }
       } catch (e) {
         console.warn('Failed to load settings:', e);
@@ -5153,6 +5319,7 @@
     // Save settings to localStorage
     function saveSettings() {
       try {
+        chartSettings = sanitizeChartSettings(chartSettings);
         localStorage.setItem('orion-screener-settings', JSON.stringify(chartSettings));
       } catch (e) {
         console.warn('Failed to save settings:', e);
@@ -5203,23 +5370,43 @@
       refreshOpenChartPreviewAppearance();
     }
 
-    function normalizeHexColor(value) {
-      if (!value) return '#000000';
-      var cleaned = value.trim().toLowerCase();
+    function parseHexColor(value) {
+      if (!value) return null;
+      var cleaned = String(value).trim().toLowerCase();
       if (cleaned[0] === '#') {
         if (cleaned.length === 4) {
-          return '#' + cleaned[1] + cleaned[1] + cleaned[2] + cleaned[2] + cleaned[3] + cleaned[3];
+          cleaned = '#' + cleaned[1] + cleaned[1] + cleaned[2] + cleaned[2] + cleaned[3] + cleaned[3];
         }
-        return cleaned;
+        return /^#[0-9a-f]{6}$/.test(cleaned) ? cleaned : null;
       }
-      var match = cleaned.match(/^rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)$/);
+      var match = cleaned.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
       if (match) {
-        var r = parseInt(match[1], 10).toString(16).padStart(2, '0');
-        var g = parseInt(match[2], 10).toString(16).padStart(2, '0');
-        var b = parseInt(match[3], 10).toString(16).padStart(2, '0');
+        var channels = [match[1], match[2], match[3]].map(function(channel) {
+          return parseInt(channel, 10);
+        });
+        if (channels.some(function(channel) { return channel < 0 || channel > 255; })) return null;
+        var r = channels[0].toString(16).padStart(2, '0');
+        var g = channels[1].toString(16).padStart(2, '0');
+        var b = channels[2].toString(16).padStart(2, '0');
         return '#' + r + g + b;
       }
-      return '#000000';
+      return null;
+    }
+
+    function normalizeHexColor(value) {
+      return parseHexColor(value) || '#000000';
+    }
+
+    function sanitizeChartStyleOverrides(value) {
+      var source = value && typeof value === 'object' ? value : {};
+      var next = {};
+      CHART_STYLE_CONTROLS.forEach(function(control) {
+        control.vars.forEach(function(varName) {
+          var color = parseHexColor(source[varName]);
+          if (color) next[varName] = color;
+        });
+      });
+      return next;
     }
 
     function applyChartStyleOverrides(persist) {
@@ -5249,10 +5436,7 @@
       try {
         var saved = localStorage.getItem(CHART_STYLE_STORAGE_KEY);
         if (saved) {
-          var parsed = JSON.parse(saved);
-          if (parsed && typeof parsed === 'object') {
-            chartStyleOverrides = parsed;
-          }
+          chartStyleOverrides = sanitizeChartStyleOverrides(JSON.parse(saved));
         }
       } catch (e) {
         chartStyleOverrides = {};
@@ -5286,61 +5470,88 @@
     // API & Data Parsing
     // =============================================================================
 
+    function normalizeMarketSymbol(baseAssetValue, symbolValue) {
+      var baseAsset = String(baseAssetValue || '').trim().toUpperCase();
+      if (/^[A-Z0-9]{1,20}$/.test(baseAsset)) {
+        return baseAsset + '/USDT';
+      }
+
+      var rawSymbol = String(symbolValue || '').trim().toUpperCase();
+      var match = rawSymbol.match(/^([A-Z0-9]{1,20})\/?USDT$/);
+      return match ? match[1] + '/USDT' : null;
+    }
+
+    function parseFiniteInRange(value, min, max) {
+      if (value === null || value === undefined || value === '') return null;
+      var parsed = typeof value === 'number' ? value : Number(String(value).trim());
+      if (!Number.isFinite(parsed) || parsed < min || parsed > max) return null;
+      return parsed;
+    }
+
+    function parseOptionalScreenerMetric(value, fallback, min, max, integer) {
+      var parsed = parseFiniteInRange(value, min, max);
+      if (parsed === null) return fallback;
+      return integer ? Math.trunc(parsed) : parsed;
+    }
+
     function parseScreenerData(data) {
       const picks = [];
 
       // New API format (2025+): { tickers: [...] }
       if (data && data.tickers && Array.isArray(data.tickers)) {
-        for (const ticker of data.tickers) {
-          if (!ticker.symbol || ticker.price <= 0) continue;
-
-          const symbol = ticker.baseAsset
-            ? ticker.baseAsset + '/USDT'
-            : ticker.symbol.replace(/USDT$/, '/USDT');
+        for (const ticker of data.tickers.slice(0, MAX_SCREENER_RECORDS)) {
+          if (!ticker || typeof ticker !== 'object') continue;
+          const symbol = normalizeMarketSymbol(ticker.baseAsset, ticker.symbol);
+          const price = parseFiniteInRange(ticker.price, Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+          const volume24h = parseFiniteInRange(ticker.tf1d?.volume, Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+          if (!symbol || price === null || volume24h === null) continue;
 
           const pick = {
             symbol,
             exchange: 'binanceusdm',
-            price: parseFloat(ticker.price) || 0,
-            priceChange1h: parseFloat(ticker.tf1h?.changePercent) || 0,
-            priceChange4h: parseFloat(ticker.tf4h?.changePercent) || 0,
-            priceChange24h: parseFloat(ticker.tf1d?.changePercent) || 0,
-            volume24h: parseFloat(ticker.tf1d?.volume) || 0,
-            volatility15m: parseFloat(ticker.tf15m?.volatility) || 0,
-            ticks5m: parseInt(ticker.tf5m?.trades, 10) || 0,
-            ticks15m: parseInt(ticker.tf15m?.trades, 10) || 0,
+            price: price,
+            priceChange1h: parseOptionalScreenerMetric(ticker.tf1h?.changePercent, 0, -100, 1000000, false),
+            priceChange4h: parseOptionalScreenerMetric(ticker.tf4h?.changePercent, 0, -100, 1000000, false),
+            priceChange24h: parseOptionalScreenerMetric(ticker.tf1d?.changePercent, 0, -100, 1000000, false),
+            volume24h: volume24h,
+            volatility15m: parseOptionalScreenerMetric(ticker.tf15m?.volatility, 0, 0, 10000, false),
+            ticks5m: parseOptionalScreenerMetric(ticker.tf5m?.trades, 0, 0, 1000000000, true),
+            ticks15m: parseOptionalScreenerMetric(ticker.tf15m?.trades, 0, 0, 1000000000, true),
           };
-
-          if (pick.volume24h <= 0) continue;
           picks.push(pick);
         }
         return picks;
       }
 
       // Legacy format: { "BTC/USDT-binanceusdm": { "11": price, ... } }
-      for (const [key, values] of Object.entries(data)) {
+      if (!data || typeof data !== 'object') return picks;
+      const legacyKeys = Object.keys(data).slice(0, MAX_SCREENER_RECORDS);
+      for (const key of legacyKeys) {
+        const values = data[key];
         if (!values || typeof values !== 'object') continue;
 
-        const match = key.match(/^(.+)-(.+)$/);
+        const match = key.match(/^([A-Z0-9]{1,20})\/USDT-([A-Z0-9-]{1,30})$/i);
         if (!match) continue;
 
         const volumeData = values['10'];
-        const volumeUSD = Array.isArray(volumeData) ? (volumeData[1] || 0) : 0;
+        const volumeUSD = Array.isArray(volumeData)
+          ? parseFiniteInRange(volumeData[1], Number.MIN_VALUE, Number.MAX_SAFE_INTEGER)
+          : null;
+        const price = parseFiniteInRange(values['11'], Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+        if (price === null || volumeUSD === null) continue;
 
         const pick = {
-          symbol: match[1],
-          exchange: match[2],
-          price: parseFloat(values['11']) || 0,
-          priceChange1h: (parseFloat(values['0']) || 0) * 100,
-          priceChange4h: (parseFloat(values['1']) || 0) * 100,
-          priceChange24h: (parseFloat(values['4']) || 0) * 100,
+          symbol: match[1].toUpperCase() + '/USDT',
+          exchange: match[2].toLowerCase(),
+          price: price,
+          priceChange1h: parseOptionalScreenerMetric(values['0'], 0, -1, 10000, false) * 100,
+          priceChange4h: parseOptionalScreenerMetric(values['1'], 0, -1, 10000, false) * 100,
+          priceChange24h: parseOptionalScreenerMetric(values['4'], 0, -1, 10000, false) * 100,
           volume24h: volumeUSD,
-          volatility15m: parseFloat(values['46']) || 0,
-          ticks5m: parseInt(values['17'], 10) || 0,
-          ticks15m: parseInt(values['15'], 10) || 0,
+          volatility15m: parseOptionalScreenerMetric(values['46'], 0, 0, 10000, false),
+          ticks5m: parseOptionalScreenerMetric(values['17'], 0, 0, 1000000000, true),
+          ticks15m: parseOptionalScreenerMetric(values['15'], 0, 0, 1000000000, true),
         };
-
-        if (pick.price <= 0 || pick.volume24h <= 0) continue;
         picks.push(pick);
       }
 
@@ -5390,7 +5601,7 @@
       if (data && data.data && Array.isArray(data.data.tickers)) return;
       if (data && typeof data === 'object') {
         var keys = Object.keys(data);
-        if (keys.some(function(key) { return /\/USDT-/.test(key); })) return;
+        if (keys.some(function(key) { return /^[A-Z0-9]{1,20}\/USDT-[A-Z0-9-]{1,30}$/i.test(key); })) return;
       }
       throw new Error('Unexpected screener response');
     }
@@ -5404,11 +5615,11 @@
       }, timeoutMs || FETCH_TIMEOUT_MS);
 
       try {
-        const response = await fetch(url, {
+        const response = await fetch(url, getSafeFetchOptions({
           method: 'GET',
           headers: { 'Accept': 'application/json' },
           signal: controller.signal,
-        });
+        }));
 
         if (!response.ok) {
           throw new Error('HTTP ' + response.status);
@@ -5427,7 +5638,20 @@
       }
     }
 
-    async function fetchWithProxy(proxyIndex) {
+    function createScanTimeoutError() {
+      var error = new Error('Scan timed out. Check your network or proxy settings, then retry.');
+      error.name = 'TimeoutError';
+      return error;
+    }
+
+    function getRequestTimeoutWithinDeadline(maxTimeoutMs, deadlineMs) {
+      if (!Number.isFinite(deadlineMs)) return maxTimeoutMs;
+      var remaining = deadlineMs - Date.now();
+      if (remaining <= 0) throw createScanTimeoutError();
+      return Math.max(1, Math.min(maxTimeoutMs, remaining));
+    }
+
+    async function fetchWithProxy(proxyIndex, deadlineMs) {
       var startIndex = Number.isFinite(proxyIndex) ? proxyIndex : 0;
       var rankedIndexes = getRankedProxyIndexes(startIndex);
       for (var offset = 0; offset < rankedIndexes.length; offset += 1) {
@@ -5440,7 +5664,8 @@
 
         try {
           const startedAt = Date.now();
-          const data = await fetchJsonWithTimeout(url, SCAN_PROXY_FETCH_TIMEOUT_MS);
+          const timeoutMs = getRequestTimeoutWithinDeadline(SCAN_PROXY_FETCH_TIMEOUT_MS, deadlineMs);
+          const data = await fetchJsonWithTimeout(url, timeoutMs);
           assertScreenerPayload(data);
           recordProxyHealthSuccess(index, Date.now() - startedAt);
           console.log('Success via ' + proxyName);
@@ -5449,26 +5674,33 @@
         } catch (err) {
           recordProxyHealthFailure(index);
           console.warn('Proxy failed: ' + proxyName + ' (' + err.message + ')');
+          if (Number.isFinite(deadlineMs) && Date.now() >= deadlineMs) {
+            throw createScanTimeoutError();
+          }
         }
       }
 
       throw new Error('Proxy chain failed');
     }
 
-    async function fetchScreener() {
+    async function fetchScreener(deadlineMs) {
       // Use proxies on file:// and GitHub Pages. Otherwise try direct and fall back to proxies if needed.
       let data;
       if (isDirectApiBlocked()) {
-        data = await fetchWithProxy(getPreferredProxyIndex());
+        data = await fetchWithProxy(getPreferredProxyIndex(), deadlineMs);
       } else {
         try {
           console.log('Trying direct API');
-          data = await fetchJsonWithTimeout(ORION_API);
+          var directTimeoutMs = getRequestTimeoutWithinDeadline(FETCH_TIMEOUT_MS, deadlineMs);
+          data = await fetchJsonWithTimeout(ORION_API, directTimeoutMs);
           clearDirectApiBlocked();
         } catch (err) {
+          if (Number.isFinite(deadlineMs) && Date.now() >= deadlineMs) {
+            throw createScanTimeoutError();
+          }
           console.warn('Direct API failed, falling back to proxies:', err);
           markDirectApiBlocked();
-          data = await fetchWithProxy(getPreferredProxyIndex());
+          data = await fetchWithProxy(getPreferredProxyIndex(), deadlineMs);
         }
       }
       const allPicks = parseScreenerData(data);
@@ -5541,6 +5773,128 @@
       setTimeout(function() {
         toast.classList.remove('show');
       }, 2500);
+    }
+
+    function updateScreenerStatus(title, detail) {
+      var titleElement = document.getElementById('heroStatusTitle');
+      var detailElement = document.getElementById('heroStatusDetail');
+      if (titleElement) titleElement.textContent = title;
+      if (detailElement) detailElement.textContent = detail;
+    }
+
+    function clearScanError() {
+      var errorBox = document.getElementById('error');
+      var errorText = document.getElementById('errorText');
+      if (errorText) errorText.textContent = '';
+      if (errorBox) errorBox.style.display = 'none';
+    }
+
+    function getScanErrorMessage(error) {
+      if (error && error.name === 'TimeoutError') return error.message;
+      return 'Market data is unavailable right now. Retry, or review Settings → Network if the problem continues.';
+    }
+
+    function showScanError(error) {
+      var message = getScanErrorMessage(error);
+      var errorBox = document.getElementById('error');
+      var errorText = document.getElementById('errorText');
+      if (errorText) errorText.textContent = message;
+      if (errorBox) errorBox.style.display = 'flex';
+      updateScreenerStatus('Scan unavailable', 'Retry or check network settings');
+      return message;
+    }
+
+    var dialogFocusState = {
+      element: null,
+      returnTo: null,
+    };
+
+    const DIALOG_FOCUSABLE_SELECTOR = [
+      'a[href]:not([aria-disabled="true"])',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    function getDialogFocusableElements(dialog) {
+      if (!dialog) return [];
+      return Array.from(dialog.querySelectorAll(DIALOG_FOCUSABLE_SELECTOR)).filter(function(element) {
+        return !element.hidden && element.getClientRects().length > 0;
+      });
+    }
+
+    function showManagedDialog(dialog, preferredFocus) {
+      if (!dialog) return;
+      var returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      dialog.classList.add('visible');
+      dialog.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('dialog-open');
+      dialogFocusState.element = dialog;
+      dialogFocusState.returnTo = returnTo;
+
+      var target = typeof preferredFocus === 'string'
+        ? dialog.querySelector(preferredFocus)
+        : preferredFocus;
+      if (!target) target = getDialogFocusableElements(dialog)[0];
+      if (!target) {
+        target = dialog.querySelector('.modal, .help-panel-inner') || dialog;
+      }
+      if (target.tabIndex < 0 && !target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      var focusTarget = function() {
+        if (dialogFocusState.element === dialog && target && typeof target.focus === 'function') {
+          target.focus({ preventScroll: true });
+        }
+      };
+      focusTarget();
+      setTimeout(focusTarget, 0);
+    }
+
+    function hideManagedDialog(dialog) {
+      if (!dialog) return;
+      dialog.classList.remove('visible');
+      dialog.setAttribute('aria-hidden', 'true');
+      if (dialogFocusState.element !== dialog) return;
+
+      var returnTo = dialogFocusState.returnTo;
+      dialogFocusState.element = null;
+      dialogFocusState.returnTo = null;
+      document.body.classList.remove('dialog-open');
+      if (returnTo && returnTo.isConnected && typeof returnTo.focus === 'function') {
+        setTimeout(function() {
+          returnTo.focus({ preventScroll: true });
+        }, 0);
+      }
+    }
+
+    function trapManagedDialogFocus(event) {
+      var dialog = dialogFocusState.element;
+      if (!dialog || event.key !== 'Tab') return false;
+      var focusable = getDialogFocusableElements(dialog);
+      if (!focusable.length) {
+        event.preventDefault();
+        return true;
+      }
+
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+        return true;
+      }
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+        return true;
+      }
+      if (!dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+        return true;
+      }
+      return false;
     }
 
     function createSvgIcon(paths, width, height) {
@@ -5944,6 +6298,7 @@
           delBtn.className = 'profile-delete-btn';
           delBtn.textContent = '\u00D7';
           delBtn.title = 'Delete preset';
+          delBtn.setAttribute('aria-label', 'Delete preset ' + profile.name);
           delBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             if (confirm('Delete "' + profile.name + '"?')) {
@@ -6156,6 +6511,7 @@
         const copyBtn = document.createElement('button');
         copyBtn.className = 'action-btn';
         copyBtn.title = 'Copy symbol';
+        copyBtn.setAttribute('aria-label', 'Copy ' + pick.symbol.replace('/', ''));
         const copyIcon = createSvgIcon([
           'M8 8h8v8H8z',
           'M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'
@@ -6171,6 +6527,7 @@
         tvLink.target = '_blank';
         tvLink.rel = 'noopener noreferrer';
         tvLink.title = 'Open in TradingView';
+        tvLink.setAttribute('aria-label', 'Open ' + pick.symbol + ' in TradingView');
         const tvIcon = createSvgIcon([
           'M18 20V10',
           'M12 20V4',
@@ -6182,6 +6539,7 @@
         const chartBtn = document.createElement('button');
         chartBtn.className = 'action-btn chart mobile-chart-btn';
         chartBtn.title = 'Show chart';
+        chartBtn.setAttribute('aria-label', 'Show chart for ' + pick.symbol);
         const chartIcon = createSvgIcon([
           'M3 3v18h18',
           'M18 9l-5 5-4-4-3 3'
@@ -6285,16 +6643,16 @@
       var deadline = Date.now() + SCAN_TIMEOUT_MS;
       while (true) {
         if (Date.now() >= deadline) {
-          throw new Error('Scan timed out. Please retry.');
+          throw createScanTimeoutError();
         }
         try {
-          return await fetchScreener();
+          return await fetchScreener(deadline);
         } catch (err) {
           attempt += 1;
           var delay = Math.min(SCAN_RETRY_BASE_DELAY_MS * Math.pow(1.5, attempt - 1), SCAN_RETRY_MAX_DELAY_MS);
           var remaining = deadline - Date.now();
           if (remaining <= 0) {
-            throw new Error('Scan timed out. Please retry.');
+            throw createScanTimeoutError();
           }
           delay = Math.min(delay, remaining);
           console.warn('Fetch failed, retrying in ' + Math.round(delay) + 'ms');
@@ -6307,8 +6665,13 @@
       if (isLoading) return;
 
       const btn = document.getElementById('scanBtn');
+      const resultsContainer = document.getElementById('resultsContainer');
       isLoading = true;
       btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+      if (resultsContainer) resultsContainer.setAttribute('aria-busy', 'true');
+      clearScanError();
+      updateScreenerStatus('Scanning market', 'Live request in progress');
       abortExtrasPrefetch();
       abortHoverExtrasPrefetch();
 
@@ -6326,13 +6689,20 @@
         picks = await fetchScreenerWithRetry();
         renderPicks();
         prefetchTopCandidateExtras();
+        updateScreenerStatus(
+          picks.length ? picks.length + (picks.length === 1 ? ' setup found' : ' setups found') : 'No setups found',
+          'Scan complete · adjust filters to refine'
+        );
         showToast('Found ' + picks.length + ' picks');
       } catch (err) {
         console.error('Scan failed:', err);
-        showToast(err.message || 'Scan failed', 'error');
+        var userMessage = showScanError(err);
+        showToast(userMessage, 'error');
       } finally {
         isLoading = false;
         btn.disabled = false;
+        btn.setAttribute('aria-busy', 'false');
+        if (resultsContainer) resultsContainer.setAttribute('aria-busy', 'false');
         btnSpan.textContent = originalText;
         btn.querySelector('.spinner')?.remove();
         btn.querySelector('svg').style.display = '';
@@ -6350,6 +6720,7 @@
       } else {
         btn.classList.add('active');
       }
+      btn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
     }
 
     function toggleHelp() {
@@ -6357,9 +6728,14 @@
       const btn = document.getElementById('helpBtn');
       if (!panel) return;
       const isVisible = panel.classList.contains('visible');
-      panel.classList.toggle('visible', !isVisible);
+      if (isVisible) {
+        hideManagedDialog(panel);
+      } else {
+        showManagedDialog(panel, '#closeHelpBtn');
+      }
       if (btn) {
         btn.classList.toggle('active', !isVisible);
+        btn.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
       }
     }
 
@@ -6384,7 +6760,7 @@
       return list
         .map(function(item) { return String(item || '').trim().toUpperCase(); })
         .filter(function(item) {
-          if (!item) return false;
+          if (!/^[A-Z0-9]{1,20}$/.test(item)) return false;
           if (seen[item]) return false;
           seen[item] = true;
           return true;
@@ -6395,22 +6771,32 @@
     function sanitizeFilterState(raw) {
       var source = raw && typeof raw === 'object' ? raw : {};
       var minVolumeRaw = parseInt(source.minVolume, 10);
-      var minVolume = Number.isFinite(minVolumeRaw) ? Math.max(0, minVolumeRaw) : DEFAULT_FILTERS.minVolume;
+      var minVolume = Number.isFinite(minVolumeRaw)
+        ? clamp(minVolumeRaw, 0, Number.MAX_SAFE_INTEGER)
+        : DEFAULT_FILTERS.minVolume;
 
       var maxVolumeRaw = parseInt(source.maxVolume, 10);
-      var maxVolume = Number.isFinite(maxVolumeRaw) && maxVolumeRaw > 0 ? maxVolumeRaw : null;
+      var maxVolume = Number.isFinite(maxVolumeRaw) && maxVolumeRaw > 0
+        ? clamp(maxVolumeRaw, 1, Number.MAX_SAFE_INTEGER)
+        : null;
       if (maxVolume !== null && maxVolume < minVolume) {
         maxVolume = minVolume;
       }
 
       var minVolatilityRaw = parseFloat(source.minVolatility15m);
-      var minVolatility15m = Number.isFinite(minVolatilityRaw) ? Math.max(0, minVolatilityRaw) : DEFAULT_FILTERS.minVolatility15m;
+      var minVolatility15m = Number.isFinite(minVolatilityRaw)
+        ? clamp(minVolatilityRaw, 0, 10000)
+        : DEFAULT_FILTERS.minVolatility15m;
 
       var minTicksRaw = parseInt(source.minTicks5m, 10);
-      var minTicks5m = Number.isFinite(minTicksRaw) ? Math.max(0, minTicksRaw) : DEFAULT_FILTERS.minTicks5m;
+      var minTicks5m = Number.isFinite(minTicksRaw)
+        ? clamp(minTicksRaw, 0, 1000000000)
+        : DEFAULT_FILTERS.minTicks5m;
 
       var maxResultsRaw = parseInt(source.maxResults, 10);
-      var maxResults = Number.isFinite(maxResultsRaw) && maxResultsRaw > 0 ? maxResultsRaw : DEFAULT_FILTERS.maxResults;
+      var maxResults = Number.isFinite(maxResultsRaw) && maxResultsRaw > 0
+        ? clamp(maxResultsRaw, 1, 100)
+        : DEFAULT_FILTERS.maxResults;
 
       var excludeSymbols = normalizeExcludeSymbols(source.excludeSymbols);
 
@@ -7224,13 +7610,13 @@
       }
 
       renderSocialCard(payload, opts.errorMessage || '');
-      modal.classList.add('visible');
+      showManagedDialog(modal, opts.onlyMode ? '.modal' : '#socialCardClose');
     }
 
     function closeSocialCardModal() {
       if (socialCardState.onlyMode) return;
       var modal = document.getElementById('socialCardModal');
-      if (modal) modal.classList.remove('visible');
+      hideManagedDialog(modal);
     }
 
     function truncateShareText(text, maxLength) {
@@ -7423,7 +7809,7 @@
       }
 
       try {
-        var response = await fetch(baseUrl, { cache: 'no-store' });
+        var response = await fetch(baseUrl, getSafeFetchOptions({ cache: 'no-store' }));
         if (!response.ok) throw new Error('Download failed');
         var html = await response.text();
         triggerDownload(html);
@@ -7486,25 +7872,12 @@
       var opts = options || {};
       var force = !!opts.force;
       var url = proxy && proxy.url ? String(proxy.url).trim() : '';
-
-      if (!url) {
-        return {
-          valid: false,
-          show: force || !!(proxy && proxy._touched),
-          message: 'Proxy URL is required.',
-        };
-      }
-
-      var lower = url.toLowerCase();
-      if (!(lower.startsWith('https://') || lower.startsWith('http://'))) {
-        return {
-          valid: false,
-          show: true,
-          message: 'Proxy URL must start with http:// or https://',
-        };
-      }
-
-      return { valid: true, show: false, message: '' };
+      var inspected = inspectCorsProxyUrl(url);
+      return {
+        valid: inspected.valid,
+        show: !inspected.valid && (force || !!url || !!(proxy && proxy._touched)),
+        message: inspected.message,
+      };
     }
 
     function refreshCorsProxyValidation(proxy, options) {
@@ -8075,7 +8448,6 @@
 
     function openSettingsModal() {
       var modal = document.getElementById('settingsModal');
-      modal.classList.add('visible');
 
       // Sync UI with current settings
       document.getElementById('settingChartEnabled').checked = chartSettings.enabled;
@@ -8089,22 +8461,23 @@
       setActiveSettingsTab(getStoredSettingsTab(), false, true);
       syncChartStyleInputs();
       syncCorsProxySettingsUi();
+      showManagedDialog(modal, '.settings-tab.active');
     }
 
     function closeSettingsModal() {
       var modal = document.getElementById('settingsModal');
-      modal.classList.remove('visible');
+      hideManagedDialog(modal);
       abortAllCorsProxyDraftTests();
     }
 
     function openAboutModal() {
       var modal = document.getElementById('aboutModal');
-      modal.classList.add('visible');
+      showManagedDialog(modal, '#aboutModalClose');
     }
 
     function closeAboutModal() {
       var modal = document.getElementById('aboutModal');
-      modal.classList.remove('visible');
+      hideManagedDialog(modal);
     }
 
     function handleSettingChange(settingId, value) {
@@ -8222,6 +8595,11 @@
       }
 
       preview.classList.toggle('maximized', isChartMaximized);
+      var maximizeButton = document.getElementById('chartPreviewMaximize');
+      if (maximizeButton) {
+        maximizeButton.setAttribute('aria-expanded', isChartMaximized ? 'true' : 'false');
+        maximizeButton.setAttribute('aria-label', isChartMaximized ? 'Collapse chart preview' : 'Expand for full data view');
+      }
 
       container.style.width = '100%';
       var bodyRect = body ? body.getBoundingClientRect() : null;
@@ -8946,6 +9324,9 @@
     // =============================================================================
 
     document.addEventListener('DOMContentLoaded', function() {
+      var fontStylesheet = document.getElementById('appFontStylesheet');
+      if (fontStylesheet) fontStylesheet.media = 'all';
+
       // Load saved settings
       loadSettings();
       loadCustomProfiles();
@@ -8963,6 +9344,7 @@
 
       // Attach event listeners
       document.getElementById('scanBtn').addEventListener('click', handleScan);
+      document.getElementById('retryScanBtn').addEventListener('click', handleScan);
       document.getElementById('filtersBtn').addEventListener('click', toggleFilters);
       document.getElementById('closeFiltersBtn').addEventListener('click', toggleFilters);
       document.getElementById('helpBtn').addEventListener('click', toggleHelp);
@@ -9226,6 +9608,7 @@
 
       // Keyboard shortcut to close modal
       document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab' && trapManagedDialogFocus(e)) return;
         if (e.key === 'Escape') {
           closeAllCandidateTooltips();
           closeSettingsModal();

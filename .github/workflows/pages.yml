@@ -49,6 +49,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Sync deployment metadata
+        env:
+          ORION_BUILD_COMMIT: ${{ github.sha }}
+        run: npm run sync:build-meta
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

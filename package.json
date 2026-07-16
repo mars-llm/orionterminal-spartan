@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "sync:build-meta": "node scripts/sync-build-meta.mjs",
+    "sync:csp": "node scripts/sync-csp.mjs",
+    "sync:build-meta": "npm run sync:csp && node scripts/sync-build-meta.mjs",
     "test": "npm run test:e2e && npm run test:coverage",
     "test:e2e": "npm run sync:build-meta && playwright test",
     "test:e2e:live": "npm run sync:build-meta && E2E_BASE_URL=https://mars-llm.github.io/orionterminal-spartan/ playwright test",

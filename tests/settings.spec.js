@@ -155,9 +155,127 @@ test('network: invalid URL shows inline validation and blocks save', async ({ pa
   const input = row.locator('input.proxy-url-input');
   await input.blur();
 
-  await expect(row.locator('.proxy-validation')).toContainText('Proxy URL must start with http:// or https://');
+  await expect(row.locator('.proxy-validation')).toContainText('Proxy URL must be a valid http:// or https:// URL.');
   await expect(page.locator('#saveCorsProxyBtn')).toBeDisabled();
   await expect(page.locator('#corsProxyStatus')).toContainText('Resolve highlighted URL errors before saving.');
+});
+
+test('network: requires HTTPS except for loopback development proxies', async ({ page }) => {
+  await openSettingsTab(page, 'network');
+  await clearProxyRows(page);
+
+  const remoteHttpRow = await addProxyRow(page, 'http://proxy.example/?url=', true);
+  await remoteHttpRow.locator('input.proxy-url-input').blur();
+  await expect(remoteHttpRow.locator('.proxy-validation')).toContainText(
+    'Proxy URL must use HTTPS. HTTP is allowed only for local development.'
+  );
+  await expect(page.locator('#saveCorsProxyBtn')).toBeDisabled();
+
+  await remoteHttpRow.getByRole('button', { name: 'Remove' }).click();
+  const loopbackRow = await addProxyRow(page, 'http://127.0.0.1:8787/?url=', true);
+  await loopbackRow.locator('input.proxy-url-input').blur();
+  await expect(loopbackRow.locator('.proxy-validation')).toBeEmpty();
+  await expect(page.locator('#saveCorsProxyBtn')).toBeEnabled();
+});
+
+test('security: outbound JSON requests omit credentials and referrer data', async ({ page }) => {
+  await page.goto('./');
+
+  const options = await page.evaluate(async () => {
+    const originalFetch = window.fetch;
+    let captured = null;
+    window.fetch = async (url, requestOptions) => {
+      captured = requestOptions;
+      return {
+        ok: true,
+        text: async () => JSON.stringify({ tickers: [] }),
+      };
+    };
+    try {
+      await fetchJsonWithTimeout('https://example.com/data', 250);
+      return captured;
+    } finally {
+      window.fetch = originalFetch;
+    }
+  });
+
+  expect(options.credentials).toBe('omit');
+  expect(options.referrerPolicy).toBe('no-referrer');
+  expect(options.method).toBe('GET');
+
+  const enforcedOptions = await page.evaluate(() => getSafeFetchOptions({
+    credentials: 'include',
+    referrerPolicy: 'origin',
+  }));
+  expect(enforcedOptions.credentials).toBe('omit');
+  expect(enforcedOptions.referrerPolicy).toBe('no-referrer');
+});
+
+test('reliability: corrupted persisted preferences fall back to safe values', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('orion-screener-settings', JSON.stringify({
+      enabled: 'yes',
+      timeframe: '2h',
+      size: 'enormous',
+      hoverDelay: 999999,
+      showSR15m: 'yes',
+    }));
+    localStorage.setItem('orion-screener-custom-profiles', JSON.stringify({ not: 'an array' }));
+    localStorage.setItem('orion-screener-chart-style', JSON.stringify({
+      '--candle-up': 'url(javascript:alert(1))',
+      '--candle-down': '#12abEF',
+      '--unknown-token': '#ffffff',
+    }));
+  });
+
+  await page.goto('./');
+  const state = await page.evaluate(() => ({
+    chartSettings,
+    customProfiles,
+    chartStyleOverrides,
+  }));
+
+  expect(state.chartSettings).toEqual({
+    enabled: true,
+    timeframe: '1m',
+    size: 'medium',
+    hoverDelay: 300,
+    showSR15m: false,
+    showSR1h: false,
+    showSR4h: false,
+    showSR1d: false,
+  });
+  expect(state.customProfiles).toEqual([]);
+  expect(state.chartStyleOverrides).toEqual({ '--candle-down': '#12abef' });
+});
+
+test('reliability: proxy requests respect the remaining scan deadline', async ({ page }) => {
+  await page.goto('./');
+
+  const result = await page.evaluate(async () => {
+    applyCorsProxies([{ url: 'https://slow.example/?url=', encode: true }], false);
+    const originalFetch = window.fetch;
+    window.fetch = (url, options) => new Promise((resolve, reject) => {
+      options.signal.addEventListener('abort', () => {
+        reject(new DOMException('Aborted', 'AbortError'));
+      }, { once: true });
+    });
+
+    const startedAt = performance.now();
+    try {
+      await fetchWithProxy(0, Date.now() + 80);
+      return { name: '', elapsed: performance.now() - startedAt };
+    } catch (error) {
+      return { name: error.name, message: error.message, elapsed: performance.now() - startedAt };
+    } finally {
+      window.fetch = originalFetch;
+    }
+  });
+
+  expect(result.name).toBe('TimeoutError');
+  expect(result.message).toContain('Scan timed out');
+  expect(result.elapsed).toBeGreaterThanOrEqual(50);
+  expect(result.elapsed).toBeLessThan(500);
 });
 
 test('network: per-row test updates status from idle to passed', async ({ page }) => {

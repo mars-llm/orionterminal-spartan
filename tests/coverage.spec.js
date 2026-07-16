@@ -189,6 +189,48 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
     toggleFilters();
     toggleFilters();
 
+    const sanitizedCandles = sanitizeCandles([
+      { time: 3, open: 3, high: 4, low: 2, close: 3.5, volume: 10 },
+      { time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 8 },
+      { time: 2, open: 2, high: 1, low: 0.5, close: 1.5, volume: 4 },
+      { time: 4, open: 4, high: 5, low: 3, close: 4.5, volume: -1 },
+    ]);
+    const boundedFilters = sanitizeFilterState({
+      minVolume: -10,
+      minVolatility15m: 99999,
+      minTicks5m: 9999999999,
+      maxResults: 9999,
+      excludeSymbols: ['BTC', 'bad symbol', 'BTC'],
+    });
+    const proxyPolicy = {
+      secure: inspectCorsProxyUrl('https://proxy.example/?url=').valid,
+      loopback: inspectCorsProxyUrl('http://localhost:8787/?url=').valid,
+      ipv6Loopback: inspectCorsProxyUrl('http://[::1]:8787/?url=').valid,
+      remoteHttp: inspectCorsProxyUrl('http://proxy.example/?url=').valid,
+      credentials: inspectCorsProxyUrl('https://user:pass@proxy.example/?url=').valid,
+    };
+    const parsedScreenerPicks = parseScreenerData({
+      tickers: [
+        {
+          symbol: 'SAFEUSDT',
+          price: '1.25',
+          tf1d: { volume: '1250000', changePercent: '4.5' },
+          tf15m: { volatility: '0.8', trades: '450' },
+          tf5m: { trades: '300' },
+        },
+        {
+          symbol: 'BAD&LIMIT=100USDT',
+          price: '2',
+          tf1d: { volume: '5000' },
+        },
+        {
+          symbol: 'INFINITEUSDT',
+          price: '1e999',
+          tf1d: { volume: '5000' },
+        },
+      ],
+    });
+
     return {
       decodedSetupOk: decodedSetup.ok,
       decodedFiltersOk: decodedFilters.ok,
@@ -208,6 +250,10 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
       storedProxiesAfterReset,
       buildStamp: getAppBuildStamp(window.__ORION_BUILD_INFO__),
       runtimeSource: window.__ORION_BUILD_INFO__ && window.__ORION_BUILD_INFO__.source,
+      candleTimes: sanitizedCandles.map((candle) => candle.time),
+      boundedFilters,
+      proxyPolicy,
+      parsedScreenerSymbols: parsedScreenerPicks.map((pick) => pick.symbol),
     };
   });
 
@@ -230,4 +276,20 @@ test('coverage: exercises low-touch helpers and fallback branches', async ({ pag
   expect(result.storedProxiesAfterReset).toBe(null);
   expect(result.buildStamp).toContain('card v2');
   expect(['build-meta.json', 'fallback']).toContain(result.runtimeSource);
+  expect(result.candleTimes).toEqual([1, 3]);
+  expect(result.boundedFilters).toMatchObject({
+    minVolume: 0,
+    minVolatility15m: 10000,
+    minTicks5m: 1000000000,
+    maxResults: 100,
+    excludeSymbols: ['BTC'],
+  });
+  expect(result.proxyPolicy).toEqual({
+    secure: true,
+    loopback: true,
+    ipv6Loopback: false,
+    remoteHttp: false,
+    credentials: false,
+  });
+  expect(result.parsedScreenerSymbols).toEqual(['SAFE/USDT']);
 });
