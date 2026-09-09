@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-luuyuQFzUG8LmoMqg8NYbk9N1lthPnmlQE8sZChlGxQ='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-myuA/+hoMdD5V/yXBov0175zeFpczKXwXt05LzDZL38='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -1354,12 +1354,14 @@
       flex-direction: column;
       pointer-events: none;
       opacity: 0;
+      visibility: hidden;
       transition: opacity 0.15s ease;
       backdrop-filter: blur(18px);
     }
 
     .chart-preview.visible {
       opacity: 1;
+      visibility: visible;
       pointer-events: auto;
     }
 
@@ -4033,6 +4035,7 @@
 
       chartLibraryPromise = new Promise(function(resolve, reject) {
         var script = document.querySelector('script[data-lightweight-charts="true"]');
+        var needsAppend = !script;
         if (!script) {
           script = document.createElement('script');
           script.src = LIGHTWEIGHT_CHARTS_SRC;
@@ -4041,7 +4044,6 @@
           script.referrerPolicy = 'no-referrer';
           script.async = true;
           script.dataset.lightweightCharts = 'true';
-          document.head.appendChild(script);
         }
 
         var timeoutId = null;
@@ -4054,18 +4056,18 @@
 
         function fail(message) {
           cleanup();
+          script.remove();
           chartLibraryPromise = null;
           reject(new Error(message));
         }
 
         function handleLoad() {
-          cleanup();
           if (window.LightweightCharts) {
+            cleanup();
             resolve(window.LightweightCharts);
             return;
           }
-          chartLibraryPromise = null;
-          reject(new Error('Chart library unavailable'));
+          fail('Chart library unavailable');
         }
 
         function handleError() {
@@ -4083,6 +4085,7 @@
         timeoutId = window.setTimeout(function() {
           fail('Chart library timed out');
         }, 12000);
+        if (needsAppend) document.head.appendChild(script);
       });
 
       return chartLibraryPromise;
@@ -4905,7 +4908,17 @@
       throw new Error('Invalid JSON response');
     }
 
+    function throwIfRequestAborted(signal, error) {
+      if (error && error.name === 'AbortError') throw error;
+      if (signal && signal.aborted) {
+        var abortError = new Error('Request aborted');
+        abortError.name = 'AbortError';
+        throw abortError;
+      }
+    }
+
     async function fetchJsonOrThrow(url, signal, timeoutMs) {
+      throwIfRequestAborted(signal);
       var controller = new AbortController();
       var didTimeout = false;
       var timeoutId = setTimeout(function() {
@@ -4927,8 +4940,10 @@
           throw err;
         }
         var data = await parseJsonResponseBody(response);
+        throwIfRequestAborted(signal);
         return { response: response, data: data };
       } catch (err) {
+        throwIfRequestAborted(signal);
         if (didTimeout && err && err.name === 'AbortError') {
           var timeoutErr = new Error('Request timed out');
           timeoutErr.name = 'TimeoutError';
@@ -4944,6 +4959,7 @@
     }
 
     async function fetchJsonWithProxies(url, signal, options) {
+      throwIfRequestAborted(signal);
       var lastErr = null;
       var forceEncode = options && options.forceEncode;
       var preferredIndex = getPreferredChartProxyIndex();
@@ -4974,6 +4990,7 @@
             setPreferredChartProxyIndex(index);
             return result;
           } catch (err) {
+            throwIfRequestAborted(signal, err);
             lastErr = err;
           }
         }
@@ -4982,6 +4999,7 @@
     }
 
     async function fetchCandlesFromSource(sourceId, cleanSymbol, baseAsset, timeframe, limit, signal) {
+      throwIfRequestAborted(signal);
       var source = CHART_SOURCES[sourceId];
       if (!source) throw new Error('Unknown source');
 
@@ -5038,12 +5056,14 @@
     }
 
     async function fetchChartCandles(symbol, timeframe, limit, signal) {
+      throwIfRequestAborted(signal);
       var cleanSymbol = getCleanSymbol(symbol);
       var baseAsset = getBaseAsset(symbol);
       var lastErr = null;
       var regionRestricted = isRegionRestricted();
 
       async function trySource(sourceId) {
+        throwIfRequestAborted(signal);
         var cacheKey = getChartCacheKey(sourceId, cleanSymbol, timeframe, limit);
         var cached = getCachedEntry(cacheKey);
         if (cached && cached.data && cached.data.length > 0) {
@@ -5054,20 +5074,22 @@
           if (sourceId === 'binance-futures-proxy') {
             cachedSourceId = 'binance-futures-proxy';
           }
-          return { candles: cached.data, source: CHART_SOURCES[cachedSourceId] || CHART_SOURCES[sourceId], cached: true };
+          return { candles: cached.data, source: CHART_SOURCES[cachedSourceId] || CHART_SOURCES[sourceId], cached: true, fetchedAt: cached.timestamp };
         }
         var candles = await fetchCandlesFromSource(sourceId, cleanSymbol, baseAsset, timeframe, limit, signal);
+        throwIfRequestAborted(signal);
         if (!candles || candles.length === 0) {
           throw new Error('No data');
         }
         setCachedData(cacheKey, candles, { source: sourceId });
-        return { candles: candles, source: CHART_SOURCES[sourceId], cached: false };
+        return { candles: candles, source: CHART_SOURCES[sourceId], cached: false, fetchedAt: dataCache.get(cacheKey).timestamp };
       }
 
       if (!regionRestricted) {
         try {
           return await trySource('binance-futures');
         } catch (err) {
+          throwIfRequestAborted(signal, err);
           lastErr = err;
           if (err && (err.status === 451 || err.status === 403)) {
             markRegionRestricted();
@@ -5079,6 +5101,7 @@
       try {
         return await trySource('binance-futures-proxy');
       } catch (err) {
+        throwIfRequestAborted(signal, err);
         lastErr = err;
       }
 
@@ -5087,6 +5110,7 @@
         try {
           return await trySource(sourceId);
         } catch (err) {
+          throwIfRequestAborted(signal, err);
           lastErr = err;
         }
       }
@@ -5123,6 +5147,7 @@
      * Fetch S/R levels for a specific timeframe
      */
     async function fetchSRLevels(symbol, interval, signal, source) {
+      throwIfRequestAborted(signal);
       if (!source || !source.id) return [];
       var cacheKey = symbol.replace('/', '') + '-sr-' + interval + '-' + source.id;
       var cached = getCachedData(cacheKey);
@@ -5132,13 +5157,12 @@
         var cleanSymbol = getCleanSymbol(symbol);
         var baseAsset = getBaseAsset(symbol);
         var candles = await fetchCandlesFromSource(source.id, cleanSymbol, baseAsset, interval, 3, signal);
+        throwIfRequestAborted(signal);
         var levels = detectSRLevels(candles);
         setCachedData(cacheKey, levels);
         return levels;
       } catch (err) {
-        if (err && err.name === 'AbortError') {
-          throw err;
-        }
+        throwIfRequestAborted(signal, err);
         console.warn('Failed to fetch S/R levels:', err);
         return [];
       }
@@ -5168,6 +5192,7 @@
     }
 
     async function fetchBinanceFuturesExtras(cleanSymbol, signal) {
+      throwIfRequestAborted(signal);
       var premiumUrl = getBinanceFuturesPremiumIndexUrl(cleanSymbol);
       var openInterestUrl = getBinanceFuturesOpenInterestUrl(cleanSymbol);
       var lastErr = null;
@@ -5189,6 +5214,7 @@
         try {
           return await fetchPair(fetchJsonOrThrow, 'binance-futures');
         } catch (err) {
+          throwIfRequestAborted(signal, err);
           lastErr = err;
           if (err && (err.status === 451 || err.status === 403)) {
             markRegionRestricted();
@@ -5202,6 +5228,7 @@
           return fetchJsonWithProxies(url, sig, { forceEncode: true });
         }, 'binance-futures-proxy');
       } catch (err) {
+        throwIfRequestAborted(signal, err);
         lastErr = err;
       }
 
@@ -5209,6 +5236,7 @@
     }
 
     async function getFuturesExtras(symbol, signal) {
+      throwIfRequestAborted(signal);
       if (!symbol) return null;
       var cleanSymbol = getCleanSymbol(symbol);
       var cacheKey = getFuturesExtrasCacheKey(cleanSymbol);
@@ -5216,6 +5244,7 @@
       if (cached && cached.data) return cached.data;
 
       var fetched = await fetchBinanceFuturesExtras(cleanSymbol, signal);
+      throwIfRequestAborted(signal);
       var premium = fetched && fetched.premium ? fetched.premium : null;
       var openInterest = fetched && fetched.openInterest ? fetched.openInterest : null;
       if (!premium || !openInterest) {
@@ -5693,6 +5722,7 @@
           console.log('Trying direct API');
           var directTimeoutMs = getRequestTimeoutWithinDeadline(FETCH_TIMEOUT_MS, deadlineMs);
           data = await fetchJsonWithTimeout(ORION_API, directTimeoutMs);
+          assertScreenerPayload(data);
           clearDirectApiBlocked();
         } catch (err) {
           if (Number.isFinite(deadlineMs) && Date.now() >= deadlineMs) {
@@ -8625,6 +8655,7 @@
     var chartPreviewLayoutSyncRaf = null;
     var currentPreviewSymbol = null;
     var currentPreviewSettings = null;
+    var currentPreviewLoadedAt = 0;
     var currentPreviewCard = null;
     var currentPreviewSource = null;
     var isChartMaximized = false;
@@ -9149,15 +9180,20 @@
       closeAllCandidateTooltips();
 
       // Check if we need to reload the chart
-      if (currentPreviewSettings === settingsKey && chartInstance) {
-        // Same settings, just reposition
+      if (currentPreviewSettings === settingsKey && chartInstance && currentPreviewSource &&
+          Date.now() - currentPreviewLoadedAt < CACHE_TTL) {
+        // Reuse only a completed chart with data still inside its original cache TTL.
+        currentPreviewSymbol = symbol;
+        updateChartPreviewBadge(currentPreviewSource);
         return;
       }
 
       currentPreviewSymbol = symbol;
-      currentPreviewSettings = settingsKey;
+      currentPreviewSettings = null;
+      currentPreviewLoadedAt = 0;
 
       // Show loading state
+      loading.textContent = 'Loading chart...';
       loading.classList.remove('hidden');
       container.style.display = 'none';
       legend.style.display = 'none';
@@ -9166,6 +9202,7 @@
 
       try {
         await ensureChartLibraryLoaded();
+        throwIfRequestAborted(signal);
 
         // Fetch candle data
         var intervalConfig = BINANCE_INTERVALS[resolvedTimeframe] || BINANCE_INTERVALS['15m'];
@@ -9203,14 +9240,14 @@
           item.style.display = 'none';
         });
 
-        [
+        await Promise.all([
           { enabled: chartSettings.showSR15m, interval: '15m', color: srColors.sr15m, label: '15m', legendItem: legend15m },
           { enabled: chartSettings.showSR1h, interval: '1h', color: srColors.sr1h, label: '1h', legendItem: legend1h },
           { enabled: chartSettings.showSR4h, interval: '4h', color: srColors.sr4h, label: '4h', legendItem: legend4h },
           { enabled: chartSettings.showSR1d, interval: '1d', color: srColors.sr1d, label: '1d', legendItem: legend1d },
-        ].forEach(function(config) {
+        ].map(function(config) {
           if (!config.enabled) return;
-          fetchSRLevels(symbol, config.interval, signal, source).then(function(levels) {
+          return fetchSRLevels(symbol, config.interval, signal, source).then(function(levels) {
             if (requestId !== chartPreviewRequestId) return;
             addSRLinesToChart(levels, config.color, config.label, isChartMaximized);
             config.legendItem.style.display = levels.length > 0 ? 'flex' : 'none';
@@ -9233,10 +9270,17 @@
                 ? 'flex'
                 : 'none';
           });
-        });
+        }));
+        if (requestId !== chartPreviewRequestId) return;
+        throwIfRequestAborted(signal);
+        currentPreviewSettings = settingsKey;
+        currentPreviewLoadedAt = Number.isFinite(chartResult.fetchedAt) ? chartResult.fetchedAt : Date.now();
 
       } catch (err) {
         if (requestId !== chartPreviewRequestId) return;
+        currentPreviewSettings = null;
+        currentPreviewLoadedAt = 0;
+        currentPreviewSource = null;
         if (err && err.name === 'AbortError') return;
         var errMsg = err && err.message ? err.message : 'Unknown error';
         console.error('Chart error for ' + symbol + ':', errMsg, err);
@@ -9264,7 +9308,6 @@
         chartPreviewAbortController = null;
       }
       chartPreviewRequestId += 1;
-      currentPreviewSource = null;
 
       // Reset loading text for next time
       var loading = document.getElementById('chartPreviewLoading');
@@ -9285,7 +9328,6 @@
         chartPreviewAbortController = null;
       }
       chartPreviewRequestId += 1;
-      currentPreviewSource = null;
 
       var loading = document.getElementById('chartPreviewLoading');
       loading.textContent = 'Loading chart...';

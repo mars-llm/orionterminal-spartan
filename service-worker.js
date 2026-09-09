@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spartan-orion-screener-v9';
+const CACHE_NAME = 'spartan-orion-screener-v10';
 const APP_SHELL_URL = './index.html';
 const PRECACHE_ASSETS = [
   './',
@@ -25,35 +25,48 @@ function shouldCacheStaticAsset(request) {
 }
 
 async function handleNavigationRequest(request) {
-  const cache = await caches.open(CACHE_NAME);
-
   try {
     const response = await fetch(request);
     if (response && response.ok) {
-      await cache.put(APP_SHELL_URL, response.clone());
+      await cacheResponse(APP_SHELL_URL, response);
     }
     return response;
   } catch (error) {
     const cachedShell =
-      (await cache.match(APP_SHELL_URL)) ||
-      (await cache.match('./')) ||
-      (await caches.match(APP_SHELL_URL)) ||
-      (await caches.match('./'));
+      (await readCachedResponse(APP_SHELL_URL)) ||
+      (await readCachedResponse('./'));
     if (cachedShell) return cachedShell;
     throw error;
   }
 }
 
 async function handleStaticAssetRequest(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
+  const cached = await readCachedResponse(request);
   if (cached) return cached;
 
   const response = await fetch(request);
   if (response && response.ok) {
-    await cache.put(request, response.clone());
+    await cacheResponse(request, response);
   }
   return response;
+}
+
+async function readCachedResponse(request) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    return await cache.match(request);
+  } catch (error) {
+    return undefined;
+  }
+}
+
+async function cacheResponse(request, response) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, response.clone());
+  } catch (error) {
+    // Storage is optional; a successful network response must remain usable.
+  }
 }
 
 self.addEventListener('install', (event) => {
@@ -67,7 +80,8 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+      Promise.all(keys.filter((key) => /^spartan-orion-screener-v\d+$/.test(key) && key !== CACHE_NAME)
+        .map((key) => caches.delete(key)))
     ).then(() => self.clients.claim())
   );
 });

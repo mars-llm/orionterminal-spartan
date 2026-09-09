@@ -7,25 +7,40 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 const outputDir = resolve(rootDir, 'coverage');
 const rawDir = resolve(outputDir, 'raw');
-const threshold = Number.parseFloat(process.env.COVERAGE_THRESHOLD || '80');
-const targetScriptMarker = 'const CARD_PAYLOAD_VERSION = 2;';
+const targetScriptMarker = /const CARD_PAYLOAD_VERSION = \d+;/;
 
-function collectRanges(entries, sourceLength) {
+export function parseCoverageThreshold(value = '80') {
+  if (!/^\d+(?:\.\d+)?$/.test(String(value))) {
+    throw new Error('COVERAGE_THRESHOLD must be a number between 0 and 100');
+  }
+  const threshold = Number(value);
+  if (!Number.isFinite(threshold) || threshold < 0 || threshold > 100) {
+    throw new Error('COVERAGE_THRESHOLD must be a number between 0 and 100');
+  }
+  return threshold;
+}
+
+export function collectRanges(entries, sourceLength) {
   const ranges = [];
   for (const entry of entries) {
-    for (const fn of entry.functions || []) {
-      for (const range of fn.ranges || []) {
-        const isRootScriptRange =
-          range.startOffset === 0 &&
-          sourceLength > 0 &&
-          range.endOffset >= sourceLength - 1;
-        if (isRootScriptRange) {
-          continue;
-        }
-        if (range.count > 0 && range.endOffset > range.startOffset) {
-          ranges.push([range.startOffset, range.endOffset]);
+    // A zero-count child overrides its executed parent within one recording.
+    // Resolve that hierarchy before unioning coverage across recordings.
+    const recorded = (entry.functions || []).flatMap((fn) => fn.ranges || [])
+      .filter((range) => range.startOffset >= 0 && range.endOffset <= sourceLength &&
+        range.endOffset > range.startOffset);
+    const boundaries = [...new Set(recorded.flatMap((range) => [range.startOffset, range.endOffset]))]
+      .sort((a, b) => a - b);
+    for (let index = 0; index < boundaries.length - 1; index += 1) {
+      const start = boundaries[index];
+      const end = boundaries[index + 1];
+      let specific;
+      for (const range of recorded) {
+        if (range.startOffset > start || range.endOffset < end) continue;
+        if (!specific || range.endOffset - range.startOffset < specific.endOffset - specific.startOffset) {
+          specific = range;
         }
       }
+      if (specific && specific.count > 0) ranges.push([start, end]);
     }
   }
   ranges.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -98,9 +113,9 @@ function isLineCovered(ranges, start, end) {
   return false;
 }
 
-function summarizeCoverage(source, entries) {
+export function summarizeCoverage(source, entries) {
   const ranges = collectRanges(entries, source.length);
-  const lines = source.split(/\r?\n/);
+  const lines = source.split('\n');
   const blockState = { inBlockComment: false };
 
   let total = 0;
@@ -109,8 +124,8 @@ function summarizeCoverage(source, entries) {
 
   lines.forEach((line, index) => {
     const sanitizedLine = stripInlineComments(line, blockState);
-    const lineStart = offset;
-    const lineEnd = offset + line.length;
+    const lineStart = offset + line.search(/\S|$/);
+    const lineEnd = offset + line.trimEnd().length;
 
     if (isExecutableLine(sanitizedLine)) {
       total += 1;
@@ -174,6 +189,7 @@ async function loadCoverageEntries() {
 }
 
 async function main() {
+  const threshold = parseCoverageThreshold(process.env.COVERAGE_THRESHOLD);
   await rm(rawDir, { recursive: true, force: true });
   await mkdir(rawDir, { recursive: true });
 
@@ -181,11 +197,15 @@ async function main() {
   const coverageEntries = await loadCoverageEntries();
 
   const targetEntries = coverageEntries.filter((entry) => {
-    return entry && typeof entry.source === 'string' && entry.source.includes(targetScriptMarker);
+    return entry && typeof entry.source === 'string' && targetScriptMarker.test(entry.source);
   });
 
   if (!targetEntries.length) {
     throw new Error('Unable to find main app script in browser coverage results');
+  }
+
+  if (targetEntries.some((entry) => entry.source !== targetEntries[0].source)) {
+    throw new Error('Coverage contains different versions of the app script');
   }
 
   const summary = summarizeCoverage(targetEntries[0].source, targetEntries);
@@ -211,7 +231,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error && error.message ? error.message : error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error && error.message ? error.message : error);
+    process.exitCode = 1;
+  });
+}
