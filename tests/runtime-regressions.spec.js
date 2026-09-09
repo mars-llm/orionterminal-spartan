@@ -104,7 +104,41 @@ test('runtime: an already aborted chart request never starts fallback fetches', 
   expect(result).toEqual({ errorName: 'AbortError', fetchCount: 0 });
 });
 
-test('runtime: failed replacement chart retries and fresh reuse restores the source badge', async ({ page }) => {
+test('runtime: aborting an active chart request stops the fallback chain', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const originalFetch = window.fetch;
+    let fetchCount = 0;
+    let notifyStarted;
+    const started = new Promise(resolve => { notifyStarted = resolve; });
+    dataCache.clear();
+    sessionStorage.removeItem(CHART_REGION_KEY);
+    window.fetch = (url, options) => {
+      fetchCount += 1;
+      notifyStarted();
+      return new Promise((resolve, reject) => {
+        options.signal.addEventListener('abort', () => {
+          reject(new DOMException('Aborted', 'AbortError'));
+        }, { once: true });
+      });
+    };
+    const controller = new AbortController();
+    const request = fetchChartCandles('INFLIGHTABORT/USDT', '1m', 3, controller.signal);
+    await started;
+    controller.abort();
+    try {
+      await request;
+      return { errorName: '', fetchCount };
+    } catch (error) {
+      return { errorName: error.name, fetchCount };
+    } finally {
+      window.fetch = originalFetch;
+    }
+  });
+  expect(result).toEqual({ errorName: 'AbortError', fetchCount: 1 });
+});
+
+test('runtime: failed replacement chart retries while only fresh previews are reused', async ({ page }) => {
   await page.goto('./');
   const result = await page.evaluate(async () => {
     // Isolate rendering and data transport, retaining the real preview lifecycle.
@@ -145,14 +179,16 @@ test('runtime: failed replacement chart retries and fresh reuse restores the sou
     hideChartPreview();
     const hiddenBadge = document.getElementById('chartPreviewBadge').textContent;
     await showChartPreview('B/USDT', card);
+    currentPreviewLoadedAt = Date.now() - CACHE_TTL - 1;
+    await showChartPreview('B/USDT', card);
     return {
       calls, renderedCloses, failureVisible, failedSettings, recovered, hiddenBadge,
       restoredBadge: document.getElementById('chartPreviewBadge').textContent,
       sourceTitle: document.getElementById('chartPreviewBadge').title,
     };
   });
-  expect(result.calls).toEqual(['A/USDT', 'B/USDT', 'B/USDT']);
-  expect(result.renderedCloses).toEqual([1, 2]);
+  expect(result.calls).toEqual(['A/USDT', 'B/USDT', 'B/USDT', 'B/USDT']);
+  expect(result.renderedCloses).toEqual([1, 2, 2]);
   expect(result.failureVisible).toBe(true);
   expect(result.failedSettings).toBeNull();
   expect(result.recovered).toBe(true);

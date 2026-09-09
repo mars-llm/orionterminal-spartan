@@ -3,8 +3,12 @@ const isLiveBase = !!process.env.E2E_BASE_URL;
 
 async function openSettingsTab(page, tab) {
   await page.goto('./');
-  await page.click('#settingsBtn');
-  await page.click(`.settings-tab[data-tab="${tab}"]`);
+  await page.locator('#settingsBtn').click();
+  await expect(page.locator('#settingsModal')).toBeVisible();
+  const tabButton = page.locator(`.settings-tab[data-tab="${tab}"]`);
+  await expect(tabButton).toBeVisible();
+  await tabButton.click();
+  await expect(tabButton).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator(`#settingsPanel${tab[0].toUpperCase()}${tab.slice(1)}`)).toBeVisible();
 }
 
@@ -279,8 +283,10 @@ test('reliability: proxy requests respect the remaining scan deadline', async ({
 });
 
 test('network: per-row test updates status from idle to passed', async ({ page }) => {
+  let releaseResponse;
+  const responseGate = new Promise(resolve => { releaseResponse = resolve; });
   await page.route('https://example.com/**', async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await responseGate;
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -296,7 +302,11 @@ test('network: per-row test updates status from idle to passed', async ({ page }
   await expect(status).toContainText('Not tested');
 
   await row.getByRole('button', { name: 'Test' }).click();
-  await expect(status).toContainText('Testing...');
+  try {
+    await expect(status).toContainText('Testing...');
+  } finally {
+    releaseResponse();
+  }
   await expect(status).toContainText(/Passed ·|Failed ·/);
   if (!isLiveBase) {
     await expect(status).toContainText('Passed · 0 tickers ·');
