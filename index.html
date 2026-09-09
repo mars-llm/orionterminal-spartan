@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-myuA/+hoMdD5V/yXBov0175zeFpczKXwXt05LzDZL38='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-BA44ZhRwHq4mD8B7kNeSQxQg0fyVmqBrg98lMcUGYFA='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -5855,9 +5855,11 @@
       });
     }
 
-    function showManagedDialog(dialog, preferredFocus) {
+    function showManagedDialog(dialog, preferredFocus, returnFocus) {
       if (!dialog) return;
-      var returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      var returnTo = returnFocus instanceof HTMLElement
+        ? returnFocus
+        : (document.activeElement instanceof HTMLElement ? document.activeElement : null);
       dialog.classList.add('visible');
       dialog.setAttribute('aria-hidden', 'false');
       document.body.classList.add('dialog-open');
@@ -6761,7 +6763,7 @@
       if (isVisible) {
         hideManagedDialog(panel);
       } else {
-        showManagedDialog(panel, '#closeHelpBtn');
+        showManagedDialog(panel, '#closeHelpBtn', btn);
       }
       if (btn) {
         btn.classList.toggle('active', !isVisible);
@@ -7640,7 +7642,7 @@
       }
 
       renderSocialCard(payload, opts.errorMessage || '');
-      showManagedDialog(modal, opts.onlyMode ? '.modal' : '#socialCardClose');
+      showManagedDialog(modal, opts.onlyMode ? '.modal' : '#socialCardClose', opts.returnFocus);
     }
 
     function closeSocialCardModal() {
@@ -7806,7 +7808,10 @@
     function handleShareSocialCard() {
       var payload = buildSocialCardPayloadFromState();
       var cardUrl = buildSocialCardUrl(payload, { includeView: true });
-      openSocialCardModal(payload, cardUrl, { onlyMode: false });
+      openSocialCardModal(payload, cardUrl, {
+        onlyMode: false,
+        returnFocus: document.getElementById('shareSocialCardBtn'),
+      });
       trackEvent('share_social_card_clicked', {
         type: payload.type,
         picks: picks.length,
@@ -8491,7 +8496,7 @@
       setActiveSettingsTab(getStoredSettingsTab(), false, true);
       syncChartStyleInputs();
       syncCorsProxySettingsUi();
-      showManagedDialog(modal, '.settings-tab.active');
+      showManagedDialog(modal, '.settings-tab.active', document.getElementById('settingsBtn'));
     }
 
     function closeSettingsModal() {
@@ -8502,7 +8507,7 @@
 
     function openAboutModal() {
       var modal = document.getElementById('aboutModal');
-      showManagedDialog(modal, '#aboutModalClose');
+      showManagedDialog(modal, '#aboutModalClose', document.getElementById('aboutBtn'));
     }
 
     function closeAboutModal() {

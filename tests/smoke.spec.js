@@ -239,11 +239,23 @@ test('accessibility: filters are labelled and dialogs contain then restore focus
   await page.locator('#settingsModalClose').click();
   await expect(settingsButton).toBeFocused();
 
+  const aboutButton = page.locator('#aboutBtn');
+  await aboutButton.click();
+  await expect(page.locator('#aboutModalClose')).toBeFocused();
+  await page.locator('#aboutModalClose').click();
+  await expect(aboutButton).toBeFocused();
+
   const helpButton = page.locator('#helpBtn');
   await helpButton.click();
   await expect(page.locator('#closeHelpBtn')).toBeFocused();
   await page.locator('#closeHelpBtn').click();
   await expect(helpButton).toBeFocused();
+
+  const shareButton = page.locator('#shareSocialCardBtn');
+  await shareButton.click();
+  await expect(page.locator('#socialCardClose')).toBeFocused();
+  await page.locator('#socialCardClose').click();
+  await expect(shareButton).toBeFocused();
 });
 
 test('reliability UX: scan errors persist and retry clears the alert', async ({ page }) => {
