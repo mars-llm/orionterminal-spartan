@@ -20,13 +20,13 @@ test('runtime: invalid direct HTTP 200 falls back, valid empty payload does not'
     applyCorsProxies([{ url: 'https://proxy.example/?url=', encode: true }], false);
   });
 
-  expect(await page.evaluate(() => fetchScreener())).toEqual([]);
+  expect(await page.evaluate(() => fetchOrionScreener())).toEqual([]);
   expect(requests).toEqual(['direct', 'proxy']);
 
   directPayload = { tickers: [] };
   requests.length = 0;
   await page.evaluate(() => clearDirectApiBlocked());
-  expect(await page.evaluate(() => fetchScreener())).toEqual([]);
+  expect(await page.evaluate(() => fetchOrionScreener())).toEqual([]);
   expect(requests).toEqual(['direct']);
 });
 
@@ -271,6 +271,7 @@ test('runtime: fixture scan traverses request, parser, filters, sorting and resu
   });
   await page.goto('./');
   await page.evaluate(() => {
+    fetchScreener = fetchOrionScreener;
     clearDirectApiBlocked();
     // Background chart extras are independent of the screener pipeline.
     prefetchTopCandidateExtras = () => {};

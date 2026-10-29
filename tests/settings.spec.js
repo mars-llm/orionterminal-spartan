@@ -139,7 +139,8 @@ test('theme toggle does not reopen a hidden preview or trigger chart fetches', a
 test('network: progressive guidance and advanced details render', async ({ page }) => {
   await openSettingsTab(page, 'network');
 
-  await expect(page.locator('#settingsPanelNetwork .settings-quick-guide')).toContainText('Use proxy fallback only when direct Orion API access is blocked.');
+  await expect(page.locator('#settingsPanelNetwork .settings-quick-guide')).toContainText('Market scans use Binance directly and do not use these proxies.');
+  await expect(page.locator('#corsProxyStatus')).toContainText('independently of these chart/legacy proxy settings');
   const checklist = page.locator('#settingsPanelNetwork .settings-checklist');
   await expect(checklist).toContainText('Step 1: Add URL');
   await expect(checklist).toContainText('Step 2: Test (or Test All)');

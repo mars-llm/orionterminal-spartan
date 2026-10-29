@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-k93XTXU1uunInmulHGci6c2BDVvGp4vptkVxqv+zzc4='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-qHAYYKrVPaSPaYua8DODSFTvwq9kuVa2CollqwI3jzU='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -990,6 +990,28 @@
     .scan-filter-notice:disabled {
       opacity: 0.6;
       cursor: wait;
+    }
+
+    .coverage-notice {
+      margin-bottom: 0.9rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--accent);
+      border-radius: 0.9rem;
+      background: var(--surface-muted);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .coverage-notice strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--accent);
+    }
+
+    .coverage-notice p {
+      margin: 0;
     }
 
     #resultsContainer {
@@ -3054,7 +3076,7 @@
     <header class="hero">
       <div class="hero-left">
         <div class="hero-eyebrow">
-          <span class="badge">Orion Terminal</span>
+          <span class="badge">Direct Binance data</span>
           <span class="badge badge-outline">Binance Futures</span>
           <span class="pulse-dot" aria-hidden="true"></span>
           <span class="hero-live">Live market feed</span>
@@ -3184,7 +3206,7 @@
         <div class="filter-group">
           <label for="minVolume">Min Volume (USD)</label>
           <input type="number" id="minVolume" value="500000" min="0" inputmode="numeric">
-          <div class="hint">24h trading volume (tf1d.volume)</div>
+          <div class="hint">Rolling 24h quote volume from Binance (USDT)</div>
         </div>
         <div class="filter-group">
           <label for="maxVolume">Max Volume (USD)</label>
@@ -3194,12 +3216,12 @@
         <div class="filter-group">
           <label for="minVolatility">Min Volatility (15m %)</label>
           <input type="number" id="minVolatility" step="0.01" min="0" max="10000" value="0.1" inputmode="decimal">
-          <div class="hint">15m range % (Orion: tf15m.volatility). Example: 0.5 = 0.5%</div>
+          <div class="hint">High–low range of the last three closed 5m candles, divided by their low. 0.5 = 0.5%</div>
         </div>
         <div class="filter-group">
           <label for="minTicks">Min Ticks (5m)</label>
           <input type="number" id="minTicks" value="200" min="0" max="1000000000" inputmode="numeric">
-          <div class="hint">Trade count (tf5m.trades)</div>
+          <div class="hint">Trade count in the latest closed 5m candle</div>
         </div>
         <div class="filter-group">
           <label for="maxResults">Max Results</label>
@@ -3389,6 +3411,11 @@
 
     <button class="btn-secondary btn-small scan-filter-notice" id="rescanFiltersBtn" type="button" style="display: none;" aria-controls="resultsContainer error" aria-busy="false">Filters changed · Rescan</button>
 
+    <div class="coverage-notice" id="coverageNotice" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <strong id="coverageNoticeTitle">Limited market coverage</strong>
+      <p id="coverageNoticeDetail"></p>
+    </div>
+
     <div id="emptyState" class="empty-state">
       <!-- Placeholder illustration -->
       <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="margin-bottom: 1.5rem; opacity: 0.7;">
@@ -3401,7 +3428,7 @@
         <path d="M56 12v16M48 20h16" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round"/>
         <path d="M16 65 L36 50 L56 25 L76 40 L96 55" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
       </svg>
-      <p>Click "Scan Market" to find active trading setups</p>
+      <p id="emptyMessage">Click "Scan Market" to find active trading setups</p>
       <p class="hint" id="emptyHint">Vol &gt; 500K, 15m &gt; 0.10%, 5m Ticks &gt; 200</p>
     </div>
 
@@ -3415,7 +3442,7 @@
 
     <footer>
       <p>
-        Data: <a href="https://orionterminal.com" target="_blank" rel="noopener">Orion Terminal</a> &bull;
+        Data:
         <a href="https://www.binance.com" target="_blank" rel="noopener">Binance</a> &bull;
         <a href="https://tradingview.github.io/lightweight-charts/" target="_blank" rel="noopener">Lightweight Charts</a> &bull;
         <a href="https://github.com/mars-llm/orionterminal-spartan" target="_blank" rel="noopener">GitHub</a>
@@ -3485,7 +3512,7 @@
           <div class="settings-section-title">How It Works</div>
           <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
             Spartan Orion Screener is a single-file market scanner for Binance Futures. Click <strong>Scan Market</strong>
-            to pull live tick data from Orion Terminal’s public API, filter by activity and volatility, and surface the
+            to scan active USDT perpetual contracts directly from Binance, filter by activity and volatility, and surface the
             most active setups. Hover a row to open an instant chart preview backed by Binance candles.
           </p>
         </div>
@@ -3508,7 +3535,7 @@
         <div class="settings-section">
           <div class="settings-section-title">Credits & Responsible Use</div>
           <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
-            Data is provided by Orion Terminal’s public screener API and Binance Futures candles. Please use these
+            Scan data is provided directly by Binance Futures. Activity and range metrics use closed 5m candles. Please use these
             sources responsibly, respect rate limits, and follow the providers’ terms of service.
           </p>
         </div>
@@ -3775,10 +3802,10 @@
 
         <div class="settings-panel" id="settingsPanelNetwork" data-panel="network" role="tabpanel" aria-labelledby="settingsTabNetwork" hidden>
           <div class="settings-section">
-            <div class="settings-section-title">CORS Proxy Fallback</div>
+            <div class="settings-section-title">Chart Proxies & Legacy Diagnostics</div>
             <div class="settings-quick-guide">
               <p class="settings-note">
-                Use proxy fallback only when direct Orion API access is blocked.
+                Market scans use Binance directly and do not use these proxies. This list is used by chart fallbacks and legacy Orion diagnostics.
               </p>
               <ul class="settings-checklist" aria-label="Proxy setup steps">
                 <li><strong>Step 1:</strong> Add URL</li>
@@ -3796,11 +3823,11 @@
 
             <div class="setting-row">
               <div class="setting-label">
-                <span>Preferred Scan Proxy</span>
-                <small>First proxy tried for Orion API scans</small>
+                <span>Preferred Legacy Proxy</span>
+                <small>Legacy Orion diagnostics only; does not affect Binance scans</small>
               </div>
               <div class="setting-control">
-                <select id="settingPreferredProxy" aria-label="Preferred scan proxy"></select>
+                <select id="settingPreferredProxy" aria-label="Preferred legacy proxy"></select>
               </div>
             </div>
 
@@ -4032,6 +4059,13 @@
 
     loadCorsProxies();
     const ORION_API = 'https://screener.orionterminal.com/api/screener';
+    const BINANCE_SCAN_API = 'https://fapi.binance.com/fapi/v1/';
+    const BINANCE_SCAN_TIMEOUT_MS = 90000;
+    const BINANCE_SCAN_CONCURRENCY = 6;
+    const BINANCE_CANDLE_MS = 5 * 60 * 1000;
+    var binanceUniverseCache = null;
+    var binanceScanBlockedUntil = 0;
+    const binanceScanCandleCache = new Map();
     const FETCH_TIMEOUT_MS = 12000;
     const CHART_FETCH_TIMEOUT_MS = 15000;
     const SCAN_PROXY_FETCH_TIMEOUT_MS = 4500;
@@ -4043,9 +4077,6 @@
     const DIRECT_API_BLOCK_TTL = 12 * 60 * 60 * 1000;
     const PROXY_FAILURE_COOLDOWN_BASE_MS = 15000;
     const PROXY_FAILURE_COOLDOWN_MAX_MS = 5 * 60 * 1000;
-    const SCAN_RETRY_BASE_DELAY_MS = 1500;
-    const SCAN_RETRY_MAX_DELAY_MS = 10000;
-    const SCAN_TIMEOUT_MS = 15000;
     const CARD_PARAM_KEY = 'card';
     const CARD_VIEW_PARAM_KEY = 'view';
     const CARD_VIEW_MODE = 'social-card';
@@ -4932,7 +4963,11 @@
         return parseJsonResponseText(data.contents);
       }
       if (data && typeof data === 'object' && data.data && Array.isArray(data.data.tickers)) {
-        return data.data;
+        var unwrapped = Object.assign(Object.create(null), data.data);
+        ['access', 'symbolCount', 'matchedCount', 'previewLimit'].forEach(function(key) {
+          if (unwrapped[key] === undefined && data[key] !== undefined) unwrapped[key] = data[key];
+        });
+        return unwrapped;
       }
       if (data && typeof data === 'object' && data.data && typeof data.data.content === 'string') {
         return parseJsonResponseText(data.data.content);
@@ -5020,6 +5055,11 @@
         if (!response.ok) {
           var err = new Error('HTTP ' + response.status);
           err.status = response.status;
+          if (response.headers && typeof response.headers.get === 'function') {
+            var retryAfter = response.headers.get('retry-after');
+            if (retryAfter && /^\d+$/.test(retryAfter)) err.retryAfterMs = Number(retryAfter) * 1000;
+            else if (retryAfter && Number.isFinite(Date.parse(retryAfter))) err.retryAfterMs = Math.max(0, Date.parse(retryAfter) - Date.now());
+          }
           throw err;
         }
         var data = await parseJsonResponseBody(response);
@@ -5625,13 +5665,10 @@
 
     function normalizeMarketSymbol(baseAssetValue, symbolValue) {
       var baseAsset = String(baseAssetValue || '').trim().toUpperCase();
-      if (/^[A-Z0-9]{1,20}$/.test(baseAsset)) {
-        return baseAsset + '/USDT';
-      }
-
       var rawSymbol = String(symbolValue || '').trim().toUpperCase();
       var match = rawSymbol.match(/^([A-Z0-9]{1,20})\/?USDT$/);
-      return match ? match[1] + '/USDT' : null;
+      if (!match || (baseAsset && baseAsset !== match[1])) return null;
+      return match[1] + '/USDT';
     }
 
     function parseFiniteInRange(value, min, max) {
@@ -5759,6 +5796,30 @@
       throw new Error('Unexpected screener response');
     }
 
+    function parseScreenerCount(value) {
+      if (typeof value !== 'number' && (typeof value !== 'string' || !/^\d+$/.test(value))) return null;
+      var count = Number(value);
+      return Number.isSafeInteger(count) && count >= 0 ? count : null;
+    }
+
+    function getScreenerCoverage(data, availableCount) {
+      var receivedCount = Array.isArray(data.tickers) ? data.tickers.length :
+        Object.keys(data).filter(function(key) { return /^[A-Z0-9]{1,20}\/USDT-[A-Z0-9-]{1,30}$/i.test(key); }).length;
+      var matchedCount = parseScreenerCount(data.matchedCount);
+      var symbolCount = parseScreenerCount(data.symbolCount);
+      var expectedCount = matchedCount !== null ? matchedCount : symbolCount;
+      var access = typeof data.access === 'string' ? data.access.trim().toLowerCase() : '';
+      var preview = access === 'preview';
+      return {
+        limited: ['preview', 'limited', 'restricted'].includes(access) ||
+          (expectedCount !== null && receivedCount < expectedCount),
+        preview: preview,
+        receivedCount: receivedCount,
+        availableCount: availableCount,
+        expectedCount: expectedCount,
+      };
+    }
+
     async function fetchJsonWithTimeout(url, timeoutMs) {
       var result = await fetchJsonOrThrow(url, null, timeoutMs, {
         method: 'GET',
@@ -5768,7 +5829,7 @@
     }
 
     function createScanTimeoutError() {
-      var error = new Error('Scan timed out. Check your network or proxy settings, then retry.');
+      var error = new Error('Scan timed out. Check your network connection, then retry.');
       error.name = 'TimeoutError';
       return error;
     }
@@ -5812,7 +5873,7 @@
       throw new Error('Proxy chain failed');
     }
 
-    async function fetchScreener(deadlineMs, filters) {
+    async function fetchOrionScreener(deadlineMs, filters, onCoverage) {
       var scanFilters = sanitizeFilterState(filters || currentFilters);
       // Use proxies on file:// and GitHub Pages. Otherwise try direct and fall back to proxies if needed.
       let data;
@@ -5839,8 +5900,171 @@
       latestBtcChange24h = btcPick && Number.isFinite(btcPick.priceChange24h) ? btcPick.priceChange24h : null;
       const filtered = filterPicks(allPicks, scanFilters);
       const sorted = sortPicks(filtered);
+      const result = sorted.slice(0, scanFilters.maxResults);
+      if (typeof onCoverage === 'function') onCoverage(getScreenerCoverage(data, allPicks.length));
+      return result;
+    }
 
-      return sorted.slice(0, scanFilters.maxResults);
+    function createBinanceScanError(message) {
+      var error = new Error(message);
+      error.name = 'MarketDataError';
+      return error;
+    }
+
+    async function fetchBinanceScanJson(path, signal, deadline) {
+      if (Date.now() < binanceScanBlockedUntil) {
+        throw createBinanceScanError('Binance request limit reached. Wait before retrying.');
+      }
+      try {
+        var result = await fetchJsonOrThrow(BINANCE_SCAN_API + path, signal,
+          getRequestTimeoutWithinDeadline(8000, deadline), { cache: 'no-store' });
+        return result.data;
+      } catch (error) {
+        if (error.status === 429 || error.status === 418) {
+          binanceScanBlockedUntil = Math.max(binanceScanBlockedUntil, Date.now() +
+            Math.max(120000, Number.isFinite(error.retryAfterMs) ? error.retryAfterMs : 120000));
+          throw createBinanceScanError('Binance request limit reached. Wait before retrying.');
+        }
+        if (error.status === 403 || error.status === 451) {
+          throw createBinanceScanError('Binance market data is blocked in this region or network.');
+        }
+        throw error;
+      }
+    }
+
+    function parseBinanceScanPick(market, ticker, rows, cutoff) {
+      if (!Array.isArray(rows)) throw new Error('Invalid Binance candles');
+      var byTime = new Map();
+      rows.forEach(function(row) {
+        if (!Array.isArray(row)) return;
+        var time = parseFiniteInRange(row[0], 1, Number.MAX_SAFE_INTEGER);
+        var open = parseFiniteInRange(row[1], Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+        var high = parseFiniteInRange(row[2], Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+        var low = parseFiniteInRange(row[3], Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+        var close = parseFiniteInRange(row[4], Number.MIN_VALUE, Number.MAX_SAFE_INTEGER);
+        var closeTime = parseFiniteInRange(row[6], 1, Number.MAX_SAFE_INTEGER);
+        var trades = parseFiniteInRange(row[8], 0, 1000000000);
+        if ([time, open, high, low, close, closeTime, trades].some(function(value) { return value === null; })) return;
+        if (time % BINANCE_CANDLE_MS || closeTime !== time + BINANCE_CANDLE_MS - 1 || closeTime >= cutoff ||
+            high < Math.max(open, close) || low > Math.min(open, close) || high < low || !Number.isInteger(trades)) return;
+        byTime.set(time, { open: open, high: high, low: low, close: close, trades: trades });
+      });
+      function windowRows(count) {
+        var result = [];
+        for (var i = count; i > 0; i -= 1) {
+          var candle = byTime.get(cutoff - i * BINANCE_CANDLE_MS);
+          if (!candle) return null;
+          result.push(candle);
+        }
+        return result;
+      }
+      var recent = windowRows(3);
+      if (!recent) throw new Error('Missing recent Binance candles');
+      var high = Math.max.apply(null, recent.map(function(candle) { return candle.high; }));
+      var low = Math.min.apply(null, recent.map(function(candle) { return candle.low; }));
+      function change(count) {
+        var candles = windowRows(count);
+        return candles ? (candles[candles.length - 1].close / candles[0].open - 1) * 100 : null;
+      }
+      return {
+        symbol: market.baseAsset + '/USDT', exchange: 'binanceusdm',
+        price: Number(ticker.lastPrice), volume24h: Number(ticker.quoteVolume),
+        priceChange24h: Number(ticker.priceChangePercent),
+        priceChange1h: change(12), priceChange4h: change(48),
+        volatility15m: (high / low - 1) * 100,
+        ticks5m: recent[2].trades,
+        ticks15m: recent.reduce(function(sum, candle) { return sum + candle.trades; }, 0),
+      };
+    }
+
+    async function fetchScreener(deadlineMs, filters, onCoverage) {
+      var scanFilters = sanitizeFilterState(filters || currentFilters);
+      var deadline = Number.isFinite(deadlineMs) ? deadlineMs : Date.now() + BINANCE_SCAN_TIMEOUT_MS;
+      var controller = new AbortController();
+      var timer = setTimeout(function() { controller.abort(); }, Math.max(1, deadline - Date.now()));
+      var signal = controller.signal;
+      try {
+        var responses = await Promise.all([
+          fetchBinanceScanJson('ticker/24hr', signal, deadline),
+          fetchBinanceScanJson('time', signal, deadline),
+          binanceUniverseCache && Date.now() - binanceUniverseCache.loadedAt < 10 * 60 * 1000
+            ? Promise.resolve(binanceUniverseCache.data)
+            : fetchBinanceScanJson('exchangeInfo', signal, deadline),
+        ]);
+        var daily = responses[0], clock = responses[1], info = responses[2];
+        if (!Array.isArray(daily) || !daily.length || !clock || !Number.isSafeInteger(clock.serverTime) || clock.serverTime <= 0 ||
+            !info || !Array.isArray(info.symbols) || !info.symbols.length) {
+          throw createBinanceScanError('Binance returned incomplete market data. Retry the scan.');
+        }
+        var seen = new Set();
+        var markets = info.symbols.filter(function(market) {
+          if (!market || market.status !== 'TRADING' || market.contractType !== 'PERPETUAL' ||
+              market.quoteAsset !== 'USDT' || market.marginAsset !== 'USDT' ||
+              !normalizeMarketSymbol(market.baseAsset, market.symbol) || seen.has(market.symbol)) return false;
+          seen.add(market.symbol);
+          return true;
+        });
+        if (!markets.length) throw createBinanceScanError('Binance returned no active USDT perpetual markets. Retry the scan.');
+        binanceUniverseCache = { data: info, loadedAt: Date.now() };
+        var cutoff = Math.floor(clock.serverTime / BINANCE_CANDLE_MS) * BINANCE_CANDLE_MS;
+        binanceScanCandleCache.forEach(function(entry, key) {
+          if (entry.cutoff !== cutoff) binanceScanCandleCache.delete(key);
+        });
+        var bySymbol = new Map(daily.filter(function(row) { return row && typeof row.symbol === 'string'; })
+          .map(function(row) { return [row.symbol, row]; }));
+        var btc = bySymbol.get('BTCUSDT');
+        var btcChange = btc ? parseFiniteInRange(btc.priceChangePercent, -100, 1000000) : null;
+        var missing = 0, validTickers = 0;
+        var candidates = markets.filter(function(market) {
+          if (scanFilters.excludeSymbols.includes(market.baseAsset)) return false;
+          var ticker = bySymbol.get(market.symbol);
+          if (!ticker || parseFiniteInRange(ticker.lastPrice, Number.MIN_VALUE, Number.MAX_SAFE_INTEGER) === null ||
+              parseFiniteInRange(ticker.quoteVolume, 0, Number.MAX_SAFE_INTEGER) === null ||
+              parseFiniteInRange(ticker.priceChangePercent, -100, 1000000) === null) { missing += 1; return false; }
+          validTickers += 1;
+          var volume = Number(ticker.quoteVolume);
+          return volume >= scanFilters.minVolume && (!scanFilters.maxVolume || volume <= scanFilters.maxVolume);
+        });
+        if (missing && !validTickers) throw createBinanceScanError('Binance returned incomplete market data. Retry the scan.');
+        var allPicks = [], next = 0, completed = 0, fatal = null;
+        async function worker() {
+          while (next < candidates.length && !signal.aborted) {
+            var market = candidates[next++];
+            try {
+              var cached = binanceScanCandleCache.get(market.symbol);
+              var rows = cached && cached.cutoff === cutoff ? cached.rows :
+                await fetchBinanceScanJson('klines?symbol=' + encodeURIComponent(market.symbol) +
+                  '&interval=5m&limit=48&endTime=' + (cutoff - 1), signal, deadline);
+              var pick = parseBinanceScanPick(market, bySymbol.get(market.symbol), rows, cutoff);
+              if (binanceScanCandleCache.size >= 1500) binanceScanCandleCache.delete(binanceScanCandleCache.keys().next().value);
+              binanceScanCandleCache.set(market.symbol, { cutoff: cutoff, rows: rows });
+              allPicks.push(pick);
+            } catch (error) {
+              if (error.name === 'MarketDataError') { fatal = error; controller.abort(); }
+            }
+            completed += 1;
+            if (isLoading && (completed % 10 === 0 || completed === candidates.length)) {
+              updateScreenerStatus('Scanning Binance', completed + '/' + candidates.length + ' markets checked');
+            }
+          }
+        }
+        await Promise.all(Array.from({ length: Math.min(BINANCE_SCAN_CONCURRENCY, candidates.length) }, worker));
+        if (fatal) throw fatal;
+        if (candidates.length && !allPicks.length) {
+          throw createBinanceScanError('Binance candle data could not be loaded. Retry the scan.');
+        }
+        var coverage = {
+          source: 'binance', preview: false, limited: allPicks.length < candidates.length + missing,
+          receivedCount: allPicks.length, availableCount: allPicks.length,
+          expectedCount: candidates.length + missing, universeCount: markets.length, metricsAt: cutoff,
+        };
+        latestBtcChange24h = btcChange;
+        if (typeof onCoverage === 'function') onCoverage(coverage);
+        return sortPicks(filterPicks(allPicks, scanFilters)).slice(0, scanFilters.maxResults);
+      } finally {
+        clearTimeout(timer);
+        controller.abort();
+      }
     }
 
     // =============================================================================
@@ -5921,8 +6145,9 @@
     }
 
     function getScanErrorMessage(error) {
+      if (error && error.name === 'MarketDataError') return error.message;
       if (error && error.name === 'TimeoutError') return error.message;
-      return 'Market data is unavailable right now. Retry, or review Settings → Network if the problem continues.';
+      return 'Market data is unavailable right now. Check your connection and retry.';
     }
 
     function showScanError(error) {
@@ -6470,6 +6695,29 @@
       button.setAttribute('aria-busy', isLoading ? 'true' : 'false');
     }
 
+    function updateScanCoverageNotice() {
+      var notice = document.getElementById('coverageNotice');
+      var coverage = lastSuccessfulScanSnapshot && lastSuccessfulScanSnapshot.coverage;
+      notice.hidden = !coverage || !coverage.limited;
+      if (notice.hidden) return;
+      if (coverage.source === 'binance') {
+        document.getElementById('coverageNoticeTitle').textContent = 'Incomplete Binance scan';
+        document.getElementById('coverageNoticeDetail').textContent =
+          coverage.receivedCount + ' of ' + coverage.expectedCount + ' eligible markets loaded (' +
+          coverage.universeCount + ' active USDT perpetuals). Some market data could not be loaded. Retry to check missing markets.';
+        return;
+      }
+      document.getElementById('coverageNoticeTitle').textContent = coverage.preview
+        ? 'Limited market coverage · Orion preview'
+        : 'Limited market coverage · Partial source data';
+      var counts = coverage.receivedCount +
+        (coverage.expectedCount !== null ? ' of ' + coverage.expectedCount : '');
+      document.getElementById('coverageNoticeDetail').textContent =
+        'Source records received: ' + counts + '. USDT pairs available: ' + coverage.availableCount +
+        '. These results do not cover the full market. ' +
+        'Changing filters cannot recover records the source did not provide.';
+    }
+
     function renderPicks() {
       const resultsContainer = document.getElementById('resultsContainer');
       const emptyState = document.getElementById('emptyState');
@@ -6478,6 +6726,9 @@
       const lastUpdated = document.getElementById('lastUpdated');
       const copyAllBtn = document.getElementById('copyAllBtn');
       updateScanFilterNotice();
+      updateScanCoverageNotice();
+      var coverage = lastSuccessfulScanSnapshot && lastSuccessfulScanSnapshot.coverage;
+      var limited = !!(coverage && coverage.limited);
       resultsList.textContent = '';
 
       if (picks.length === 0) {
@@ -6488,6 +6739,9 @@
         updateChartPreviewCandidateBadge('');
         resultsContainer.style.display = 'none';
         emptyState.style.display = 'block';
+        document.getElementById('emptyMessage').textContent = limited
+          ? 'No setups match within the available source data'
+          : 'No setups match these filters';
         copyAllBtn.style.display = 'none';
         updateShareActionButtons();
         return;
@@ -6498,7 +6752,9 @@
       copyAllBtn.style.display = 'inline-flex';
       updateShareActionButtons();
 
-      resultsCount.textContent = picks.length + ' active setups';
+      resultsCount.textContent = limited
+        ? picks.length + (picks.length === 1 ? ' setup' : ' setups') + (coverage.preview ? ' · preview' : ' · partial data')
+        : picks.length + ' active setups';
       lastUpdated.textContent = new Date(
         lastSuccessfulScanSnapshot ? lastSuccessfulScanSnapshot.createdAt : Date.now()
       ).toLocaleTimeString();
@@ -6799,28 +7055,10 @@
       });
     }
 
-    async function fetchScreenerWithRetry(filters) {
+    async function fetchScreenerWithRetry(filters, onCoverage) {
       var scanFilters = sanitizeFilterState(filters || currentFilters);
-      var attempt = 0;
-      var deadline = Date.now() + SCAN_TIMEOUT_MS;
-      while (true) {
-        if (Date.now() >= deadline) {
-          throw createScanTimeoutError();
-        }
-        try {
-          return await fetchScreener(deadline, scanFilters);
-        } catch (err) {
-          attempt += 1;
-          var delay = Math.min(SCAN_RETRY_BASE_DELAY_MS * Math.pow(1.5, attempt - 1), SCAN_RETRY_MAX_DELAY_MS);
-          var remaining = deadline - Date.now();
-          if (remaining <= 0) {
-            throw createScanTimeoutError();
-          }
-          delay = Math.min(delay, remaining);
-          console.warn('Fetch failed, retrying in ' + Math.round(delay) + 'ms');
-          await sleep(delay);
-        }
-      }
+      // A batch is not replayed automatically: the retry action starts a new bounded scan.
+      return fetchScreener(Date.now() + BINANCE_SCAN_TIMEOUT_MS, scanFilters, onCoverage);
     }
 
     async function handleScan() {
@@ -6852,13 +7090,16 @@
       btn.querySelector('svg').style.display = 'none';
 
       try {
-        var nextPicks = await fetchScreenerWithRetry(scanFilters);
+        var coverage = null;
+        var nextPicks = await fetchScreenerWithRetry(scanFilters, function(value) { coverage = value; });
         var previousSnapshot = lastSuccessfulScanSnapshot;
         var previousSymbols = new Set(previousSnapshot ? previousSnapshot.symbols : []);
-        var comparable = previousSnapshot && filtersEqual(scanFilters, previousSnapshot.filters);
+        var comparable = previousSnapshot && filtersEqual(scanFilters, previousSnapshot.filters) &&
+          (previousSnapshot.coverage && previousSnapshot.coverage.source) === (coverage && coverage.source);
         lastSuccessfulScanSnapshot = {
           filters: scanFilters,
           createdAt: new Date().toISOString(),
+          coverage: coverage,
           symbols: nextPicks.map(function(pick) { return pick.symbol; }),
           newSymbols: comparable ? nextPicks.filter(function(pick) {
             return !previousSymbols.has(pick.symbol);
@@ -6867,11 +7108,18 @@
         picks = nextPicks;
         renderPicks();
         prefetchTopCandidateExtras();
+        var limited = !!(coverage && coverage.limited);
+        var scopeSuffix = limited ? (coverage.preview ? ' in preview' : ' in partial data') : '';
         updateScreenerStatus(
-          picks.length ? picks.length + (picks.length === 1 ? ' setup found' : ' setups found') : 'No setups found',
-          'Scan complete · adjust filters to refine'
+          (picks.length ? picks.length + (picks.length === 1 ? ' setup found' : ' setups found') : 'No setups found') +
+            scopeSuffix,
+          limited ? 'Limited source coverage · see notice below' : (coverage && coverage.source === 'binance'
+            ? 'Binance · ' + coverage.universeCount + ' USDT perpetuals · ' + coverage.availableCount + ' checked'
+            : 'Scan complete · adjust filters to refine')
         );
-        showToast('Found ' + picks.length + ' picks');
+        showToast(limited
+          ? picks.length + (picks.length === 1 ? ' setup' : ' setups') + scopeSuffix
+          : 'Found ' + picks.length + ' picks');
       } catch (err) {
         console.error('Scan failed:', err);
         var userMessage = showScanError(err);
@@ -7518,6 +7766,9 @@
         payload.type = 'setup';
         payload.title = getDefaultCardTitle('setup');
         payload.note = getDefaultCardNote('setup');
+        if (resultSnapshot && resultSnapshot.coverage && resultSnapshot.coverage.limited) {
+          payload.note = (resultSnapshot.coverage.preview ? 'Limited Orion preview. ' : 'Partial source data. ') + payload.note;
+        }
         payload.setupSummary = {
           count: picks.length,
           top: topEntries,
@@ -8122,9 +8373,10 @@
       var directBlocked = isDirectApiBlocked();
       var summary = getCorsProxyDraftValidationSummary(false);
       var statusParts = [];
+      statusParts.push('Market scans use Binance directly, independently of these chart/legacy proxy settings.');
       statusParts.push(directBlocked
-        ? 'Direct Orion API access is blocked here, so scan requests will use proxy fallback.'
-        : 'Direct Orion API access is available, so proxies are used only when needed.'
+        ? 'Direct Orion API access is blocked here; legacy diagnostics use proxy fallback.'
+        : 'Legacy Orion diagnostics try direct access before proxy fallback.'
       );
 
       var isCustom = false;

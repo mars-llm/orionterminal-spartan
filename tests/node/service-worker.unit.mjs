@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 const source = await readFile(new URL('../../service-worker.js', import.meta.url), 'utf8');
+const currentCacheName = source.match(/const CACHE_NAME = '([^']+)'/)[1];
 
 function worker({ failure, offline = false, responseUrl = 'https://example.test/app/' } = {}) {
   const handlers = {};
@@ -27,7 +28,7 @@ function worker({ failure, offline = false, responseUrl = 'https://example.test/
     },
     caches: {
       async open() { if (failure === 'open') throw new Error('open failed'); return cache; },
-      async keys() { return ['another-app-v1', 'spartan-orion-screener-v10', 'spartan-orion-screener-v11', 'spartan-orion-screener-user-data']; },
+      async keys() { return ['another-app-v1', 'spartan-orion-screener-v0', currentCacheName, 'spartan-orion-screener-user-data']; },
       async delete(key) { deleted.push(key); return true; },
     },
     async fetch() { if (offline) throw new Error('offline'); return fresh; },
@@ -42,7 +43,7 @@ test('activation deletes old app caches and preserves foreign caches', async () 
   let pending;
   handlers.activate({ waitUntil(promise) { pending = promise; } });
   await pending;
-  assert.deepEqual(deleted, ['spartan-orion-screener-v10']);
+  assert.deepEqual(deleted, ['spartan-orion-screener-v0']);
 });
 
 for (const failure of ['open', 'match', 'put']) {

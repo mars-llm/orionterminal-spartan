@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spartan-orion-screener-v11';
+const CACHE_NAME = 'spartan-orion-screener-v12';
 const APP_SHELL_URL = './index.html';
 const PRECACHE_ASSETS = [
   './',

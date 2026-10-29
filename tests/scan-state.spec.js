@@ -6,6 +6,8 @@ async function prepareScan(page, handler) {
   await page.route('https://screener.orionterminal.com/api/screener', handler);
   await page.goto('./');
   await page.evaluate(() => {
+    // These UI-state fixtures retain the legacy adapter; Binance has separate integration coverage.
+    fetchScreener = fetchOrionScreener;
     clearDirectApiBlocked();
     chartSettings.enabled = false;
   });
