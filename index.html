@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-4tb6nNCb0ucDcc9EEuDE05Qufl/rVrVKLX26v6SwxcE='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-fb+xRuBuufOkWFybZQmGh/EGaEiVOxeqpUK35tE4QR0='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -9716,7 +9716,29 @@
       };
     }
 
-    function createChart(container, width, height) {
+    function getChartPriceFormat(candles) {
+      var precision = 2;
+      (Array.isArray(candles) ? candles : []).forEach(function(candle) {
+        ['open', 'high', 'low', 'close'].forEach(function(key) {
+          var price = candle && candle[key];
+          if (!Number.isFinite(price) || price <= 0) return;
+          // Infer display resolution from loaded OHLC data, not an exchange tick-size request.
+          // Fifteen significant digits exclude binary arithmetic noise in normalized numbers.
+          var parts = Number(price.toPrecision(15)).toString().split('e');
+          var decimals = (parts[0].split('.')[1] || '').length - Number(parts[1] || 0);
+          precision = Math.max(precision, decimals, 3 - Math.floor(Math.log10(price)));
+        });
+      });
+      var minMove = Number('1e-' + Math.min(precision, 308));
+      // The library's built-in fixed-point formatter loses accuracy at high precision.
+      return { type: 'custom', minMove: minMove, formatter: function(price) {
+        if (!Number.isFinite(price)) return '—';
+        // Keep extreme subdecimal labels readable instead of rounding them to zero.
+        return precision > 16 ? Number(price.toPrecision(15)).toString() : price.toFixed(precision);
+      } };
+    }
+
+    function createChart(container, width, height, candles) {
       var chartTheme = getChartThemeColors();
       var volUsdColors = getVolUsdColors();
       var candleUp = getCssVar('--candle-up', '#22c55e');
@@ -9760,6 +9782,7 @@
       });
 
       chartCandleSeries = chartInstance.addCandlestickSeries({
+        priceFormat: getChartPriceFormat(candles),
         upColor: candleUp,
         downColor: candleDown,
         borderUpColor: candleUp,
@@ -9959,7 +9982,7 @@
         var containerRect = container.getBoundingClientRect();
         var chartWidth = Math.max(200, Math.round(containerRect.width || layout.width));
         var chartHeight = Math.max(1, Math.round(containerRect.height || (layout.height - 44)));
-        createChart(container, chartWidth, chartHeight);
+        createChart(container, chartWidth, chartHeight, candles);
         chartCandleSeries.setData(candles);
         chartInstance.timeScale().fitContent();
         scheduleChartPreviewLayoutSync();
