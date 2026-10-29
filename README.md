@@ -31,6 +31,8 @@ python3 -m http.server 8000
 
 Install as an app from Chrome/Edge via the install icon, or from iOS Safari via **Share -> Add to Home Screen**.
 
+Optional web fonts load without blocking the first visible page. If they are slow or unavailable, the app uses system fonts. The browser's deferred-install-banner notice is informational; use the app's Install button to request installation.
+
 ## Sharing
 
 - Sharing is social-card-only. Setup-link sharing is intentionally not part of the product anymore.
@@ -51,6 +53,7 @@ Install as an app from Chrome/Edge via the install icon, or from iOS Safari via 
 - A cold scan makes at most 23 requests (three bulk/metadata requests and 20 candle requests), with two concurrent candle requests and a 90-second overall deadline. Bulk tickers and server time are cached for one minute; candles are reused within their closed 5m window, and exchange metadata for ten minutes. Immediate repeats with the same market selection need no new requests. Scan completion does not automatically prefetch funding or open interest.
 - Scans have a local ceiling of 30 requests per rolling minute. The shared ceiling for all Binance requests is 60, including charts and encoded proxy targets. Optional funding, open-interest and S/R requests stop when only 20 slots remain, preserving capacity for candles. A blocked scan reports the wait until enough slots are available for its whole uncached batch. The budget and provider cooldown survive reloads and are shared across same-origin tabs, using Web Locks where available. If browser storage or locking is unavailable, protection falls back to the current tab. This is a client-side limit, not a guarantee against provider blocks or traffic from other apps/devices sharing an IP.
 - Chart previews load only after the configured hover delay or an explicit open action; passing over a card starts no market request. A compact preview requests candles only (plus any S/R overlays explicitly enabled in Settings). Funding and open interest load after candles in the expanded detail view. Identical pending candle, S/R and extra requests share their network work, caller cancellation is isolated, and reopening a cached chart does not fetch candles again within the cache TTL. Fresh cached charts, including labelled spot fallbacks, remain usable when the network budget is exhausted.
+- Timeframe changes settle for 150ms before loading; a new selection or closing the chart cancels pending work. Older responses cannot replace the active chart. On touch screens, chart gestures do not expand the preview, scrolling does not open cards, and viewport or header-size changes resize the canvas without fetching market data. Use the header's Expand control for the detail view.
 - Closed-candle metrics can lag by up to six minutes including the one-minute summary cache. The 1h and 4h changes use complete 12- and 48-candle windows; missing longer windows are unavailable, not reported as zero.
 - Missing market data produces a visible incomplete-scan notice, including on setup social cards. Rate-limit and regional-access responses stop the scan; they are not bypassed through proxies. Retry is user-triggered rather than automatically replaying a full batch.
 - USDC, delivery, inactive, and conflicting base-asset/symbol markets are excluded. Displayed results still obey the selected result limit.

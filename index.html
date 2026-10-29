@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-JfyMvs7mATRPuNMc9xXMc6mCpYfzqkU5aAbEgPCbyaw='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-/EiuJEqRUqcD/elVB1k6KPSlu7F7+Uhlzs0jO2DMXSU='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -53,8 +53,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" id="appFontStylesheet"
     href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap"
     media="print">
@@ -1447,6 +1445,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 0.75rem;
     }
 
@@ -1455,6 +1454,7 @@
       align-items: center;
       gap: 0.35rem;
       flex-wrap: wrap;
+      min-width: 0;
     }
 
     .chart-preview-stats {
@@ -1551,6 +1551,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      margin-left: auto;
     }
 
     .chart-preview-links {
@@ -1698,6 +1699,8 @@
     .chart-preview-body {
       width: 100%;
       flex: 1;
+      min-height: 0;
+      overflow: hidden;
       background: var(--chart-bg);
       position: relative;
     }
@@ -7215,21 +7218,28 @@
 
         // Chart preview handlers
         (function(sym, cardEl, chartBtnEl) {
+          var touchStartX = 0;
           var touchStartY = 0;
           var didScroll = false;
 
           // Track touch to detect scrolling vs tapping
           cardEl.addEventListener('touchstart', function(e) {
+            if (e.touches.length !== 1) { didScroll = true; return; }
+            touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
             didScroll = false;
           }, { passive: true });
 
           cardEl.addEventListener('touchmove', function(e) {
+            if (e.touches.length !== 1) { didScroll = true; return; }
+            var moveX = Math.abs(e.touches[0].clientX - touchStartX);
             var moveY = Math.abs(e.touches[0].clientY - touchStartY);
-            if (moveY > 10) {
+            if (moveX > 10 || moveY > 10) {
               didScroll = true;
             }
           }, { passive: true });
+
+          cardEl.addEventListener('touchcancel', function() { didScroll = true; }, { passive: true });
 
           // Desktop: hover to show
           cardEl.addEventListener('mouseenter', function() {
@@ -9217,15 +9227,17 @@
       switch (settingId) {
         case 'settingChartEnabled':
           chartSettings.enabled = value;
+          if (!value) closeChartPreview();
           break;
         case 'settingChartTimeframe':
+          if (!BINANCE_INTERVALS[value] || chartSettings.timeframe === value) return;
           chartSettings.timeframe = value;
-          currentPreviewSymbol = null; // Force reload on next hover
+          scheduleChartTimeframeRefresh();
           break;
         case 'settingChartSize':
           chartSettings.size = value;
           updateChartPreviewSize();
-          currentPreviewSymbol = null;
+          scheduleChartPreviewLayoutSync();
           break;
         case 'settingHoverDelay':
           chartSettings.hoverDelay = parseInt(value, 10);
@@ -9313,19 +9325,11 @@
       var container = document.getElementById('chartContainer');
       var body = document.getElementById('chartPreviewBody');
 
-      // On mobile, let CSS handle positioning (bottom: 0, left: 0)
-      if (!isMobileDevice()) {
-        preview.style.width = layout.width + 'px';
-        preview.style.height = layout.height + 'px';
-        preview.style.left = layout.left + 'px';
-        preview.style.top = layout.top + 'px';
-      } else {
-        // Clear any inline styles that might conflict with CSS
-        preview.style.width = '';
-        preview.style.height = '';
-        preview.style.left = '';
-        preview.style.top = '';
-      }
+      // Narrow-screen CSS can override this; touch landscapes still need a layout.
+      preview.style.width = layout.width + 'px';
+      preview.style.height = layout.height + 'px';
+      preview.style.left = layout.left + 'px';
+      preview.style.top = layout.top + 'px';
 
       preview.classList.toggle('maximized', isChartMaximized);
       var maximizeButton = document.getElementById('chartPreviewMaximize');
@@ -9339,12 +9343,11 @@
       var chartWidth = bodyRect ? Math.round(bodyRect.width) : layout.width;
       var chartHeight = bodyRect ? Math.round(bodyRect.height) : layout.height;
       chartWidth = Math.max(200, chartWidth);
-      chartHeight = Math.max(120, chartHeight);
+      chartHeight = Math.max(1, chartHeight);
       container.style.height = chartHeight + 'px';
 
       if (chartInstance) {
         chartInstance.resize(chartWidth, chartHeight);
-        chartInstance.timeScale().fitContent();
       }
     }
 
@@ -9353,6 +9356,7 @@
     // =============================================================================
 
     var chartPreviewTimeout = null;
+    var chartTimeframeTimeout = null;
     var chartPreviewAbortController = null;
     var chartPreviewRequestId = 0;
     var chartPreviewLayoutSyncRaf = null;
@@ -9364,6 +9368,35 @@
     var isChartMaximized = false;
     var isPreviewHovered = false;
 
+    function cancelChartTimeframeRefresh() {
+      clearTimeout(chartTimeframeTimeout);
+      chartTimeframeTimeout = null;
+    }
+
+    function scheduleChartTimeframeRefresh() {
+      cancelChartTimeframeRefresh();
+      var preview = document.getElementById('chartPreview');
+      if (!currentPreviewSymbol || !currentPreviewCard || !preview.classList.contains('visible')) return;
+      if (chartPreviewAbortController) chartPreviewAbortController.abort();
+      chartPreviewRequestId += 1;
+      currentPreviewSettings = null;
+      currentPreviewLoadedAt = 0;
+      currentPreviewSource = null;
+      updateChartPreviewBadge(null);
+      document.getElementById('chartPreviewTimeframe').textContent = chartSettings.timeframe;
+      document.getElementById('chartPreviewTimeframeSelect').value = chartSettings.timeframe;
+      document.getElementById('chartContainer').style.display = 'none';
+      document.getElementById('chartPreviewLegend').style.display = 'none';
+      var loading = document.getElementById('chartPreviewLoading');
+      loading.textContent = 'Loading chart...';
+      loading.classList.remove('hidden');
+      var symbol = currentPreviewSymbol, card = currentPreviewCard;
+      chartTimeframeTimeout = setTimeout(function() {
+        chartTimeframeTimeout = null;
+        showChartPreview(symbol, card);
+      }, 150);
+    }
+
     function scheduleChartPreviewLayoutSync() {
       if (chartPreviewLayoutSyncRaf) return;
       if (!currentPreviewCard) return;
@@ -9372,7 +9405,7 @@
 
       chartPreviewLayoutSyncRaf = requestAnimationFrame(function() {
         chartPreviewLayoutSyncRaf = null;
-        if (!currentPreviewCard) return;
+        if (!currentPreviewCard || !preview.classList.contains('visible')) return;
         applyPreviewLayout(getPreviewLayout(currentPreviewCard));
       });
     }
@@ -9838,6 +9871,7 @@
 
     async function showChartPreview(symbol, cardElement) {
       if (!chartSettings.enabled) return;
+      cancelChartTimeframeRefresh();
       if (chartPreviewTimeout) {
         clearTimeout(chartPreviewTimeout);
         chartPreviewTimeout = null;
@@ -9906,6 +9940,8 @@
           Date.now() - currentPreviewLoadedAt < CACHE_TTL) {
         // Reuse only a completed chart with data still inside its original cache TTL.
         currentPreviewSymbol = symbol;
+        loading.classList.add('hidden');
+        container.style.display = 'block';
         updateChartPreviewBadge(currentPreviewSource);
         updateChartPreviewStats(symbol, requestId, signal, isChartMaximized);
         return;
@@ -9945,10 +9981,11 @@
 
         var containerRect = container.getBoundingClientRect();
         var chartWidth = Math.max(200, Math.round(containerRect.width || layout.width));
-        var chartHeight = Math.max(120, Math.round(containerRect.height || (layout.height - 44)));
+        var chartHeight = Math.max(1, Math.round(containerRect.height || (layout.height - 44)));
         createChart(container, chartWidth, chartHeight);
         chartCandleSeries.setData(candles);
         chartInstance.timeScale().fitContent();
+        scheduleChartPreviewLayoutSync();
 
         if (isChartMaximized && chartVolumeSeries) {
           var volSeries = buildVolUsdSeries(candles);
@@ -10023,6 +10060,7 @@
 
     function hideChartPreview() {
       if (isChartMaximized) return;
+      cancelChartTimeframeRefresh();
       var preview = document.getElementById('chartPreview');
       preview.classList.remove('visible');
       document.body.classList.remove('chart-preview-visible');
@@ -10041,6 +10079,7 @@
     }
 
     function closeChartPreview() {
+      cancelChartTimeframeRefresh();
       if (chartPreviewTimeout) {
         clearTimeout(chartPreviewTimeout);
         chartPreviewTimeout = null;
@@ -10097,7 +10136,11 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       var fontStylesheet = document.getElementById('appFontStylesheet');
-      if (fontStylesheet) fontStylesheet.media = 'all';
+      if (fontStylesheet) {
+        // Optional remote CSS must not hold the first paint hostage.
+        if (fontStylesheet.sheet) fontStylesheet.media = 'all';
+        else fontStylesheet.addEventListener('load', function() { fontStylesheet.media = 'all'; }, { once: true });
+      }
 
       // Load saved settings
       loadSettings();
@@ -10301,6 +10344,12 @@
       }
 
       var preview = document.getElementById('chartPreview');
+      window.addEventListener('resize', scheduleChartPreviewLayoutSync, { passive: true });
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleChartPreviewLayoutSync, { passive: true });
+      if (typeof ResizeObserver === 'function') {
+        var chartBodyObserver = new ResizeObserver(scheduleChartPreviewLayoutSync);
+        chartBodyObserver.observe(document.getElementById('chartPreviewBody'));
+      }
       preview.addEventListener('mouseenter', function() {
         isPreviewHovered = true;
       });
@@ -10309,6 +10358,7 @@
         if (!isChartMaximized) hideChartPreview();
       });
       preview.addEventListener('click', function(e) {
+        if (!e.target.closest('.chart-preview-header')) return;
         if (e.target.closest('#chartPreviewMaximize')) return;
         if (e.target.closest('#chartPreviewClose')) return;
         if (e.target.closest('#chartPreviewTimeframeSelect')) return;
@@ -10321,11 +10371,7 @@
         toggleChartMaximize();
       });
       document.getElementById('chartPreviewTimeframeSelect').addEventListener('change', function(e) {
-        if (!currentPreviewSymbol || !currentPreviewCard) return;
-        var symbol = currentPreviewSymbol;
-        var card = currentPreviewCard;
         handleSettingChange('settingChartTimeframe', this.value);
-        showChartPreview(symbol, card);
       });
       document.getElementById('chartPreviewTimeframeSelect').addEventListener('click', function(e) {
         e.stopPropagation();
