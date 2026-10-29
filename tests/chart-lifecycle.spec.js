@@ -60,6 +60,12 @@ test('startup: the uncached app paints and remains interactive on its first navi
   await expect(page.locator('#filtersBtn')).toHaveAttribute('aria-expanded', 'true');
 });
 
+test('startup: essential content is not gated by decorative entry animations', async ({ page }) => {
+  await page.goto('./');
+  expect(await page.locator('header.hero, .controls, .empty-state').evaluateAll(elements =>
+    elements.map(element => getComputedStyle(element).animationName))).toEqual(['none', 'none', 'none']);
+});
+
 test('startup: a stalled optional font stylesheet cannot block the first contentful paint', async ({ page }) => {
   let release;
   const held = new Promise(resolve => { release = resolve; });
@@ -76,6 +82,20 @@ test('startup: a stalled optional font stylesheet cannot block the first content
     await expect(page.locator('#appFontStylesheet')).toHaveAttribute('media', 'print');
   } finally { release(); }
   await expect(page.locator('#appFontStylesheet')).toHaveAttribute('media', 'all');
+});
+
+test('startup: a failed optional font stays non-blocking and is requested only once', async ({ page }) => {
+  let requests = 0;
+  await page.route('https://fonts.googleapis.com/**', route => { requests += 1; return route.abort(); });
+  await page.goto('./');
+  await expect.poll(() => requests).toBe(1);
+  await page.waitForTimeout(300);
+  expect(requests).toBe(1);
+  await expect(page.locator('#appFontStylesheet')).toHaveAttribute('media', 'print');
+  await expect.poll(() => page.evaluate(() => performance.getEntriesByName('first-contentful-paint').length))
+    .toBeGreaterThan(0);
+  await page.locator('#filtersBtn').click();
+  await expect(page.locator('#filtersBtn')).toHaveAttribute('aria-expanded', 'true');
 });
 
 test('chart: rapid timeframe changes coalesce and returning to fresh data sends no request', async ({ page }) => {

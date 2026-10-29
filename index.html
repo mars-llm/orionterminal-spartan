@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-/EiuJEqRUqcD/elVB1k6KPSlu7F7+Uhlzs0jO2DMXSU='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-4tb6nNCb0ucDcc9EEuDE05Qufl/rVrVKLX26v6SwxcE='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -54,7 +54,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="stylesheet" id="appFontStylesheet"
-    href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap"
+    data-href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap"
     media="print">
   <noscript>
     <link rel="stylesheet"
@@ -236,7 +236,6 @@
       gap: 1.5rem;
       align-items: center;
       margin-bottom: 0.85rem;
-      animation: riseIn 0.7s ease both;
     }
 
     .hero-left {
@@ -443,8 +442,6 @@
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(16px);
-      animation: riseIn 0.7s ease both;
-      animation-delay: 0.05s;
     }
 
     .controls-group {
@@ -494,7 +491,6 @@
       overflow-x: hidden;
       box-shadow: var(--shadow-strong);
       backdrop-filter: blur(18px);
-      animation: riseIn 0.7s ease both;
     }
 
     .help-panel-inner::after {
@@ -729,7 +725,6 @@
       margin-bottom: 1.75rem;
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(18px);
-      animation: riseIn 0.7s ease both;
     }
 
     .filters-header {
@@ -955,7 +950,6 @@
       border: 1px solid var(--glass-border);
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(18px);
-      animation: riseIn 0.7s ease both;
     }
 
     .empty-state p {
@@ -1020,10 +1014,6 @@
 
     .coverage-notice p {
       margin: 0;
-    }
-
-    #resultsContainer {
-      animation: riseIn 0.7s ease both;
     }
 
     .pick-card {
@@ -1856,17 +1846,6 @@
       to { transform: rotate(360deg); }
     }
 
-    @keyframes riseIn {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     @keyframes pulse {
       0% {
         box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.35);
@@ -2603,8 +2582,6 @@
       font-size: 0.75rem;
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(16px);
-      animation: riseIn 0.7s ease both;
-      animation-delay: 0.08s;
     }
 
     footer a {
@@ -10137,9 +10114,9 @@
     document.addEventListener('DOMContentLoaded', function() {
       var fontStylesheet = document.getElementById('appFontStylesheet');
       if (fontStylesheet) {
-        // Optional remote CSS must not hold the first paint hostage.
-        if (fontStylesheet.sheet) fontStylesheet.media = 'all';
-        else fontStylesheet.addEventListener('load', function() { fontStylesheet.media = 'all'; }, { once: true });
+        // Register before requesting CSS, including a warm-cache or failed response.
+        fontStylesheet.addEventListener('load', function() { fontStylesheet.media = 'all'; }, { once: true });
+        fontStylesheet.href = fontStylesheet.dataset.href;
       }
 
       // Load saved settings
