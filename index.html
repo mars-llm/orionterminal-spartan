@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-BA44ZhRwHq4mD8B7kNeSQxQg0fyVmqBrg98lMcUGYFA='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-k93XTXU1uunInmulHGci6c2BDVvGp4vptkVxqv+zzc4='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -980,6 +980,18 @@
       gap: 0.65rem;
     }
 
+    .scan-filter-notice {
+      margin-bottom: 0.9rem;
+      min-height: 44px;
+      max-width: 100%;
+      color: var(--accent);
+    }
+
+    .scan-filter-notice:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
     #resultsContainer {
       animation: riseIn 0.7s ease both;
     }
@@ -1039,6 +1051,27 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       text-transform: uppercase;
+    }
+
+    .new-setup-badge {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--accent-2);
+      border-radius: 999px;
+      color: var(--accent-2);
+      background: var(--surface-muted);
+      font-size: 0.65rem;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .new-setup-context {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
 
     .pick-card.candidate {
@@ -2976,11 +3009,21 @@
       }
 
       .pick-card {
+        position: relative;
         padding: 0.75rem;
         gap: 0.5rem;
         cursor: pointer;
         -webkit-tap-highlight-color: rgba(45, 212, 191, 0.25);
         touch-action: manipulation;
+      }
+
+      #resultsList .candidate-badge-wrap {
+        position: static;
+      }
+
+      #resultsList .candidate-tooltip {
+        left: 0.5rem;
+        max-width: calc(100% - 1rem);
       }
 
       .pick-card:active {
@@ -3343,6 +3386,8 @@
       <span id="errorText"></span>
       <button class="btn-secondary btn-small error-retry" id="retryScanBtn" type="button">Retry scan</button>
     </div>
+
+    <button class="btn-secondary btn-small scan-filter-notice" id="rescanFiltersBtn" type="button" style="display: none;" aria-controls="resultsContainer error" aria-busy="false">Filters changed · Rescan</button>
 
     <div id="emptyState" class="empty-state">
       <!-- Placeholder illustration -->
@@ -3988,6 +4033,7 @@
     loadCorsProxies();
     const ORION_API = 'https://screener.orionterminal.com/api/screener';
     const FETCH_TIMEOUT_MS = 12000;
+    const CHART_FETCH_TIMEOUT_MS = 15000;
     const SCAN_PROXY_FETCH_TIMEOUT_MS = 4500;
     const THEME_STORAGE_KEY = 'orion-screener-theme';
     const CHART_STYLE_STORAGE_KEY = 'orion-screener-chart-style';
@@ -4465,6 +4511,7 @@
     let currentFilters = JSON.parse(JSON.stringify(DEFAULT_FILTERS));
     let activeProfileId = 'default';
     let picks = [];
+    let lastSuccessfulScanSnapshot = null;
     let isLoading = false;
     // Stores BTC 24h % change for BTC-relative comparisons (BTC Δ).
     let latestBtcChange24h = null;
@@ -4558,6 +4605,7 @@
         updateEmptyStateHint();
       }
       renderProfiles();
+      updateScanFilterNotice();
       showToast('Preset deleted');
     }
 
@@ -4892,15 +4940,48 @@
       return data;
     }
 
+    async function readBoundedJsonResponseText(response) {
+      if (!response.body || typeof response.body.getReader !== 'function' || typeof TextDecoder !== 'function') {
+        return response.text();
+      }
+
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      var chunks = [];
+      var bytesRead = 0;
+      try {
+        while (true) {
+          var chunk = await reader.read();
+          if (chunk.done) break;
+          bytesRead += chunk.value.byteLength;
+          if (bytesRead > MAX_JSON_RESPONSE_LENGTH) {
+            throw new Error('JSON response exceeds the safe size limit');
+          }
+          chunks.push(decoder.decode(chunk.value, { stream: true }));
+        }
+        chunks.push(decoder.decode());
+        return chunks.join('');
+      } catch (error) {
+        // Cancellation must not delay the error if a source never finishes closing.
+        reader.cancel().catch(function() {});
+        throw error;
+      } finally {
+        reader.releaseLock();
+      }
+    }
+
     async function parseJsonResponseBody(response) {
       if (response && response.headers && typeof response.headers.get === 'function') {
         var contentLength = parseInt(response.headers.get('content-length'), 10);
         if (Number.isFinite(contentLength) && contentLength > MAX_JSON_RESPONSE_LENGTH) {
+          if (response.body && typeof response.body.cancel === 'function') {
+            response.body.cancel().catch(function() {});
+          }
           throw new Error('JSON response exceeds the safe size limit');
         }
       }
       if (response && typeof response.text === 'function') {
-        return normalizeParsedJsonPayload(parseJsonResponseText(await response.text()));
+        return normalizeParsedJsonPayload(parseJsonResponseText(await readBoundedJsonResponseText(response)));
       }
       if (response && typeof response.json === 'function') {
         return normalizeParsedJsonPayload(await response.json());
@@ -4917,7 +4998,7 @@
       }
     }
 
-    async function fetchJsonOrThrow(url, signal, timeoutMs) {
+    async function fetchJsonOrThrow(url, signal, timeoutMs, options) {
       throwIfRequestAborted(signal);
       var controller = new AbortController();
       var didTimeout = false;
@@ -4933,7 +5014,9 @@
       }
 
       try {
-        var response = await fetch(url, getSafeFetchOptions({ signal: controller.signal }));
+        var response = await fetch(url, getSafeFetchOptions(
+          Object.assign({}, options || {}, { signal: controller.signal })
+        ));
         if (!response.ok) {
           var err = new Error('HTTP ' + response.status);
           err.status = response.status;
@@ -5055,7 +5138,7 @@
       throw new Error('Unsupported source');
     }
 
-    async function fetchChartCandles(symbol, timeframe, limit, signal) {
+    async function fetchChartCandlesFromFallbacks(symbol, timeframe, limit, signal) {
       throwIfRequestAborted(signal);
       var cleanSymbol = getCleanSymbol(symbol);
       var baseAsset = getBaseAsset(symbol);
@@ -5119,6 +5202,47 @@
         throw new Error('Chart not available in your region');
       }
       throw lastErr || new Error('Chart data not available');
+    }
+
+    async function fetchChartCandles(symbol, timeframe, limit, signal) {
+      throwIfRequestAborted(signal);
+      var controller = new AbortController();
+      var didTimeout = false;
+      var timeoutId = setTimeout(function() {
+        didTimeout = true;
+        controller.abort();
+      }, CHART_FETCH_TIMEOUT_MS);
+      var abortHandler = null;
+
+      if (signal) {
+        if (signal.aborted) controller.abort();
+        abortHandler = function() { controller.abort(); };
+        signal.addEventListener('abort', abortHandler);
+      }
+
+      try {
+        return await fetchChartCandlesFromFallbacks(
+          symbol,
+          timeframe,
+          limit,
+          controller.signal
+        );
+      } catch (err) {
+        if (signal && signal.aborted) {
+          throwIfRequestAborted(signal, err);
+        }
+        if (didTimeout && err && err.name === 'AbortError') {
+          var timeoutErr = new Error('Chart request timed out');
+          timeoutErr.name = 'TimeoutError';
+          throw timeoutErr;
+        }
+        throw err;
+      } finally {
+        clearTimeout(timeoutId);
+        if (signal && abortHandler) {
+          signal.removeEventListener('abort', abortHandler);
+        }
+      }
     }
 
     // =============================================================================
@@ -5636,35 +5760,11 @@
     }
 
     async function fetchJsonWithTimeout(url, timeoutMs) {
-      const controller = new AbortController();
-      let didTimeout = false;
-      const timeoutId = setTimeout(() => {
-        didTimeout = true;
-        controller.abort();
-      }, timeoutMs || FETCH_TIMEOUT_MS);
-
-      try {
-        const response = await fetch(url, getSafeFetchOptions({
-          method: 'GET',
-          headers: { 'Accept': 'application/json' },
-          signal: controller.signal,
-        }));
-
-        if (!response.ok) {
-          throw new Error('HTTP ' + response.status);
-        }
-
-        return await parseJsonResponseBody(response);
-      } catch (err) {
-        if (didTimeout && err && err.name === 'AbortError') {
-          var timeoutErr = new Error('Request timed out');
-          timeoutErr.name = 'TimeoutError';
-          throw timeoutErr;
-        }
-        throw err;
-      } finally {
-        clearTimeout(timeoutId);
-      }
+      var result = await fetchJsonOrThrow(url, null, timeoutMs, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      });
+      return result.data;
     }
 
     function createScanTimeoutError() {
@@ -5712,7 +5812,8 @@
       throw new Error('Proxy chain failed');
     }
 
-    async function fetchScreener(deadlineMs) {
+    async function fetchScreener(deadlineMs, filters) {
+      var scanFilters = sanitizeFilterState(filters || currentFilters);
       // Use proxies on file:// and GitHub Pages. Otherwise try direct and fall back to proxies if needed.
       let data;
       if (isDirectApiBlocked()) {
@@ -5736,10 +5837,10 @@
       const allPicks = parseScreenerData(data);
       const btcPick = allPicks.find(pick => pick.symbol && pick.symbol.startsWith('BTC/'));
       latestBtcChange24h = btcPick && Number.isFinite(btcPick.priceChange24h) ? btcPick.priceChange24h : null;
-      const filtered = filterPicks(allPicks, currentFilters);
+      const filtered = filterPicks(allPicks, scanFilters);
       const sorted = sortPicks(filtered);
 
-      return sorted.slice(0, currentFilters.maxResults);
+      return sorted.slice(0, scanFilters.maxResults);
     }
 
     // =============================================================================
@@ -6359,6 +6460,16 @@
       }
     }
 
+    function updateScanFilterNotice() {
+      var button = document.getElementById('rescanFiltersBtn');
+      if (!button) return;
+      var changed = !!lastSuccessfulScanSnapshot &&
+        !filtersEqual(currentFilters, lastSuccessfulScanSnapshot.filters);
+      button.style.display = changed ? 'inline-flex' : 'none';
+      button.disabled = isLoading;
+      button.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+    }
+
     function renderPicks() {
       const resultsContainer = document.getElementById('resultsContainer');
       const emptyState = document.getElementById('emptyState');
@@ -6366,9 +6477,14 @@
       const resultsCount = document.getElementById('resultsCount');
       const lastUpdated = document.getElementById('lastUpdated');
       const copyAllBtn = document.getElementById('copyAllBtn');
+      updateScanFilterNotice();
+      resultsList.textContent = '';
 
       if (picks.length === 0) {
         candidateHighlights = { bySymbol: {}, topSymbols: [], total: 0 };
+        resultsCount.textContent = '';
+        lastUpdated.textContent = '';
+        closeChartPreview();
         updateChartPreviewCandidateBadge('');
         resultsContainer.style.display = 'none';
         emptyState.style.display = 'block';
@@ -6383,9 +6499,9 @@
       updateShareActionButtons();
 
       resultsCount.textContent = picks.length + ' active setups';
-      lastUpdated.textContent = new Date().toLocaleTimeString();
-
-      resultsList.textContent = '';
+      lastUpdated.textContent = new Date(
+        lastSuccessfulScanSnapshot ? lastSuccessfulScanSnapshot.createdAt : Date.now()
+      ).toLocaleTimeString();
 
       candidateHighlights = evaluateCandidateHighlights(picks);
       picks = pinTopCandidates(picks, candidateHighlights);
@@ -6402,6 +6518,7 @@
         clearChartPreviewStats();
       }
 
+      var newSymbols = new Set(lastSuccessfulScanSnapshot ? lastSuccessfulScanSnapshot.newSymbols : []);
       picks.forEach(function(pick, index) {
         var highlight = candidateHighlights.bySymbol[pick.symbol];
 
@@ -6435,6 +6552,18 @@
 
         symbolRow.appendChild(symbolSpan);
         symbolRow.appendChild(exchangeSpan);
+
+        if (newSymbols.has(pick.symbol)) {
+          var newBadge = document.createElement('span');
+          newBadge.className = 'new-setup-badge';
+          newBadge.title = 'Not in the previous successful scan with these filters';
+          newBadge.textContent = 'New';
+          var newContext = document.createElement('span');
+          newContext.className = 'new-setup-context';
+          newContext.textContent = ' since last scan';
+          newBadge.appendChild(newContext);
+          symbolRow.appendChild(newBadge);
+        }
 
         if (highlight && highlight.topRank) {
           var badgeWrap = document.createElement('span');
@@ -6670,7 +6799,8 @@
       });
     }
 
-    async function fetchScreenerWithRetry() {
+    async function fetchScreenerWithRetry(filters) {
+      var scanFilters = sanitizeFilterState(filters || currentFilters);
       var attempt = 0;
       var deadline = Date.now() + SCAN_TIMEOUT_MS;
       while (true) {
@@ -6678,7 +6808,7 @@
           throw createScanTimeoutError();
         }
         try {
-          return await fetchScreener(deadline);
+          return await fetchScreener(deadline, scanFilters);
         } catch (err) {
           attempt += 1;
           var delay = Math.min(SCAN_RETRY_BASE_DELAY_MS * Math.pow(1.5, attempt - 1), SCAN_RETRY_MAX_DELAY_MS);
@@ -6698,7 +6828,11 @@
 
       const btn = document.getElementById('scanBtn');
       const resultsContainer = document.getElementById('resultsContainer');
+      const scanFilters = sanitizeFilterState(currentFilters);
+      const rescanButton = document.getElementById('rescanFiltersBtn');
+      const returnFocusToScan = document.activeElement === rescanButton;
       isLoading = true;
+      updateScanFilterNotice();
       btn.disabled = true;
       btn.setAttribute('aria-busy', 'true');
       if (resultsContainer) resultsContainer.setAttribute('aria-busy', 'true');
@@ -6718,7 +6852,19 @@
       btn.querySelector('svg').style.display = 'none';
 
       try {
-        picks = await fetchScreenerWithRetry();
+        var nextPicks = await fetchScreenerWithRetry(scanFilters);
+        var previousSnapshot = lastSuccessfulScanSnapshot;
+        var previousSymbols = new Set(previousSnapshot ? previousSnapshot.symbols : []);
+        var comparable = previousSnapshot && filtersEqual(scanFilters, previousSnapshot.filters);
+        lastSuccessfulScanSnapshot = {
+          filters: scanFilters,
+          createdAt: new Date().toISOString(),
+          symbols: nextPicks.map(function(pick) { return pick.symbol; }),
+          newSymbols: comparable ? nextPicks.filter(function(pick) {
+            return !previousSymbols.has(pick.symbol);
+          }).map(function(pick) { return pick.symbol; }) : [],
+        };
+        picks = nextPicks;
         renderPicks();
         prefetchTopCandidateExtras();
         updateScreenerStatus(
@@ -6738,6 +6884,10 @@
         btnSpan.textContent = originalText;
         btn.querySelector('.spinner')?.remove();
         btn.querySelector('svg').style.display = '';
+        updateScanFilterNotice();
+        if (returnFocusToScan && rescanButton.style.display === 'none') {
+          btn.focus({ preventScroll: true });
+        }
       }
     }
 
@@ -6782,6 +6932,7 @@
       updateFilterInputs();
       updateEmptyStateHint();
       renderProfiles();
+      updateScanFilterNotice();
     }
 
     function normalizeExcludeSymbols(value) {
@@ -6873,6 +7024,7 @@
       activeProfileId = findMatchingProfileId(currentFilters);
       updateEmptyStateHint();
       renderProfiles();
+      updateScanFilterNotice();
     }
 
     function resetFilters() {
@@ -7348,17 +7500,20 @@
     }
 
     function buildSocialCardPayloadFromState() {
+      var topEntries = buildTopCardEntriesFromCurrentPicks();
+      var resultSnapshot = topEntries.length > 0 && lastSuccessfulScanSnapshot
+        ? lastSuccessfulScanSnapshot
+        : null;
       var payload = {
         v: CARD_PAYLOAD_VERSION,
         type: 'filters',
-        createdAt: new Date().toISOString(),
+        createdAt: resultSnapshot ? resultSnapshot.createdAt : new Date().toISOString(),
         theme: getCurrentThemeMode(),
-        filters: sanitizeFilterState(currentFilters),
+        filters: sanitizeFilterState(resultSnapshot ? resultSnapshot.filters : currentFilters),
         title: getDefaultCardTitle('filters'),
         note: getDefaultCardNote('filters'),
       };
 
-      var topEntries = buildTopCardEntriesFromCurrentPicks();
       if (topEntries.length > 0) {
         payload.type = 'setup';
         payload.title = getDefaultCardTitle('setup');
@@ -7815,7 +7970,7 @@
       trackEvent('share_social_card_clicked', {
         type: payload.type,
         picks: picks.length,
-        maxResults: currentFilters.maxResults,
+        maxResults: payload.filters.maxResults,
       });
     }
 
@@ -7864,6 +8019,7 @@
     let corsProxyDraft = null;
     let preferredProxyDraft = 'auto';
     let isTestingAllCorsProxies = false;
+    let corsProxyTestRunId = 0;
     let corsProxyDraftSeed = 0;
     var socialCardState = {
       payload: null,
@@ -7940,6 +8096,7 @@
     }
 
     function abortAllCorsProxyDraftTests() {
+      corsProxyTestRunId += 1;
       (corsProxyDraft || []).forEach(function(proxy) {
         abortCorsProxyTest(proxy);
       });
@@ -8064,8 +8221,9 @@
         return false;
       }
 
-      proxy._testAbort = new AbortController();
-      var signal = proxy._testAbort.signal;
+      var testController = new AbortController();
+      proxy._testAbort = testController;
+      var signal = testController.signal;
       var normalized = normalizeCorsProxyEntry(proxy);
       if (!normalized) {
         proxy._test = { state: 'error', message: 'Failed · Invalid proxy URL' };
@@ -8081,6 +8239,7 @@
       var startedAt = Date.now();
       try {
         var result = await fetchJsonOrThrow(requestUrl, signal);
+        if (proxy._testAbort !== testController || signal.aborted) return false;
         var tickerCount = getOrionApiTickerCount(result && result.data ? result.data : null);
         if (!Number.isFinite(tickerCount)) {
           throw new Error('Unexpected response (missing tickers array).');
@@ -8092,6 +8251,7 @@
         };
         return true;
       } catch (err) {
+        if (proxy._testAbort !== testController) return false;
         if (err && err.name === 'AbortError') {
           proxy._test = null;
           return false;
@@ -8100,8 +8260,10 @@
         proxy._test = { state: 'error', message: 'Failed · ' + msg };
         return false;
       } finally {
-        proxy._testAbort = null;
-        if (!opts.skipRender) renderCorsProxySettingsUi();
+        if (proxy._testAbort === testController) {
+          proxy._testAbort = null;
+          if (!opts.skipRender) renderCorsProxySettingsUi();
+        }
       }
     }
 
@@ -8112,6 +8274,7 @@
         return;
       }
 
+      var runId = ++corsProxyTestRunId;
       isTestingAllCorsProxies = true;
       renderCorsProxySettingsUi();
       var snapshot = corsProxyDraft.slice();
@@ -8120,19 +8283,22 @@
 
       try {
         for (var i = 0; i < snapshot.length; i += 1) {
-          if (!isTestingAllCorsProxies) break;
+          if (runId !== corsProxyTestRunId) return;
           var proxy = snapshot[i];
           if (!corsProxyDraft.includes(proxy)) continue;
           tested += 1;
           var ok = await testCorsProxy(proxy, { skipRender: false });
+          if (runId !== corsProxyTestRunId) return;
           if (ok) passed += 1;
           if (i < snapshot.length - 1) {
             await sleep(120);
           }
         }
       } finally {
-        isTestingAllCorsProxies = false;
-        renderCorsProxySettingsUi();
+        if (runId === corsProxyTestRunId) {
+          isTestingAllCorsProxies = false;
+          renderCorsProxySettingsUi();
+        }
       }
 
       if (tested === 0) {
@@ -9322,6 +9488,10 @@
     }
 
     function closeChartPreview() {
+      if (chartPreviewTimeout) {
+        clearTimeout(chartPreviewTimeout);
+        chartPreviewTimeout = null;
+      }
       isChartMaximized = false;
       isPreviewHovered = false;
       var preview = document.getElementById('chartPreview');
@@ -9392,6 +9562,7 @@
       // Attach event listeners
       document.getElementById('scanBtn').addEventListener('click', handleScan);
       document.getElementById('retryScanBtn').addEventListener('click', handleScan);
+      document.getElementById('rescanFiltersBtn').addEventListener('click', handleScan);
       document.getElementById('filtersBtn').addEventListener('click', toggleFilters);
       document.getElementById('closeFiltersBtn').addEventListener('click', toggleFilters);
       document.getElementById('helpBtn').addEventListener('click', toggleHelp);

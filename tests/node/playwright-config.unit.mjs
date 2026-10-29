@@ -13,6 +13,10 @@ test('local browser tests use a dedicated loopback server without reuse', () => 
   assert.equal(result.use.baseURL, 'http://127.0.0.1:43173');
   assert.equal(result.webServer.reuseExistingServer, false);
   assert.match(result.webServer.command, /--bind 127\.0\.0\.1$/);
+  assert.equal(result.use.serviceWorkers, 'block');
+  assert.deepEqual(result.use.launchOptions.args, [
+    '--proxy-server=http://127.0.0.1:1', '--proxy-bypass-list=127.0.0.1;localhost',
+  ]);
 });
 
 test('port override updates browser URL and server together', () => {
@@ -23,5 +27,8 @@ test('port override updates browser URL and server together', () => {
 });
 
 test('live URL does not start a local server', () => {
-  assert.equal(config({ E2E_BASE_URL: 'https://example.test/' }).webServer, undefined);
+  const result = config({ E2E_BASE_URL: 'https://example.test/' });
+  assert.equal(result.webServer, undefined);
+  assert.equal(result.use.serviceWorkers, 'allow');
+  assert.deepEqual(result.use.launchOptions, {});
 });

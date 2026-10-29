@@ -15,6 +15,17 @@ function sanitizeFileName(value) {
 }
 
 const test = base.extend({
+  context: async ({ context, baseURL }, use) => {
+    if (!process.env.E2E_BASE_URL) {
+      const localOrigin = new URL(baseURL).origin;
+      await context.route('**/*', (route) => {
+        return new URL(route.request().url()).origin === localOrigin
+          ? route.continue()
+          : route.abort();
+      });
+    }
+    await use(context);
+  },
   page: async ({ page, browserName }, use, testInfo) => {
     const shouldCollectCoverage = coverageEnabled && browserName === 'chromium';
     if (!shouldCollectCoverage) {
@@ -30,12 +41,7 @@ const test = base.extend({
     try {
       await use(page);
     } finally {
-      let entries = [];
-      try {
-        entries = await page.coverage.stopJSCoverage();
-      } catch (error) {
-        entries = [];
-      }
+      const entries = await page.coverage.stopJSCoverage();
 
       const hash = crypto
         .createHash('sha1')

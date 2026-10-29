@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spartan-orion-screener-v10';
+const CACHE_NAME = 'spartan-orion-screener-v11';
 const APP_SHELL_URL = './index.html';
 const PRECACHE_ASSETS = [
   './',
@@ -10,6 +10,18 @@ const PRECACHE_ASSETS = [
   './icon-512.png',
   './social-card.png'
 ];
+const APP_SCOPE_URL = new URL(self.registration.scope);
+const APP_SHELL_PATHS = new Set([
+  APP_SCOPE_URL.pathname,
+  new URL(APP_SHELL_URL, APP_SCOPE_URL).pathname,
+]);
+const APP_ASSET_PATHS = new Set(
+  PRECACHE_ASSETS.map((asset) => new URL(asset, APP_SCOPE_URL).pathname)
+);
+
+function isAppShellUrl(url) {
+  return url.origin === APP_SCOPE_URL.origin && APP_SHELL_PATHS.has(url.pathname);
+}
 
 function isNavigationRequest(request) {
   if (!request) return false;
@@ -27,7 +39,8 @@ function shouldCacheStaticAsset(request) {
 async function handleNavigationRequest(request) {
   try {
     const response = await fetch(request);
-    if (response && response.ok) {
+    // A redirect to another page must not replace the offline app shell.
+    if (response && response.ok && isAppShellUrl(new URL(response.url || request.url))) {
       await cacheResponse(APP_SHELL_URL, response);
     }
     return response;
@@ -90,14 +103,15 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== APP_SCOPE_URL.origin) return;
 
   if (isNavigationRequest(event.request)) {
+    if (!isAppShellUrl(url)) return;
     event.respondWith(handleNavigationRequest(event.request));
     return;
   }
 
-  if (!shouldCacheStaticAsset(event.request)) return;
+  if (!APP_ASSET_PATHS.has(url.pathname) || !shouldCacheStaticAsset(event.request)) return;
 
   event.respondWith(handleStaticAssetRequest(event.request));
 });

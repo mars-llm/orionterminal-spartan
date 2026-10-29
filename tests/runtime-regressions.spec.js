@@ -138,6 +138,43 @@ test('runtime: aborting an active chart request stops the fallback chain', async
   expect(result).toEqual({ errorName: 'AbortError', fetchCount: 1 });
 });
 
+test('runtime: chart fallback chain respects one total timeout budget', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const originalFetch = window.fetch;
+    const originalSetTimeout = window.setTimeout;
+    const realSetTimeout = window.setTimeout.bind(window);
+    let fetchCount = 0;
+    dataCache.clear();
+    sessionStorage.removeItem(CHART_REGION_KEY);
+    window.setTimeout = function(callback, delay) {
+      const args = Array.prototype.slice.call(arguments, 2);
+      return realSetTimeout(callback, delay === CHART_FETCH_TIMEOUT_MS ? 25 : delay, ...args);
+    };
+    window.fetch = (url, options) => {
+      fetchCount += 1;
+      return new Promise((resolve, reject) => {
+        options.signal.addEventListener('abort', () => {
+          reject(new DOMException('Aborted', 'AbortError'));
+        }, { once: true });
+      });
+    };
+    const startedAt = performance.now();
+    try {
+      await fetchChartCandles('TIMEOUT/USDT', '1m', 3);
+      return { errorName: '', fetchCount, elapsedMs: performance.now() - startedAt };
+    } catch (error) {
+      return { errorName: error.name, fetchCount, elapsedMs: performance.now() - startedAt };
+    } finally {
+      window.fetch = originalFetch;
+      window.setTimeout = originalSetTimeout;
+    }
+  });
+  expect(result.errorName).toBe('TimeoutError');
+  expect(result.fetchCount).toBe(1);
+  expect(result.elapsedMs).toBeLessThan(500);
+});
+
 test('runtime: failed replacement chart retries while only fresh previews are reused', async ({ page }) => {
   await page.goto('./');
   const result = await page.evaluate(async () => {
@@ -249,4 +286,248 @@ test('runtime: fixture scan traverses request, parser, filters, sorting and resu
   await expect(page.locator('#scanBtn')).toHaveAttribute('aria-busy', 'false');
   await expect(page.locator('#error')).toBeHidden();
   expect(requestCount).toBe(1);
+});
+
+test('runtime: superseded proxy tests cannot overwrite the active test', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const originalFetch = fetchJsonOrThrow;
+    const pending = [];
+    fetchJsonOrThrow = (url, signal) => new Promise((resolve) => {
+      pending.push({ signal, resolve });
+    });
+    const proxy = createCorsProxyDraftEntry({ url: 'https://proxy.example/?url=', encode: true });
+    try {
+      const first = testCorsProxy(proxy, { skipRender: true });
+      const second = testCorsProxy(proxy, { skipRender: true });
+      const activeController = proxy._testAbort;
+      pending[0].resolve({ data: { tickers: [] } });
+      const firstResult = await first;
+      const afterFirst = {
+        state: proxy._test && proxy._test.state,
+        activeControllerPreserved: proxy._testAbort === activeController,
+      };
+      pending[1].resolve({ data: { tickers: [{ symbol: 'FIXTUREUSDT' }] } });
+      return {
+        firstAborted: pending[0].signal.aborted,
+        firstResult,
+        afterFirst,
+        secondResult: await second,
+        finalState: proxy._test && proxy._test.state,
+        controllerReleased: proxy._testAbort === null,
+      };
+    } finally {
+      fetchJsonOrThrow = originalFetch;
+    }
+  });
+  expect(result).toEqual({
+    firstAborted: true,
+    firstResult: false,
+    afterFirst: { state: 'testing', activeControllerPreserved: true },
+    secondResult: true,
+    finalState: 'success',
+    controllerReleased: true,
+  });
+});
+
+test('runtime: canceled proxy batches cannot complete or unlock a newer batch', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const originalTest = testCorsProxy;
+    const originalToast = showToast;
+    const originalSleep = sleep;
+    const pending = [];
+    const messages = [];
+    testCorsProxy = (proxy) => new Promise((resolve) => { pending.push({ proxy, resolve }); });
+    showToast = (message) => messages.push(message);
+    sleep = async () => {};
+    const draft = () => copyCorsProxyList([
+      { url: 'https://proxy-a.example/?url=', encode: true },
+      { url: 'https://proxy-b.example/?url=', encode: true },
+    ]);
+    try {
+      corsProxyDraft = draft();
+      const first = testAllCorsProxies();
+      abortAllCorsProxyDraftTests();
+      corsProxyDraft = draft();
+      const second = testAllCorsProxies();
+      pending[0].resolve(false);
+      await first;
+      const afterFirst = {
+        newBatchStillRunning: isTestingAllCorsProxies,
+        testButtonDisabled: document.getElementById('testAllCorsProxyBtn').disabled,
+        messages: messages.slice(),
+      };
+      pending[1].resolve(true);
+      // The next test starts after the batch continuation and its inter-row pause.
+      for (let i = 0; i < 5 && pending.length < 3; i += 1) await Promise.resolve();
+      if (pending[2]) pending[2].resolve(true);
+      await second;
+      return { afterFirst, tested: pending.length, messages, running: isTestingAllCorsProxies };
+    } finally {
+      abortAllCorsProxyDraftTests();
+      testCorsProxy = originalTest;
+      showToast = originalToast;
+      sleep = originalSleep;
+    }
+  });
+  expect(result).toEqual({
+    afterFirst: { newBatchStillRunning: true, testButtonDisabled: true, messages: [] },
+    tested: 3,
+    messages: ['2/2 proxies passed'],
+    running: false,
+  });
+});
+
+test('runtime: oversized streamed JSON stops downloading before the entire body is buffered', async ({ page }) => {
+  await page.goto('./');
+  const results = await page.evaluate(async () => {
+    const results = [];
+    for (const headers of [{}, { 'content-length': '2' }]) {
+      let pulls = 0;
+      let canceled = false;
+      const body = new ReadableStream({
+        pull(controller) {
+          pulls += 1;
+          if (pulls <= 20) controller.enqueue(new Uint8Array(512 * 1024).fill(32));
+          else { controller.enqueue(new TextEncoder().encode('{}')); controller.close(); }
+        },
+        cancel() { canceled = true; },
+      });
+      const response = new Response(body, { headers });
+      let errorMessage = '';
+      try { await parseJsonResponseBody(response); }
+      catch (error) { errorMessage = error.message; }
+      results.push({ pulls, canceled, errorMessage, locked: response.body.locked });
+    }
+    return results;
+  });
+  for (const result of results) {
+    expect(result.errorMessage).toBe('JSON response exceeds the safe size limit');
+    expect(result.pulls).toBeLessThan(20);
+    expect(result.canceled).toBe(true);
+    expect(result.locked).toBe(false);
+  }
+});
+
+test('runtime: bounded JSON decoding preserves split UTF-8, proxy wrappers, and fallback readers', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const payload = { tickers: [], note: '€ 🚀' };
+    const bytes = new TextEncoder().encode(JSON.stringify({ contents: JSON.stringify(payload) }));
+    let offset = 0;
+    const response = new Response(new ReadableStream({
+      pull(controller) {
+        if (offset === bytes.length) controller.close();
+        else controller.enqueue(bytes.slice(offset, ++offset));
+      },
+    }));
+    return {
+      streamed: await parseJsonResponseBody(response),
+      locked: response.body.locked,
+      text: await parseJsonResponseBody({ text: async () => JSON.stringify(payload) }),
+      json: await parseJsonResponseBody({ json: async () => ({ data: payload }) }),
+    };
+  });
+  const payload = { tickers: [], note: '€ 🚀' };
+  expect(result).toEqual({ streamed: payload, locked: false, text: payload, json: payload });
+});
+
+test('runtime: editing a proxy during its test keeps the current input and keyboard focus', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const originalFetch = fetchJsonOrThrow;
+    let resolveTest;
+    fetchJsonOrThrow = () => new Promise((resolve) => { resolveTest = resolve; });
+    try {
+      openSettingsModal();
+      setActiveSettingsTab('network', false, false);
+      const proxy = corsProxyDraft[0];
+      const pendingTest = testCorsProxy(proxy);
+      const input = document.querySelector('#corsProxyList .proxy-url-input');
+      input.focus();
+      input.value = 'https://edited-proxy.example/?url=';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      resolveTest({ data: { tickers: [] } });
+      await pendingTest;
+      return {
+        inputPreserved: input.isConnected,
+        focusPreserved: document.activeElement === input,
+        value: input.value,
+        state: proxy._test,
+      };
+    } finally {
+      fetchJsonOrThrow = originalFetch;
+      closeSettingsModal();
+    }
+  });
+  expect(result).toEqual({
+    inputPreserved: true, focusPreserved: true,
+    value: 'https://edited-proxy.example/?url=', state: null,
+  });
+});
+
+test('runtime: shared request transport preserves headers, HTTP errors, body deadlines and cancellation', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    const originalFetch = window.fetch;
+    const requests = [];
+    window.fetch = async (url, options) => {
+      requests.push({
+        url, method: options.method, headers: options.headers,
+        credentials: options.credentials, referrerPolicy: options.referrerPolicy,
+      });
+      if (url.endsWith('/unavailable')) return new Response('{}', { status: 503 });
+      return new Response(new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('{"tickers":['));
+          options.signal.addEventListener('abort', () => {
+            controller.error(new DOMException('Aborted', 'AbortError'));
+          }, { once: true });
+        },
+      }));
+    };
+    try {
+      let httpError;
+      try { await fetchJsonWithTimeout('https://fixture.example/unavailable', 1000); }
+      catch (error) { httpError = { message: error.message, status: error.status }; }
+      let timeoutError;
+      try { await fetchJsonWithTimeout('https://fixture.example/stalled-body', 25); }
+      catch (error) { timeoutError = error.name; }
+      const controller = new AbortController();
+      const pending = fetchJsonOrThrow('https://fixture.example/canceled-body', controller.signal, 1000);
+      controller.abort();
+      let cancelError;
+      try { await pending; } catch (error) { cancelError = error.name; }
+      return { httpError, timeoutError, cancelError, requests };
+    } finally {
+      window.fetch = originalFetch;
+    }
+  });
+  expect(result.httpError).toEqual({ message: 'HTTP 503', status: 503 });
+  expect(result.timeoutError).toBe('TimeoutError');
+  expect(result.cancelError).toBe('AbortError');
+  expect(result.requests).toHaveLength(3);
+  expect(result.requests[0]).toMatchObject({
+    method: 'GET', headers: { Accept: 'application/json' },
+    credentials: 'omit', referrerPolicy: 'no-referrer',
+  });
+});
+
+test('runtime: oversized declared JSON bodies are canceled without waiting for the source to close', async ({ page }) => {
+  await page.goto('./');
+  const result = await page.evaluate(async () => {
+    let canceled = false;
+    const response = new Response(new ReadableStream({
+      cancel() {
+        canceled = true;
+        return new Promise(() => {});
+      },
+    }), { headers: { 'content-length': String(MAX_JSON_RESPONSE_LENGTH + 1) } });
+    let errorMessage;
+    try { await parseJsonResponseBody(response); }
+    catch (error) { errorMessage = error.message; }
+    return { errorMessage, canceled };
+  });
+  expect(result).toEqual({ canceled: true, errorMessage: 'JSON response exceeds the safe size limit' });
 });

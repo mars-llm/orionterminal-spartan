@@ -122,7 +122,7 @@ export function summarizeCoverage(source, entries) {
   let covered = 0;
   let offset = 0;
 
-  lines.forEach((line, index) => {
+  lines.forEach((line) => {
     const sanitizedLine = stripInlineComments(line, blockState);
     const lineStart = offset + line.search(/\S|$/);
     const lineEnd = offset + line.trimEnd().length;
@@ -137,7 +137,7 @@ export function summarizeCoverage(source, entries) {
     offset += line.length + 1;
   });
 
-  const percent = total > 0 ? Number(((covered / total) * 100).toFixed(2)) : 0;
+  const percent = total > 0 ? (covered / total) * 100 : 0;
   return {
     total,
     covered,
@@ -213,7 +213,7 @@ async function main() {
     'Browser coverage summary',
     'Target: index.html inline app script',
     `Covered lines: ${summary.covered}/${summary.total}`,
-    `Coverage: ${summary.percent}%`,
+    `Coverage: ${summary.percent.toFixed(2)}%`,
     `Threshold: ${threshold}%`,
   ].join('\n');
 

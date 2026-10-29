@@ -51,6 +51,14 @@ module.exports = defineConfig({
   use: {
     baseURL,
     trace: 'retain-on-failure',
+    serviceWorkers: isLiveBaseUrl ? 'allow' : 'block',
+    // Also contain speculative connections, which request routing cannot intercept.
+    launchOptions: isLiveBaseUrl ? {} : {
+      args: [
+        '--proxy-server=http://127.0.0.1:1',
+        '--proxy-bypass-list=127.0.0.1;localhost',
+      ],
+    },
   },
   projects,
   webServer: isLiveBaseUrl

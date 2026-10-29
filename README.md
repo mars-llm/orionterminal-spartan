@@ -9,6 +9,7 @@ Single-file market scanner for Binance USDT-M futures. It pulls Orion Terminal s
 ## What You Get
 
 - One-click scans with ranked `Top 1-3` candidates and metric tooltips
+- `New` badges highlight setups absent from the previous successful scan with the same filters; comparisons stay in memory and reset when the page reloads
 - Instant chart previews plus a larger modal with S/R overlays, MA, volume, funding, and open interest
 - Built-in presets for majors, low caps, scalping, and the default mid-cap flow
 - Settings for chart appearance, display behavior, and CORS/proxy management

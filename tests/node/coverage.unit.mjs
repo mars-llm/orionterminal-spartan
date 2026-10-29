@@ -42,3 +42,12 @@ test('invalid thresholds cannot bypass the gate', () => {
     assert.throws(() => parseCoverageThreshold(value), /COVERAGE_THRESHOLD/);
   }
 });
+
+test('coverage below the threshold cannot pass by rounding up', () => {
+  const source = 'run();\n'.repeat(20001).trimEnd();
+  const summary = summarizeCoverage(source, [recording([0, 16000 * 7, 1])]);
+  assert.equal(summary.covered, 16000);
+  assert.equal(summary.total, 20001);
+  assert.equal(summary.percent.toFixed(2), '80.00');
+  assert.ok(summary.percent < parseCoverageThreshold());
+});

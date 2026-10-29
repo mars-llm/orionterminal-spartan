@@ -166,6 +166,64 @@ test('social card: no picks creates v2 filter payload', async ({ page }) => {
   });
 });
 
+test('social card: successful scan keeps its original filters after later edits', async ({ page }) => {
+  await page.goto('./');
+
+  const result = await page.evaluate(async () => {
+    const scannedFilters = sanitizeFilterState({
+      minVolume: 1400000,
+      maxVolume: 4200000,
+      minVolatility15m: 0.28,
+      minTicks5m: 360,
+      maxResults: 6,
+      excludeSymbols: ['BTC', 'ETH'],
+    });
+    let receivedFilters = null;
+    currentFilters = scannedFilters;
+    fetchScreenerWithRetry = async (filters) => {
+      receivedFilters = filters;
+      return [{
+        symbol: 'SNAPSHOT/USDT',
+        exchange: 'binanceusdm',
+        price: 2.5,
+        priceChange1h: 0.5,
+        priceChange4h: 1.5,
+        priceChange24h: 3.5,
+        volume24h: 2200000,
+        volatility15m: 0.61,
+        ticks5m: 650,
+        ticks15m: 980,
+      }];
+    };
+    prefetchTopCandidateExtras = () => {};
+    await handleScan();
+    const capturedAt = lastSuccessfulScanSnapshot.createdAt;
+
+    currentFilters = sanitizeFilterState({
+      minVolume: 9000000,
+      maxVolume: null,
+      minVolatility15m: 1.5,
+      minTicks5m: 1200,
+      maxResults: 2,
+      excludeSymbols: [],
+    });
+    const payload = buildSocialCardPayloadFromState();
+    return { receivedFilters, capturedAt, payload };
+  });
+
+  expect(result.receivedFilters).toEqual(result.payload.filters);
+  expect(result.payload.type).toBe('setup');
+  expect(result.payload.createdAt).toBe(result.capturedAt);
+  expect(result.payload.filters).toMatchObject({
+    minVolume: 1400000,
+    maxVolume: 4200000,
+    minVolatility15m: 0.28,
+    minTicks5m: 360,
+    maxResults: 6,
+    excludeSymbols: ['BTC', 'ETH'],
+  });
+});
+
 test('social card: card-only view renders and sets ready marker', async ({ page }) => {
   await page.goto('./');
   const payload = await encodeCardPayloadOnPage(page, {
