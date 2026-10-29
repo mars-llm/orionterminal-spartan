@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-jVwyjl011+2SzjI/PCeS3sRD5VKLtCp0nbiWAanWgNM='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-bzofFRLCMyq36KGiJpy8ACiby2E7Y36XDIB5zmkGpzc='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -4086,7 +4086,9 @@
     const BINANCE_SCAN_TIMEOUT_MS = 90000;
     const BINANCE_SCAN_CONCURRENCY = 2;
     const BINANCE_SCAN_MARKET_LIMIT = 20;
-    const BINANCE_REQUEST_LIMIT = 30;
+    const BINANCE_REQUEST_LIMIT = 60;
+    const BINANCE_SCAN_REQUEST_LIMIT = 30;
+    const BINANCE_CHART_HEADROOM = 20;
     const BINANCE_REQUEST_WINDOW_MS = 60000;
     const BINANCE_BUDGET_KEY = 'orion-binance-request-budget-v1';
     const BINANCE_CANDLE_MS = 5 * 60 * 1000;
@@ -4095,6 +4097,7 @@
     var binanceScanBlockedUntil = 0;
     var binanceBlockReason = '';
     var binanceRequestTimes = [];
+    var binanceScanRequestTimes = [];
     var binanceBudgetStorageAvailable = true;
     const binanceScanCandleCache = new Map();
     const FETCH_TIMEOUT_MS = 12000;
@@ -4780,6 +4783,51 @@
       dataCache.set(key, { data: data, meta: meta || null, timestamp: Date.now() });
     }
 
+    const pendingMarketRequests = new Map();
+
+    function shareMarketRequest(key, signal, load) {
+      throwIfRequestAborted(signal);
+      var entry = pendingMarketRequests.get(key);
+      if (!entry || entry.controller.signal.aborted) {
+        entry = { controller: new AbortController(), users: 0, settled: false, abortTimer: null };
+        pendingMarketRequests.set(key, entry);
+        entry.promise = Promise.resolve().then(function() {
+          if (!entry.users) entry.controller.abort();
+          throwIfRequestAborted(entry.controller.signal);
+          return load(entry.controller.signal);
+        }).finally(function() {
+          entry.settled = true;
+          clearTimeout(entry.abortTimer);
+          if (pendingMarketRequests.get(key) === entry) pendingMarketRequests.delete(key);
+        });
+      }
+      clearTimeout(entry.abortTimer);
+      entry.users += 1;
+      return new Promise(function(resolve, reject) {
+        var finished = false;
+        function finish(callback, value) {
+          if (finished) return;
+          finished = true;
+          if (signal) signal.removeEventListener('abort', abort);
+          entry.users -= 1;
+          if (!entry.users && !entry.settled) {
+            // A preview resize/reopen can attach in this turn without restarting its request.
+            entry.abortTimer = setTimeout(function() {
+              if (!entry.users && !entry.settled) entry.controller.abort();
+            }, 0);
+          }
+          callback(value);
+        }
+        function abort() {
+          var error = new Error('Request aborted');
+          error.name = 'AbortError';
+          finish(reject, error);
+        }
+        if (signal) signal.addEventListener('abort', abort, { once: true });
+        entry.promise.then(function(value) { finish(resolve, value); }, function(error) { finish(reject, error); });
+      });
+    }
+
     // =============================================================================
     // Chart Data Fetcher (Futures-first with Spot fallback)
     // =============================================================================
@@ -5070,6 +5118,16 @@
       return /(?:fapi\.binance\.com|data-api\.binance\.vision)/i.test(String(url));
     }
 
+    function getBinanceRequestKind(url) {
+      var target = String(url);
+      try { target = decodeURIComponent(target); } catch (error) { /* Keep the original target. */ }
+      if (/\/(?:ticker\/24hr|exchangeInfo|time)(?:[?&#]|$)/i.test(target) ||
+          (/\/klines\?/i.test(target) && /[?&]endTime=\d+/i.test(target))) return 'scan';
+      if (/\/(?:premiumIndex|openInterest)(?:[?&#]|$)/i.test(target) ||
+          (/\/klines\?/i.test(target) && /[?&]limit=3(?:&|$)/i.test(target))) return 'optional';
+      return 'chart';
+    }
+
     function readBinanceBudget() {
       var now = Date.now();
       try {
@@ -5079,6 +5137,10 @@
           binanceRequestTimes = saved.times.filter(function(time) {
             return Number.isFinite(time) && time > now - BINANCE_REQUEST_WINDOW_MS && time <= now;
           }).slice(-BINANCE_REQUEST_LIMIT);
+          // Older clients stored a single counter; conservatively charge it to scans too.
+          binanceScanRequestTimes = (Array.isArray(saved.scanTimes) ? saved.scanTimes : saved.times).filter(function(time) {
+            return Number.isFinite(time) && time > now - BINANCE_REQUEST_WINDOW_MS && time <= now;
+          }).slice(-BINANCE_SCAN_REQUEST_LIMIT);
           if (Number.isFinite(saved.blockedUntil) && saved.blockedUntil > binanceScanBlockedUntil) {
             binanceScanBlockedUntil = saved.blockedUntil;
             binanceBlockReason = saved.reason === 'region' ? 'region' : 'rate';
@@ -5086,18 +5148,20 @@
         }
       } catch (error) { binanceBudgetStorageAvailable = false; }
       binanceRequestTimes = binanceRequestTimes.filter(function(time) { return time > now - BINANCE_REQUEST_WINDOW_MS; });
+      binanceScanRequestTimes = binanceScanRequestTimes.filter(function(time) { return time > now - BINANCE_REQUEST_WINDOW_MS; });
     }
 
     function saveBinanceBudget() {
       try {
         if (!binanceBudgetStorageAvailable) return;
         localStorage.setItem(BINANCE_BUDGET_KEY, JSON.stringify({
-          times: binanceRequestTimes, blockedUntil: binanceScanBlockedUntil, reason: binanceBlockReason,
+          times: binanceRequestTimes, scanTimes: binanceScanRequestTimes,
+          blockedUntil: binanceScanBlockedUntil, reason: binanceBlockReason,
         }));
       } catch (error) { binanceBudgetStorageAvailable = false; }
     }
 
-    function assertBinanceBudget(required) {
+    function assertBinanceBudget(required, kind) {
       readBinanceBudget();
       var now = Date.now();
       if (now < binanceScanBlockedUntil) {
@@ -5105,17 +5169,23 @@
           ? 'Binance market data is blocked in this region or network.'
           : 'Binance request limit reached. Wait before retrying.');
       }
-      if (binanceRequestTimes.length + required > BINANCE_REQUEST_LIMIT) {
-        var seconds = Math.max(1, Math.ceil((binanceRequestTimes[0] + BINANCE_REQUEST_WINDOW_MS - now) / 1000));
-        throw createBinanceScanError('Local Binance request budget reached. Retry in ' + seconds + 's before loading new market data.');
+      var exhaustedScan = kind === 'scan' && binanceScanRequestTimes.length + required > BINANCE_SCAN_REQUEST_LIMIT;
+      var reservedForCharts = kind === 'optional' && binanceRequestTimes.length + required > BINANCE_REQUEST_LIMIT - BINANCE_CHART_HEADROOM;
+      if (exhaustedScan || reservedForCharts || binanceRequestTimes.length + required > BINANCE_REQUEST_LIMIT) {
+        var times = exhaustedScan ? binanceScanRequestTimes : binanceRequestTimes;
+        var seconds = Math.max(1, Math.ceil((times[0] + BINANCE_REQUEST_WINDOW_MS - now) / 1000));
+        var error = createBinanceScanError('Local Binance request budget reached. Retry in ' + seconds + 's before loading new market data.');
+        error.isLocalBudget = true;
+        throw error;
       }
     }
 
-    async function reserveBinanceRequest(signal) {
+    async function reserveBinanceRequest(signal, kind) {
       var reserve = function() {
         throwIfRequestAborted(signal);
-        assertBinanceBudget(1);
+        assertBinanceBudget(1, kind);
         binanceRequestTimes.push(Date.now());
+        if (kind === 'scan') binanceScanRequestTimes.push(Date.now());
         saveBinanceBudget();
       };
       // Web Locks make the persistent reservation atomic across same-origin tabs.
@@ -5153,7 +5223,7 @@
       }
 
       try {
-        if (isBinanceRequest(url)) await reserveBinanceRequest(controller.signal);
+        if (isBinanceRequest(url)) await reserveBinanceRequest(controller.signal, getBinanceRequestKind(url));
         var response = await fetch(url, getSafeFetchOptions(
           Object.assign({}, options || {}, { signal: controller.signal })
         ));
@@ -5355,6 +5425,12 @@
     }
 
     async function fetchChartCandles(symbol, timeframe, limit, signal) {
+      return shareMarketRequest('chart:' + getCleanSymbol(symbol) + ':' + timeframe + ':' + limit, signal, function(sharedSignal) {
+        return fetchChartCandlesWithinBudget(symbol, timeframe, limit, sharedSignal);
+      });
+    }
+
+    async function fetchChartCandlesWithinBudget(symbol, timeframe, limit, signal) {
       throwIfRequestAborted(signal);
       var controller = new AbortController();
       var didTimeout = false;
@@ -5512,6 +5588,14 @@
     }
 
     async function getFuturesExtras(symbol, signal) {
+      throwIfRequestAborted(signal);
+      if (!symbol) return null;
+      return shareMarketRequest('extras:' + getCleanSymbol(symbol), signal, function(sharedSignal) {
+        return getFuturesExtrasUnshared(symbol, sharedSignal);
+      });
+    }
+
+    async function getFuturesExtrasUnshared(symbol, signal) {
       throwIfRequestAborted(signal);
       if (!symbol) return null;
       var cleanSymbol = getCleanSymbol(symbol);
@@ -6148,7 +6232,7 @@
           return !entry || entry.cutoff !== cutoff;
         }).length;
         // Do not begin a batch that cannot fit the remaining local minute budget.
-        if (uncachedCount) assertBinanceBudget(uncachedCount);
+        if (uncachedCount) assertBinanceBudget(uncachedCount, 'scan');
         var allPicks = [], next = 0, completed = 0, fatal = null;
         async function worker() {
           while (next < candidates.length && !signal.aborted) {
@@ -9450,6 +9534,12 @@
         stats.appendChild(createChartStatChip('4h', formatChange(pick.priceChange4h), change4hClass));
       }
 
+      if (!extras && extrasState === 'deferred') {
+        stats.classList.toggle('visible', stats.childNodes.length > 0);
+        scheduleChartPreviewLayoutSync();
+        return;
+      }
+
       var fundingValue = '—';
       var fundingClass = '';
       if (extras && Number.isFinite(extras.fundingRate)) {
@@ -9459,6 +9549,8 @@
         fundingValue = 'Loading…';
       } else if (extrasState === 'error') {
         fundingValue = 'Unavailable';
+      } else if (extrasState === 'paused') {
+        fundingValue = 'Deferred';
       }
       stats.appendChild(createChartStatChip('Funding', fundingValue, fundingClass));
 
@@ -9469,6 +9561,8 @@
         oiValue = 'Loading…';
       } else if (extrasState === 'error') {
         oiValue = 'Unavailable';
+      } else if (extrasState === 'paused') {
+        oiValue = 'Deferred';
       }
       stats.appendChild(createChartStatChip('OI', oiValue));
 
@@ -9476,7 +9570,7 @@
       scheduleChartPreviewLayoutSync();
     }
 
-    function updateChartPreviewStats(symbol, requestId, signal) {
+    function updateChartPreviewStats(symbol, requestId, signal, allowFetch) {
       if (!symbol) {
         clearChartPreviewStats();
         return;
@@ -9494,6 +9588,11 @@
         return;
       }
 
+      if (!allowFetch) {
+        renderChartPreviewStats(symbol, highlight, pick, null, 'deferred');
+        return;
+      }
+
       renderChartPreviewStats(symbol, highlight, pick, null, 'loading');
 
       getFuturesExtras(symbol, signal).then(function(extras) {
@@ -9506,7 +9605,7 @@
       }).catch(function(err) {
         if (requestId !== chartPreviewRequestId) return;
         if (err && err.name === 'AbortError') return;
-        renderChartPreviewStats(symbol, highlight, pick, null, 'error');
+        renderChartPreviewStats(symbol, highlight, pick, null, err && err.isLocalBudget ? 'paused' : 'error');
       });
     }
 
@@ -9780,6 +9879,7 @@
         // Reuse only a completed chart with data still inside its original cache TTL.
         currentPreviewSymbol = symbol;
         updateChartPreviewBadge(currentPreviewSource);
+        updateChartPreviewStats(symbol, requestId, signal, isChartMaximized);
         return;
       }
 
@@ -9830,6 +9930,7 @@
         }
 
         loading.classList.add('hidden');
+        updateChartPreviewStats(symbol, requestId, signal, isChartMaximized);
         legend.style.display = 'none';
         [legend15m, legend1h, legend4h, legend1d].forEach(function(item) {
           item.style.display = 'none';
@@ -9937,8 +10038,9 @@
     function handleCardMouseEnter(symbol, cardElement) {
       if (!chartSettings.enabled) return;
 
-      prefetchHoverExtras(symbol);
+      if (chartPreviewTimeout) clearTimeout(chartPreviewTimeout);
       chartPreviewTimeout = setTimeout(function() {
+        chartPreviewTimeout = null;
         showChartPreview(symbol, cardElement);
       }, chartSettings.hoverDelay);
     }

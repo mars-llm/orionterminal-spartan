@@ -12,19 +12,28 @@ const candles = (cutoff = CUTOFF) => Array.from({ length: 48 }, (_, index) => {
 
 async function setup(page, { symbols = ['ALPHAUSDT', 'BRAVOUSDT'], badCandle, infoStatus = 200, rateLimit = false } = {}) {
   const state = { klines: 0, globals: 0, active: 0, peak: 0, clock: CUTOFF + 1000, badCandle, rateLimit, blocked: false,
-    tickers: symbols.map(symbol => daily(symbol)), candleRows: {}, requestedSymbols: [] };
+    tickers: symbols.map(symbol => daily(symbol)), candleRows: {}, requestedSymbols: [], chartKlines: 0, extras: 0 };
   await page.route('https://fapi.binance.com/fapi/v1/**', async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/klines')) {
       state.klines += 1;
+      if (!url.searchParams.has('endTime')) state.chartKlines += 1;
       state.requestedSymbols.push(url.searchParams.get('symbol'));
       state.active += 1;
       state.peak = Math.max(state.peak, state.active);
       try {
         await new Promise(resolve => setTimeout(resolve, 4));
         if (url.searchParams.get('symbol') === state.badCandle) return await route.fulfill({ status: 502, json: { message: 'Fixture error' } });
-        return await route.fulfill({ json: state.candleRows[url.searchParams.get('symbol')] || candles(Number(url.searchParams.get('endTime')) + 1) });
+        return await route.fulfill({ json: state.candleRows[url.searchParams.get('symbol')] ||
+          candles(url.searchParams.has('endTime') ? Number(url.searchParams.get('endTime')) + 1 : CUTOFF) });
       } finally { state.active -= 1; }
+    }
+    if (/\/(premiumIndex|openInterest)$/.test(url.pathname)) {
+      state.extras += 1;
+      if (state.rateLimit) return route.fulfill({ status: 429, headers: { 'Retry-After': '180', 'Access-Control-Expose-Headers': 'Retry-After' }, json: {} });
+      return route.fulfill({ json: url.pathname.endsWith('/premiumIndex')
+        ? { markPrice: '100', indexPrice: '100', lastFundingRate: '0.0001', nextFundingTime: CUTOFF + STEP }
+        : { openInterest: '1000' } });
     }
     state.globals += 1;
     if (state.blocked) return route.fulfill({ status: 451, json: {} });
@@ -38,6 +47,137 @@ async function setup(page, { symbols = ['ALPHAUSDT', 'BRAVOUSDT'], badCandle, in
   await page.evaluate(() => { chartSettings.enabled = false; });
   return state;
 }
+
+async function enablePreviewHarness(page) {
+  await page.evaluate(() => {
+    chartSettings.enabled = true;
+    ensureChartLibraryLoaded = async () => ({});
+    window.__renderedCharts = [];
+    createChart = () => {
+      chartInstance = { resize() {}, timeScale: () => ({ fitContent() {} }) };
+      chartCandleSeries = { setData: data => window.__renderedCharts.push(data.length),
+        createPriceLine: () => ({}), removePriceLine() {} };
+      return chartInstance;
+    };
+  });
+}
+
+test('Binance: brief card hover starts no chart, funding or open-interest requests', async ({ page }) => {
+  const state = await setup(page, { symbols: Array.from({ length: 20 }, (_, i) => 'ASSET' + i + 'USDT') });
+  await enablePreviewHarness(page);
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  await page.evaluate(() => {
+    const card = document.querySelector('.pick-card');
+    handleCardMouseEnter(picks[0].symbol, card);
+    handleCardMouseLeave();
+  });
+  await page.waitForTimeout(400);
+  expect(state.extras).toBe(0);
+  expect(state.chartKlines).toBe(0);
+  expect(state.globals + state.klines).toBe(23);
+});
+
+test('Binance: after a cold scan all ten previews are lazy, use one request each and reuse cached candles', async ({ page }) => {
+  const state = await setup(page, { symbols: Array.from({ length: 20 }, (_, i) => 'ASSET' + i + 'USDT') });
+  await enablePreviewHarness(page);
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  expect(state.klines + state.globals).toBe(23);
+  const symbols = await page.evaluate(() => picks.map(pick => pick.symbol));
+  for (const symbol of symbols) {
+    await page.evaluate(async symbol => {
+      const card = [...document.querySelectorAll('.pick-card')].find(card => card.querySelector('.symbol').textContent === symbol);
+      await showChartPreview(symbol, card);
+    }, symbol);
+    await expect(page.locator('#chartPreviewLoading')).toHaveClass(/hidden/);
+    await page.evaluate(() => closeChartPreview());
+  }
+  expect(state.chartKlines).toBe(10);
+  expect(state.extras).toBe(0);
+  expect(await page.evaluate(() => window.__renderedCharts.length)).toBe(10);
+  for (const symbol of symbols) {
+    await page.evaluate(async symbol => { await showChartPreview(symbol, document.querySelector('.pick-card')); closeChartPreview(); }, symbol);
+  }
+  expect(state.chartKlines).toBe(10);
+});
+
+test('Binance: expanded details start after candles and never duplicate pending extras', async ({ page }) => {
+  const state = await setup(page);
+  await enablePreviewHarness(page);
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  await page.evaluate(async () => { isChartMaximized = true; await showChartPreview(picks[0].symbol, document.querySelector('.pick-card')); });
+  await expect(page.locator('#chartPreviewStats')).toContainText('Funding');
+  await expect(page.locator('#chartPreviewStats')).not.toContainText('Loading');
+  expect(state.chartKlines).toBe(1);
+  expect(state.extras).toBe(2);
+  await page.evaluate(async () => {
+    dataCache.delete(getFuturesExtrasCacheKey(getCleanSymbol(picks[0].symbol)));
+    await Promise.all([getFuturesExtras(picks[0].symbol), getFuturesExtras(getCleanSymbol(picks[0].symbol))]);
+  });
+  expect(state.extras).toBe(4);
+});
+
+test('Binance: identical candle requests share work while cancellation only detaches its caller', async ({ page }) => {
+  const state = await setup(page);
+  const results = await page.evaluate(async () => {
+    const a = new AbortController(), b = new AbortController();
+    const first = fetchChartCandles('ALPHA/USDT', '1m', 100, a.signal);
+    const second = fetchChartCandles('ALPHA/USDT', '1m', 100, b.signal);
+    a.abort();
+    const outcome = await Promise.allSettled([first, second]);
+    return outcome.map(result => result.status === 'fulfilled' ? result.value.candles.length : result.reason.name);
+  });
+  expect(results).toEqual(['AbortError', 48]);
+  expect(state.chartKlines).toBe(1);
+  await expect.poll(() => page.evaluate(() => pendingMarketRequests.size)).toBe(0);
+});
+
+test('Binance: cancelling all subscribers before dispatch sends nothing and permits a later retry', async ({ page }) => {
+  const state = await setup(page);
+  await page.evaluate(async () => {
+    const controller = new AbortController();
+    const first = fetchChartCandles('ALPHA/USDT', '1m', 100, controller.signal);
+    controller.abort();
+    await first.catch(() => null);
+  });
+  expect(state.chartKlines).toBe(0);
+  await page.evaluate(() => fetchChartCandles('ALPHA/USDT', '1m', 100));
+  expect(state.chartKlines).toBe(1);
+});
+
+test('Binance: a failed shared request is removed so the next attempt can recover', async ({ page }) => {
+  await setup(page);
+  const result = await page.evaluate(async () => {
+    let attempts = 0;
+    try { await shareMarketRequest('fixture-retry', null, () => { attempts += 1; throw new Error('Fixture failure'); }); } catch {}
+    const value = await shareMarketRequest('fixture-retry', null, () => { attempts += 1; return 42; });
+    return { attempts, value, pending: pendingMarketRequests.size };
+  });
+  expect(result).toEqual({ attempts: 2, value: 42, pending: 0 });
+});
+
+test('Binance: optional details preserve twenty candle slots and scan requests cannot use them', async ({ page }) => {
+  const state = await setup(page);
+  const result = await page.evaluate(async () => {
+    // Simulate thirty already dispatched scan requests in this rolling minute.
+    binanceRequestTimes = Array.from({ length: 30 }, () => Date.now());
+    binanceScanRequestTimes = binanceRequestTimes.slice();
+    saveBinanceBudget();
+    let scanBlocked = false;
+    try { await fetchBinanceScanJson('time', null, Date.now() + 1000); } catch (error) { scanBlocked = error.isLocalBudget; }
+    for (let i = 0; i < 10; i += 1) await fetchJsonOrThrow(getBinanceFuturesPremiumIndexUrl('ALPHAUSDT'));
+    let optionalBlocked = false;
+    try { await fetchJsonOrThrow(getBinanceFuturesPremiumIndexUrl('ALPHAUSDT')); } catch (error) { optionalBlocked = error.isLocalBudget; }
+    for (let i = 0; i < 20; i += 1) await fetchChartCandles('RESERVE' + i + '/USDT', '1m', 100);
+    return { scanBlocked, optionalBlocked };
+  });
+  expect(result).toEqual({ scanBlocked: true, optionalBlocked: true });
+  expect(state.globals).toBe(0);
+  expect(state.extras).toBe(10);
+  expect(state.chartKlines).toBe(20);
+});
 
 test('Binance: a 500-market universe needs at most 23 requests, immediate repeats need zero', async ({ page }, testInfo) => {
   await page.clock.install({ time: CUTOFF + 1000 });
@@ -244,13 +384,13 @@ test('Binance: changing to an uncached shortlist does not start a batch beyond t
 test('Binance: transport budget includes charts and proxies, survives reload and is shared by tabs', async ({ page, context }) => {
   const state = await setup(page);
   const consume = count => page.evaluate(async count => Promise.allSettled(Array.from({ length: count }, () =>
-    fetchJsonOrThrow('https://fapi.binance.com/fapi/v1/time'))), count);
-  await consume(29);
+    fetchJsonOrThrow(getBinanceFuturesUrl('BUDGETUSDT', '1m', 100)))), count);
+  await consume(59);
   const second = await context.newPage();
-  await second.route('https://fapi.binance.com/fapi/v1/time', route => { state.globals += 1; return route.fulfill({ json: { serverTime: CUTOFF } }); });
+  await second.route('https://fapi.binance.com/fapi/v1/klines**', route => { state.klines += 1; return route.fulfill({ json: candles() }); });
   await second.goto('./');
-  await Promise.all([consume(1), second.evaluate(() => fetchJsonOrThrow('https://fapi.binance.com/fapi/v1/time').catch(() => null))]);
-  expect(state.globals).toBe(30);
+  await Promise.all([consume(1), second.evaluate(() => fetchJsonOrThrow(getBinanceFuturesUrl('BUDGETUSDT', '1m', 100)).catch(() => null))]);
+  expect(state.klines).toBe(60);
   let proxyRequests = 0;
   await page.route('https://budget-proxy.example/**', route => { proxyRequests += 1; return route.fulfill({ json: [] }); });
   const error = await page.evaluate(async () => {
@@ -261,7 +401,7 @@ test('Binance: transport budget includes charts and proxies, survives reload and
   expect(proxyRequests).toBe(0);
   await page.reload();
   await consume(1);
-  expect(state.globals).toBe(30);
+  expect(state.klines).toBe(60);
 });
 
 test('Binance: the minute budget recovers and blocked storage keeps the in-memory guard', async ({ page }) => {
@@ -335,10 +475,10 @@ test('Binance: provider cooldown applies to chart extras and cannot be bypassed 
     try { await getFuturesExtras('ALPHA/USDT'); return ''; } catch (error) { return error.message; }
   });
   expect(await run()).toContain('Binance request limit reached');
-  const count = state.globals;
+  const count = state.globals + state.extras;
   await page.reload();
   expect(await run()).toContain('Binance request limit reached');
-  expect(state.globals).toBe(count);
+  expect(state.globals + state.extras).toBe(count);
   expect(proxyRequests).toBe(0);
 });
 
