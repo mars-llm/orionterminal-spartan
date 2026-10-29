@@ -122,12 +122,16 @@ test('chart: rapid timeframe changes coalesce and returning to fresh data sends 
 test('chart: a queued timeframe change cannot reopen a closed chart', async ({ page }) => {
   const state = await setupChart(page);
   await openExpanded(page);
-  await page.evaluate(() => {
+  // Keep a newly uncovered card from starting a separate hover interaction.
+  await page.mouse.move(0, 0);
+  const pending = await page.evaluate(() => {
     const select = document.getElementById('chartPreviewTimeframeSelect');
     select.value = '5m'; select.dispatchEvent(new Event('change', { bubbles: true }));
     document.getElementById('chartPreviewClose').click();
+    return { timeframe: chartTimeframeTimeout, hover: chartPreviewTimeout };
   });
-  await page.waitForTimeout(250);
+  expect(pending).toEqual({ timeframe: null, hover: null });
+  await page.waitForTimeout(await page.evaluate(() => chartSettings.hoverDelay + 200));
   await expect(page.locator('#chartPreview')).not.toHaveClass(/visible/);
   expect(state.intervals).toEqual(['1m']);
 });
