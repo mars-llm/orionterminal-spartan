@@ -228,7 +228,7 @@ test('Binance: a 500-market universe needs at most 23 requests, immediate repeat
   await expect(page.locator('#resultsList .pick-card')).toHaveCount(20);
   await expect(page.locator('#scanBtn')).toBeEnabled();
   await expect(page.locator('#coverageNotice')).toContainText('Selected up to 20 of 500 matching markets');
-  await expect(page.locator('#heroStatusDetail')).toHaveText('Binance · 20 checked · ranked by 24h volume');
+  await expect(page.locator('#heroStatusDetail')).toHaveText('Binance · 20 checked · shortlist: mixed signals');
   expect(state.klines).toBe(20);
   expect(state.globals).toBe(3);
   expect(state.peak).toBeLessThanOrEqual(2);
@@ -722,4 +722,147 @@ test('Binance: losing storage writes after a saved budget retains the in-memory 
   await page.clock.fastForward(60001);
   await consume();
   expect(state.chartKlines).toBe(75);
+});
+
+function mixedUniverse() {
+  return [
+    ...Array.from({ length: 20 }, (_, i) => ({ ...daily('LIQUID' + i + 'USDT', 100000000 - i * 1000000),
+      count: 50000, weightedAvgPrice: '100' })),
+    ...Array.from({ length: 10 }, (_, i) => ({ ...daily('ACTIVE' + i + 'USDT', 5000000 - i * 10000),
+      count: 1000000 - i * 10000, weightedAvgPrice: '100' })),
+    ...Array.from({ length: 10 }, (_, i) => ({ ...daily('MOVER' + i + 'USDT', 1000000 - i * 1000),
+      count: 40000, lastPrice: String(100 + (i % 2 ? -1 : 1) * (20 + i)), weightedAvgPrice: '100' })),
+  ];
+}
+
+test('Binance: mixed selection reserves distinct liquidity, activity and current VWAP-movement slots', async ({ page }) => {
+  const state = await setup(page);
+  const rows = mixedUniverse();
+  const expected = [...Array.from({ length: 8 }, (_, i) => 'LIQUID' + i + 'USDT'),
+    ...Array.from({ length: 6 }, (_, i) => 'ACTIVE' + i + 'USDT'),
+    ...[9, 8, 7, 6, 5, 4].map(i => 'MOVER' + i + 'USDT')];
+  const result = await page.evaluate(rows => {
+    const markets = rows.map(row => ({ symbol: row.symbol }));
+    const bySymbol = new Map(rows.map(row => [row.symbol, row]));
+    const original = JSON.stringify({ markets, rows });
+    const select = input => selectBinanceScanMarkets(input, bySymbol, 'mixed').map(market => market.symbol);
+    const selected = select(markets);
+    const permutations = [markets.slice().reverse(), markets.slice(13).concat(markets.slice(0, 13)),
+      markets.slice(0, 10).reverse().concat(markets.slice(10))].map(select);
+    const scaled = new Map(rows.map(row => [row.symbol, { ...row,
+      lastPrice: String(Number(row.lastPrice) * 1e-6), weightedAvgPrice: String(Number(row.weightedAvgPrice) * 1e-6) }]));
+    return { selected, permutations, unchanged: JSON.stringify({ markets, rows }) === original,
+      volume: selectBinanceScanMarkets(markets, bySymbol, 'volume').map(market => market.symbol),
+      activity: selectBinanceScanMarkets(markets, bySymbol, 'activity').map(market => market.symbol),
+      scaled: selectBinanceScanMarkets(markets, scaled, 'mixed').map(market => market.symbol) };
+  }, rows);
+  expect(result.selected).toEqual(expected);
+  expect(result.permutations).toEqual([expected, expected, expected]);
+  expect(new Set(result.selected).size).toBe(20);
+  expect(result.unchanged).toBe(true);
+  expect(result.volume).toEqual(Array.from({ length: 20 }, (_, i) => 'LIQUID' + i + 'USDT'));
+  expect(result.activity).toEqual([...Array.from({ length: 10 }, (_, i) => 'ACTIVE' + i + 'USDT'),
+    ...Array.from({ length: 10 }, (_, i) => 'LIQUID' + i + 'USDT')]);
+  expect(result.scaled).toEqual(expected);
+  expect(state.globals + state.klines).toBe(0);
+});
+
+test('Binance: mixed lanes skip invalid auxiliary data, deduplicate overlap and fill sparse pools by volume', async ({ page }) => {
+  await setup(page);
+  const result = await page.evaluate(rows => {
+    const overlapping = rows.slice(0, 20).map((row, i) => ({ ...row, count: 1000000 - i,
+      lastPrice: String(150 - i), weightedAvgPrice: '100' }));
+    const invalid = rows.slice(0, 25).map((row, i) => ({ ...row, count: [undefined, 'invalid', -1, 1.5, Infinity][i % 5],
+      weightedAvgPrice: [undefined, { toString: 'not-callable' }, [1], '-1', '1e-320'][i % 5], priceChangePercent: '999999' }));
+    const run = data => selectBinanceScanMarkets(data.map(row => ({ symbol: row.symbol })),
+      new Map(data.map(row => [row.symbol, row])), 'mixed').map(row => row.symbol);
+    const tied = Array.from({ length: 30 }, (_, i) => ({ symbol: 'TIE' + String(i).padStart(2, '0') + 'USDT',
+      quoteVolume: '1000000', count: 1000, lastPrice: '100', weightedAvgPrice: '100' }));
+    return { overlapping: run(overlapping), invalid: run(invalid), small: run(invalid.slice(0, 5)),
+      empty: run([]), ties: run(tied), reversedTies: run(tied.slice().reverse()) };
+  }, mixedUniverse());
+  const liquid = Array.from({ length: 20 }, (_, i) => 'LIQUID' + i + 'USDT');
+  expect(result.overlapping).toEqual(liquid);
+  expect(result.invalid).toEqual(liquid);
+  expect(result.small).toEqual(liquid.slice(0, 5));
+  expect(result.empty).toEqual([]);
+  expect(result.ties).toEqual(Array.from({ length: 20 }, (_, i) => 'TIE' + String(i).padStart(2, '0') + 'USDT'));
+  expect(result.reversedTies).toEqual(result.ties);
+});
+
+test('Binance: a mixed cold scan still uses only 23 requests and preserves prefilters and cached repeats', async ({ page }) => {
+  await page.clock.install({ time: CUTOFF + 1000 });
+  const rows = [...mixedUniverse(),
+    { ...daily('BTCUSDT', 1000000000), count: 9000000, lastPrice: '500', weightedAvgPrice: '100' },
+    { ...daily('ILLIQUIDUSDT', 499999), count: 9000000, lastPrice: '500', weightedAvgPrice: '100' },
+    { ...daily('UNVERIFIEDUSDT', 1000000), count: 500, priceChangePercent: '999999', weightedAvgPrice: { toString: 'not-callable' } }];
+  const state = await setup(page, { symbols: rows.map(row => row.symbol) });
+  state.tickers = rows;
+  await page.evaluate(() => { currentFilters = { ...DEFAULT_FILTERS, maxResults: 100 }; });
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  await expect(page.locator('#error')).toBeHidden();
+  expect(state.requestedSymbols.slice(0, 8).sort()).toEqual(Array.from({ length: 8 }, (_, i) => 'LIQUID' + i + 'USDT').sort());
+  expect(state.requestedSymbols.filter(symbol => symbol.startsWith('ACTIVE'))).toHaveLength(6);
+  expect(state.requestedSymbols.filter(symbol => symbol.startsWith('MOVER')).sort()).toEqual([4, 5, 6, 7, 8, 9].map(i => 'MOVER' + i + 'USDT'));
+  expect(state.requestedSymbols).not.toContain('BTCUSDT');
+  expect(state.requestedSymbols).not.toContain('ILLIQUIDUSDT');
+  expect(state.requestedSymbols).not.toContain('UNVERIFIEDUSDT');
+  expect(state.globals + state.klines).toBe(23);
+  expect(state.peak).toBeLessThanOrEqual(2);
+  expect(state.extras + state.chartKlines).toBe(0);
+  await expect(page.locator('#heroStatusDetail')).toHaveText('Binance · 20 checked · shortlist: mixed signals');
+  await expect(page.locator('#coverageNotice')).toContainText('24h VWAP');
+  await expect(page.locator('#coverageNotice')).toContainText('not a measured 5m trend');
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  expect(state.globals + state.klines).toBe(23);
+  await page.evaluate(() => { currentFilters.includeSymbols = ['MOVER9', 'ACTIVE0', 'BTC']; });
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  expect((await page.locator('#resultsList .symbol').allTextContents()).sort()).toEqual(['ACTIVE0/USDT', 'MOVER9/USDT']);
+  expect(state.globals + state.klines).toBe(23);
+});
+
+test('Binance: mixed mode roundtrips while old volume profiles and compact cards retain their meaning', async ({ page }) => {
+  const state = await setup(page);
+  await page.locator('#filtersBtn').click();
+  await expect(page.locator('#marketSort')).toHaveValue('mixed');
+  const result = await page.evaluate(() => {
+    const legacy = { ...DEFAULT_FILTERS }; delete legacy.marketSort;
+    const mixed = sanitizeFilterState(DEFAULT_FILTERS);
+    const oldCard = [500000, 0, 10, 200, 10, legacy.excludeSymbols];
+    const oldProfile = sanitizeCustomProfiles([{ id: 'custom-legacy', name: 'Legacy volume', filters: legacy }])[0];
+    customProfiles = [oldProfile]; saveCustomProfiles();
+    createCustomProfile('Mixed discovery');
+    const payload = { type: 'filters', createdAt: new Date().toISOString(), filters: mixed };
+    const decoded = decodeCardPayload(encodeCardPayload(payload));
+    renderSocialCard(decoded.payload);
+    return { mixed, decoded: decoded.payload.filters, packed: packCardFiltersV2(mixed),
+      legacy: sanitizeFilterState(legacy), old: unpackCardFiltersV2(oldCard),
+      oldExplicit: unpackCardFiltersV2([...oldCard, 0, []]),
+      activity: unpackCardFiltersV2([...oldCard, 1, []]), unknown: unpackCardFiltersV2([...oldCard, 999, []]),
+      oldProfile: oldProfile.filters, equal: filtersEqual(mixed, legacy),
+      presetModes: BUILTIN_PROFILES.map(profile => profile.filters.marketSort || 'volume') };
+  });
+  expect(result.mixed.marketSort).toBe('mixed');
+  expect(result.decoded).toEqual(result.mixed);
+  expect(result.packed[6]).toBe(2);
+  expect(result.old).toEqual(result.legacy);
+  expect(result.oldExplicit).toEqual(result.legacy);
+  expect(result.oldProfile).toEqual(result.legacy);
+  expect(result.unknown).toEqual(result.legacy);
+  expect(result.activity.marketSort).toBe('activity');
+  expect(result.equal).toBe(false);
+  expect(result.presetModes).toEqual(['mixed', 'volume', 'volume', 'activity']);
+  await expect(page.locator('#socialCardRoot')).toContainText('Shortlist: mixed signals');
+  await page.reload();
+  await page.locator('#filtersBtn').click();
+  await page.getByRole('button', { name: 'Mixed discovery', exact: false }).filter({ has: page.locator('.custom-badge') }).click();
+  await expect(page.locator('#marketSort')).toHaveValue('mixed');
+  await page.getByRole('button', { name: 'Legacy volume', exact: false }).filter({ has: page.locator('.custom-badge') }).click();
+  await expect(page.locator('#marketSort')).toHaveValue('volume');
+  await page.locator('#resetBtn').click();
+  await expect(page.locator('#marketSort')).toHaveValue('mixed');
+  expect(state.globals + state.klines).toBe(0);
 });

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-fb+xRuBuufOkWFybZQmGh/EGaEiVOxeqpUK35tE4QR0='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-uJZ/3X/ghuu45xqGi1OFmerGmKntGrJ4R8P9mGsulsk='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -3226,10 +3226,11 @@
         <div class="filter-group filter-group-scope">
           <label for="marketSort">Market shortlist</label>
           <select id="marketSort" aria-describedby="marketScopeHint">
+            <option value="mixed">Mixed: volume, trades &amp; moves</option>
             <option value="volume">Top 20 by 24h volume</option>
             <option value="activity">Top 20 by 24h trade count</option>
           </select>
-          <div class="hint" id="marketScopeHint">Volume and symbol filters apply first. 5m activity and 15m range apply to this shortlist, not the full market.</div>
+          <div class="hint" id="marketScopeHint">Mixed combines 24h volume, trade count and current price vs 24h VWAP. Volume and symbol filters apply first; 5m activity and 15m range apply after selection, not to the full market.</div>
         </div>
         <div class="filter-group filter-group-scope">
           <label for="includeSymbols">Only these symbols (optional)</label>
@@ -4497,6 +4498,7 @@
     }
 
     const DEFAULT_FILTERS = {
+      marketSort: 'mixed',
       minVolume: 500000,
       maxVolume: null,
       minVolatility15m: 0.1,
@@ -6163,6 +6165,55 @@
       };
     }
 
+    function selectBinanceScanMarkets(markets, bySymbol, mode) {
+      function metric(value, min) {
+        if (typeof value !== 'number' && (typeof value !== 'string' || !value.trim())) return null;
+        return parseFiniteInRange(value, min, Number.MAX_SAFE_INTEGER);
+      }
+      var rows = markets.map(function(market) {
+        var ticker = bySymbol.get(market.symbol) || {};
+        var price = metric(ticker.lastPrice, Number.MIN_VALUE);
+        var vwap = metric(ticker.weightedAvgPrice, Number.MIN_VALUE);
+        var movement = price !== null && vwap !== null ? Math.abs((price / vwap - 1) * 100) : null;
+        return {
+          market: market,
+          volume: metric(ticker.quoteVolume, 0) || 0,
+          activity: metric(ticker.count, 0),
+          movement: Number.isFinite(movement) ? movement : null,
+        };
+      });
+      function byVolume(a, b) {
+        return b.volume - a.volume || a.market.symbol.localeCompare(b.market.symbol);
+      }
+      var liquid = rows.slice().sort(byVolume);
+      var active = rows.slice().sort(function(a, b) {
+        return (b.activity || 0) - (a.activity || 0) || byVolume(a, b);
+      });
+      if (mode !== 'mixed') {
+        return (mode === 'activity' ? active : liquid).slice(0, BINANCE_SCAN_MARKET_LIMIT)
+          .map(function(row) { return row.market; });
+      }
+      var moving = rows.filter(function(row) { return row.movement !== null; }).sort(function(a, b) {
+        return b.movement - a.movement || byVolume(a, b);
+      });
+      var selected = [], seen = new Set();
+      function take(ranked, count) {
+        for (var i = 0; i < ranked.length && count > 0 && selected.length < BINANCE_SCAN_MARKET_LIMIT; i += 1) {
+          var market = ranked[i].market;
+          if (seen.has(market.symbol)) continue;
+          seen.add(market.symbol);
+          selected.push(market);
+          count -= 1;
+        }
+      }
+      take(liquid, 8);
+      take(active.filter(function(row) { return Number.isSafeInteger(row.activity); }), 6);
+      take(moving, 6);
+      // Fill unavailable lanes from the liquid pool without inventing metrics.
+      take(liquid, BINANCE_SCAN_MARKET_LIMIT);
+      return selected;
+    }
+
     async function fetchScreener(deadlineMs, filters, onCoverage) {
       var scanFilters = sanitizeFilterState(filters || currentFilters);
       var deadline = Number.isFinite(deadlineMs) ? deadlineMs : Date.now() + BINANCE_SCAN_TIMEOUT_MS;
@@ -6220,17 +6271,8 @@
         });
         if (missing && !validTickers) throw createBinanceScanError('Binance returned incomplete market data. Retry the scan.');
         if (!summary && !missing) binanceSummaryCache = { daily: daily, clock: clock, loadedAt: Date.now() };
-        candidates.sort(function(a, b) {
-          var aTicker = bySymbol.get(a.symbol), bTicker = bySymbol.get(b.symbol);
-          if (scanFilters.marketSort === 'activity') {
-            var activityDiff = (parseFiniteInRange(bTicker.count, 0, Number.MAX_SAFE_INTEGER) || 0) -
-              (parseFiniteInRange(aTicker.count, 0, Number.MAX_SAFE_INTEGER) || 0);
-            if (activityDiff) return activityDiff;
-          }
-          return Number(bTicker.quoteVolume) - Number(aTicker.quoteVolume) || a.symbol.localeCompare(b.symbol);
-        });
         var candidateCount = candidates.length;
-        candidates = candidates.slice(0, BINANCE_SCAN_MARKET_LIMIT);
+        candidates = selectBinanceScanMarkets(candidates, bySymbol, scanFilters.marketSort);
         var uncachedCount = candidates.filter(function(market) {
           var entry = binanceScanCandleCache.get(market.symbol);
           return !entry || entry.cutoff !== cutoff;
@@ -6270,7 +6312,9 @@
           expectedCount: candidates.length, universeCount: markets.length, metricsAt: cutoff,
           focused: candidateCount > candidates.length || !!scanFilters.includeSymbols,
           candidateCount: candidateCount, selectedCount: candidates.length, missingTickerCount: missing,
-          selection: scanFilters.marketSort === 'activity' ? '24h trade count' : '24h volume',
+          selectionMode: scanFilters.marketSort || 'volume',
+          selection: scanFilters.marketSort === 'mixed' ? 'mixed signals' :
+            (scanFilters.marketSort === 'activity' ? '24h trade count' : '24h volume'),
         };
         latestBtcChange24h = btcChange;
         if (typeof onCoverage === 'function') onCoverage(coverage);
@@ -6924,6 +6968,9 @@
             '. This is not a full-market scan. ' : '') +
           (coverage.limited ? 'Some market data could not be loaded. Retry to check missing markets. ' : '') +
           (coverage.missingTickerCount ? coverage.missingTickerCount + ' market tickers unavailable. ' : '') +
+          (coverage.selectionMode === 'mixed'
+            ? 'Mix: 8 volume, 6 activity, 6 movement slots; volume fills gaps. ' +
+              'Movement uses price vs 24h VWAP, not a measured 5m trend. ' : '') +
           '5m activity and 15m range filters apply after market selection.';
         return;
       }
@@ -7345,7 +7392,7 @@
           (picks.length ? picks.length + (picks.length === 1 ? ' setup found' : ' setups found') : 'No setups found') +
             scopeSuffix,
           limited ? 'Limited source coverage · see notice below' : (coverage && coverage.source === 'binance'
-            ? 'Binance · ' + coverage.availableCount + ' checked · ranked by ' + coverage.selection
+            ? 'Binance · ' + coverage.availableCount + ' checked · shortlist: ' + coverage.selection
             : 'Scan complete · adjust filters to refine')
         );
         showToast(limited
@@ -7480,7 +7527,7 @@
       };
       var includeSymbols = normalizeIncludedSymbols(source.includeSymbols).slice(0, BINANCE_SCAN_MARKET_LIMIT);
       if (includeSymbols.length) result.includeSymbols = includeSymbols;
-      if (source.marketSort === 'activity') result.marketSort = 'activity';
+      if (source.marketSort === 'activity' || source.marketSort === 'mixed') result.marketSort = source.marketSort;
       return result;
     }
 
@@ -7673,7 +7720,9 @@
         Math.max(1, Math.round(safe.maxResults || DEFAULT_FILTERS.maxResults)),
         normalizeExcludeSymbols(safe.excludeSymbols).slice(0, 12),
       ];
-      if (safe.includeSymbols || safe.marketSort) packed.push(safe.marketSort === 'activity' ? 1 : 0, safe.includeSymbols || []);
+      if (safe.includeSymbols || safe.marketSort) {
+        packed.push(safe.marketSort === 'mixed' ? 2 : (safe.marketSort === 'activity' ? 1 : 0), safe.includeSymbols || []);
+      }
       return packed;
     }
 
@@ -7692,7 +7741,7 @@
         minTicks5m: Number.isFinite(minTicks) ? minTicks : DEFAULT_FILTERS.minTicks5m,
         maxResults: Number.isFinite(maxResults) && maxResults > 0 ? maxResults : DEFAULT_FILTERS.maxResults,
         excludeSymbols: normalizeExcludeSymbols(excludeSymbols),
-        marketSort: list[6] === 1 ? 'activity' : 'volume',
+        marketSort: list[6] === 2 ? 'mixed' : (list[6] === 1 ? 'activity' : 'volume'),
         includeSymbols: Array.isArray(list[7]) ? list[7] : [],
       });
     }
@@ -8072,7 +8121,8 @@
       if (filters.includeSymbols || filters.marketSort) {
         var scopeChip = document.createElement('span');
         scopeChip.className = 'social-card-chip';
-        scopeChip.textContent = filters.includeSymbols ? 'Only: ' + filters.includeSymbols.join(', ') : 'Shortlist: top 20 by 24h trades';
+        scopeChip.textContent = filters.includeSymbols ? 'Only: ' + filters.includeSymbols.join(', ')
+          : (filters.marketSort === 'mixed' ? 'Shortlist: mixed signals' : 'Shortlist: top 20 by 24h trades');
         container.appendChild(scopeChip);
       }
     }
