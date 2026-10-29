@@ -12,7 +12,7 @@ const candles = (cutoff = CUTOFF) => Array.from({ length: 48 }, (_, index) => {
 
 async function setup(page, { symbols = ['ALPHAUSDT', 'BRAVOUSDT'], badCandle, infoStatus = 200, rateLimit = false } = {}) {
   const state = { klines: 0, globals: 0, active: 0, peak: 0, clock: CUTOFF + 1000, badCandle, rateLimit, blocked: false,
-    tickers: symbols.map(symbol => daily(symbol)), candleRows: {}, requestedSymbols: [], chartKlines: 0, extras: 0 };
+    tickers: symbols.map(symbol => daily(symbol)), candleRows: {}, requestedSymbols: [], chartKlines: 0, extras: 0, candleDelay: 4 };
   await page.route('https://fapi.binance.com/fapi/v1/**', async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/klines')) {
@@ -22,7 +22,7 @@ async function setup(page, { symbols = ['ALPHAUSDT', 'BRAVOUSDT'], badCandle, in
       state.active += 1;
       state.peak = Math.max(state.peak, state.active);
       try {
-        await new Promise(resolve => setTimeout(resolve, 4));
+        await new Promise(resolve => setTimeout(resolve, state.candleDelay));
         if (url.searchParams.get('symbol') === state.badCandle) return await route.fulfill({ status: 502, json: { message: 'Fixture error' } });
         return await route.fulfill({ json: state.candleRows[url.searchParams.get('symbol')] ||
           candles(url.searchParams.has('endTime') ? Number(url.searchParams.get('endTime')) + 1 : CUTOFF) });
@@ -550,4 +550,176 @@ test('Binance: shortlist controls stay labelled and readable at desktop, tablet 
     expect(geometry.width).toBeGreaterThan(230);
     expect(geometry.overflow).toBe(false);
   }
+});
+
+test('Binance: batch retry waits for enough scan and shared slots, not just the oldest request', async ({ page }) => {
+  await page.clock.install({ time: CUTOFF + 1000 });
+  await setup(page);
+  const result = await page.evaluate(() => {
+    const now = Date.now();
+    binanceScanRequestTimes = [...Array(10).fill(now - 50000), ...Array(20).fill(now - 10000)];
+    binanceRequestTimes = [...binanceScanRequestTimes, ...Array(25).fill(now - 5000)].sort((a, b) => a - b);
+    saveBinanceBudget();
+    try { assertBinanceBudget(20, 'scan'); return ''; } catch (error) { return error.message; }
+  });
+  expect(result).toContain('Retry in 50s');
+  await page.clock.fastForward(10001);
+  expect(await page.evaluate(() => {
+    try { assertBinanceBudget(20, 'scan'); return false; } catch (error) { return error.isLocalBudget; }
+  })).toBe(true);
+  await page.clock.fastForward(40000);
+  expect(await page.evaluate(() => { assertBinanceBudget(20, 'scan'); return true; })).toBe(true);
+});
+
+test('Binance: a fresh fallback chart remains available when the shared network budget is full', async ({ page }) => {
+  const state = await setup(page);
+  const result = await page.evaluate(async () => {
+    const rows = [{ time: 1710000000, open: 1, high: 2, low: 1, close: 2, volume: 10 }];
+    setCachedData(getChartCacheKey('binance-spot', 'ALPHAUSDT', '1m', 100), rows, { source: 'binance-spot' });
+    binanceRequestTimes = Array(60).fill(Date.now());
+    saveBinanceBudget();
+    try {
+      const chart = await fetchChartCandles('ALPHA/USDT', '1m', 100);
+      return { cached: chart.cached, source: chart.source.id, candles: chart.candles.length };
+    } catch (error) { return { error: error.message }; }
+  });
+  expect(result).toEqual({ cached: true, source: 'binance-spot', candles: 1 });
+  expect(state.klines + state.globals).toBe(0);
+});
+
+test('Binance: S/R requests share pending work across chart recreation and caller cancellation', async ({ page }) => {
+  const state = await setup(page);
+  state.candleDelay = 200;
+  await page.evaluate(() => {
+    window.__srCaller = new AbortController();
+    window.__srFirst = fetchSRLevels('ALPHA/USDT', '1h', window.__srCaller.signal, CHART_SOURCES['binance-futures'])
+      .catch(error => error.name);
+  });
+  await expect.poll(() => state.chartKlines).toBe(1);
+  const result = await page.evaluate(async () => {
+    const source = CHART_SOURCES['binance-futures'];
+    const second = fetchSRLevels('ALPHA/USDT', '1h', null, source);
+    window.__srCaller.abort();
+    return [await window.__srFirst, (await second).length];
+  });
+  expect(result).toEqual(['AbortError', 2]);
+  expect(state.chartKlines).toBe(1);
+  await expect.poll(() => page.evaluate(() => pendingMarketRequests.size)).toBe(0);
+});
+
+test('Binance: twenty minutes of repeated scans and chart browsing stay usable within unchanged budgets', async ({ page }) => {
+  test.setTimeout(90000);
+  await page.clock.install({ time: CUTOFF + 1000 });
+  const state = await setup(page, { symbols: Array.from({ length: 20 }, (_, i) => 'ASSET' + i + 'USDT') });
+  await enablePreviewHarness(page);
+  await page.evaluate(() => {
+    window.__marketAudit = [];
+    const original = window.fetch;
+    window.fetch = function(url, options) {
+      if (isBinanceRequest(url)) window.__marketAudit.push({ at: Date.now(), kind: getBinanceRequestKind(url) });
+      return original.call(this, url, options);
+    };
+  });
+  for (let minute = 0; minute <= 20; minute += 1) {
+    if (minute) {
+      state.clock += 60001;
+      await page.clock.fastForward(60001);
+    }
+    await page.evaluate(async () => {
+      await handleScan();
+      await handleScan();
+    });
+    await expect(page.locator('#error')).toBeHidden();
+    await expect(page.locator('#resultsList .pick-card')).toHaveCount(10);
+    const beforeCharts = state.chartKlines;
+    await page.evaluate(async () => {
+      const card = document.querySelector('.pick-card');
+      for (let pass = 0; pass < 2; pass += 1) for (const pick of picks) {
+        await showChartPreview(pick.symbol, card);
+        closeChartPreview();
+      }
+      isChartMaximized = true;
+      await showChartPreview(picks[0].symbol, card);
+    });
+    await expect(page.locator('#chartPreviewStats')).not.toContainText('Loading');
+    await expect(page.locator('#chartPreviewStats')).not.toContainText('Unavailable');
+    await expect(page.locator('#chartPreviewLoading')).toHaveClass(/hidden/);
+    expect(state.chartKlines - beforeCharts).toBe(10);
+    await page.evaluate(() => closeChartPreview());
+    await expect.poll(() => page.evaluate(() => pendingMarketRequests.size)).toBe(0);
+  }
+  expect(state.globals).toBe(45);
+  expect(state.klines - state.chartKlines).toBe(100);
+  expect(state.chartKlines).toBe(210);
+  expect(state.extras).toBe(42);
+  const peaks = await page.evaluate(() => window.__marketAudit.reduce((peaks, current) => {
+    const windowRows = window.__marketAudit.filter(row => row.at <= current.at && row.at > current.at - 60000);
+    return { all: Math.max(peaks.all, windowRows.length),
+      scan: Math.max(peaks.scan, windowRows.filter(row => row.kind === 'scan').length) };
+  }, { all: 0, scan: 0 }));
+  expect(peaks.all).toBeLessThanOrEqual(35);
+  expect(peaks.scan).toBeLessThanOrEqual(23);
+});
+
+test('Binance: rapid chart bursts render only the final selection and leave no pending work', async ({ page }) => {
+  const state = await setup(page);
+  await enablePreviewHarness(page);
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.evaluate(async () => {
+    const card = document.getElementById('scanBtn');
+    await Promise.all(Array.from({ length: 100 }, (_, i) => showChartPreview('BURST' + i + '/USDT', card)));
+  });
+  await expect(page.locator('#chartPreviewSymbol')).toHaveText('BURST99/USDT');
+  await expect(page.locator('#chartPreviewLoading')).toHaveClass(/hidden/);
+  expect(state.chartKlines).toBe(1);
+  expect(state.extras).toBe(0);
+  expect(await page.evaluate(() => window.__renderedCharts.length)).toBe(1);
+  await page.evaluate(() => closeChartPreview());
+  await expect.poll(() => page.evaluate(() => pendingMarketRequests.size)).toBe(0);
+  expect(errors).toEqual([]);
+});
+
+test('Binance: competing tabs enforce scan, optional and shared ceilings over three recovered windows', async ({ page, context }) => {
+  await page.clock.install({ time: CUTOFF + 1000 });
+  const first = await setup(page);
+  const secondPage = await context.newPage();
+  await secondPage.clock.install({ time: CUTOFF + 1000 });
+  const second = await setup(secondPage);
+  const tabs = [page, secondPage];
+  for (let minute = 0; minute < 3; minute += 1) {
+    // Both tabs represent one system clock, not independently advancing test clocks.
+    await Promise.all(tabs.map(tab => tab.clock.setFixedTime(CUTOFF + 1000 + minute * 60001)));
+    await Promise.all(tabs.map(tab => tab.evaluate(async () => Promise.allSettled(Array.from({ length: 20 }, () =>
+      fetchBinanceScanJson('time', null, Date.now() + 10000))))));
+    expect(first.globals + second.globals).toBe(30 * (minute + 1));
+    await Promise.all(tabs.map(tab => tab.evaluate(async () => Promise.allSettled(Array.from({ length: 20 }, () =>
+      fetchJsonOrThrow(getBinanceFuturesPremiumIndexUrl('ALPHAUSDT')))))));
+    expect(first.extras + second.extras).toBe(10 * (minute + 1));
+    await Promise.all(tabs.map(tab => tab.evaluate(async () => Promise.allSettled(Array.from({ length: 20 }, () =>
+      fetchJsonOrThrow(getBinanceFuturesUrl('ALPHAUSDT', '1m', 100)))))));
+    expect(first.chartKlines + second.chartKlines).toBe(20 * (minute + 1));
+  }
+});
+
+test('Binance: losing storage writes after a saved budget retains the in-memory limit and recovery', async ({ page }) => {
+  await page.clock.install({ time: CUTOFF + 1000 });
+  const state = await setup(page);
+  await page.evaluate(() => {
+    binanceRequestTimes = Array(25).fill(Date.now());
+    saveBinanceBudget();
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value) {
+      if (key === BINANCE_BUDGET_KEY) throw new Error('Fixture quota exhausted');
+      return original.call(this, key, value);
+    };
+  });
+  const consume = () => page.evaluate(() => Promise.allSettled(Array.from({ length: 40 }, () =>
+    fetchJsonOrThrow(getBinanceFuturesUrl('ALPHAUSDT', '1m', 100)))));
+  await consume();
+  expect(state.chartKlines).toBe(35);
+  expect(await page.evaluate(() => binanceBudgetStorageAvailable)).toBe(false);
+  await page.clock.fastForward(60001);
+  await consume();
+  expect(state.chartKlines).toBe(75);
 });

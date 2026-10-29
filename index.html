@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-R5voGcbuKWQ7nisk5e+W+kxEdsQwCkVZti2F9EiuF2g='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-JfyMvs7mATRPuNMc9xXMc6mCpYfzqkU5aAbEgPCbyaw='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -5169,11 +5169,15 @@
           ? 'Binance market data is blocked in this region or network.'
           : 'Binance request limit reached. Wait before retrying.');
       }
-      var exhaustedScan = kind === 'scan' && binanceScanRequestTimes.length + required > BINANCE_SCAN_REQUEST_LIMIT;
-      var reservedForCharts = kind === 'optional' && binanceRequestTimes.length + required > BINANCE_REQUEST_LIMIT - BINANCE_CHART_HEADROOM;
-      if (exhaustedScan || reservedForCharts || binanceRequestTimes.length + required > BINANCE_REQUEST_LIMIT) {
-        var times = exhaustedScan ? binanceScanRequestTimes : binanceRequestTimes;
-        var seconds = Math.max(1, Math.ceil((times[0] + BINANCE_REQUEST_WINDOW_MS - now) / 1000));
+      function availableAt(times, limit) {
+        var excess = times.length + required - limit;
+        return excess > 0 ? times[Math.min(excess, times.length) - 1] + BINANCE_REQUEST_WINDOW_MS : 0;
+      }
+      var sharedLimit = kind === 'optional' ? BINANCE_REQUEST_LIMIT - BINANCE_CHART_HEADROOM : BINANCE_REQUEST_LIMIT;
+      var retryAt = Math.max(availableAt(binanceRequestTimes, sharedLimit),
+        kind === 'scan' ? availableAt(binanceScanRequestTimes, BINANCE_SCAN_REQUEST_LIMIT) : 0);
+      if (retryAt > now) {
+        var seconds = Math.max(1, Math.ceil((retryAt - now) / 1000));
         var error = createBinanceScanError('Local Binance request budget reached. Retry in ' + seconds + 's before loading new market data.');
         error.isLocalBudget = true;
         throw error;
@@ -5362,8 +5366,7 @@
       var lastErr = null;
       var regionRestricted = isRegionRestricted();
 
-      async function trySource(sourceId) {
-        throwIfRequestAborted(signal);
+      function cachedSource(sourceId) {
         var cacheKey = getChartCacheKey(sourceId, cleanSymbol, timeframe, limit);
         var cached = getCachedEntry(cacheKey);
         if (cached && cached.data && cached.data.length > 0) {
@@ -5376,6 +5379,21 @@
           }
           return { candles: cached.data, source: CHART_SOURCES[cachedSourceId] || CHART_SOURCES[sourceId], cached: true, fetchedAt: cached.timestamp };
         }
+        return null;
+      }
+
+      // Reuse fresh data before any source attempts or network-budget checks.
+      var cacheSources = ['binance-futures', 'binance-futures-proxy'].concat(SPOT_FALLBACK_CHAIN);
+      for (var cacheIndex = 0; cacheIndex < cacheSources.length; cacheIndex += 1) {
+        var existing = cachedSource(cacheSources[cacheIndex]);
+        if (existing) return existing;
+      }
+
+      async function trySource(sourceId) {
+        throwIfRequestAborted(signal);
+        var existing = cachedSource(sourceId);
+        if (existing) return existing;
+        var cacheKey = getChartCacheKey(sourceId, cleanSymbol, timeframe, limit);
         var candles = await fetchCandlesFromSource(sourceId, cleanSymbol, baseAsset, timeframe, limit, signal);
         throwIfRequestAborted(signal);
         if (!candles || candles.length === 0) {
@@ -5499,6 +5517,12 @@
     async function fetchSRLevels(symbol, interval, signal, source) {
       throwIfRequestAborted(signal);
       if (!source || !source.id) return [];
+      return shareMarketRequest('sr:' + getCleanSymbol(symbol) + ':' + interval + ':' + source.id, signal, function(sharedSignal) {
+        return fetchSRLevelsUnshared(symbol, interval, sharedSignal, source);
+      });
+    }
+
+    async function fetchSRLevelsUnshared(symbol, interval, signal, source) {
       var cacheKey = symbol.replace('/', '') + '-sr-' + interval + '-' + source.id;
       var cached = getCachedData(cacheKey);
       if (cached) return cached;
