@@ -119,6 +119,42 @@ test('Binance: expanded details start after candles and never duplicate pending 
   expect(state.extras).toBe(4);
 });
 
+test('Binance: a pending hover cannot replace an explicitly expanded chart', async ({ page }) => {
+  const state = await setup(page);
+  await enablePreviewHarness(page);
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  const intended = await page.evaluate(async () => {
+    const cards = document.querySelectorAll('.pick-card');
+    chartSettings.hoverDelay = 150;
+    handleCardMouseEnter(picks[0].symbol, cards[0]);
+    isChartMaximized = true;
+    await showChartPreview(picks[1].symbol, cards[1]);
+    handleCardMouseEnter(picks[0].symbol, cards[0]);
+    return picks[1].symbol;
+  });
+  await page.waitForTimeout(350);
+  expect(await page.evaluate(() => currentPreviewSymbol)).toBe(intended);
+  expect(state.chartKlines).toBe(1);
+  expect(state.extras).toBe(2);
+});
+
+test('Binance: an old mouse-leave callback cannot hide a newly opened chart', async ({ page }) => {
+  await setup(page);
+  await enablePreviewHarness(page);
+  await page.locator('#scanBtn').click();
+  await expect(page.locator('#scanBtn')).toBeEnabled();
+  await page.evaluate(async () => {
+    const cards = document.querySelectorAll('.pick-card');
+    await showChartPreview(picks[0].symbol, cards[0]);
+    handleCardMouseLeave();
+    await showChartPreview(picks[1].symbol, cards[1]);
+  });
+  await page.waitForTimeout(200);
+  await expect(page.locator('#chartPreview')).toHaveClass(/visible/);
+  await expect(page.locator('#chartPreviewLoading')).toHaveClass(/hidden/);
+});
+
 test('Binance: identical candle requests share work while cancellation only detaches its caller', async ({ page }) => {
   const state = await setup(page);
   const results = await page.evaluate(async () => {

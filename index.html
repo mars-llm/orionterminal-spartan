@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-bzofFRLCMyq36KGiJpy8ACiby2E7Y36XDIB5zmkGpzc='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-R5voGcbuKWQ7nisk5e+W+kxEdsQwCkVZti2F9EiuF2g='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -9814,6 +9814,10 @@
 
     async function showChartPreview(symbol, cardElement) {
       if (!chartSettings.enabled) return;
+      if (chartPreviewTimeout) {
+        clearTimeout(chartPreviewTimeout);
+        chartPreviewTimeout = null;
+      }
 
       chartPreviewRequestId += 1;
       var requestId = chartPreviewRequestId;
@@ -10036,7 +10040,7 @@
     }
 
     function handleCardMouseEnter(symbol, cardElement) {
-      if (!chartSettings.enabled) return;
+      if (!chartSettings.enabled || isChartMaximized) return;
 
       if (chartPreviewTimeout) clearTimeout(chartPreviewTimeout);
       chartPreviewTimeout = setTimeout(function() {
@@ -10051,8 +10055,9 @@
         chartPreviewTimeout = null;
       }
       if (isChartMaximized) return;
+      var requestId = chartPreviewRequestId;
       setTimeout(function() {
-        if (!isPreviewHovered) hideChartPreview();
+        if (!isPreviewHovered && requestId === chartPreviewRequestId) hideChartPreview();
       }, 120);
     }
 
