@@ -11,7 +11,7 @@ Single-file market scanner for Binance USDT-M perpetual futures. It scans Binanc
 - One-click scans with ranked `Top 1-3` candidates and metric tooltips
 - `New` badges highlight setups absent from the previous successful scan with the same filters; comparisons stay in memory and reset when the page reloads
 - Instant chart previews plus a larger modal with S/R overlays, MA, volume, funding, and open interest
-- Built-in presets for majors, low caps, scalping, and the default mid-cap flow
+- Built-in presets for high-volume markets, lower-volume markets, scalping activity, and the default flow
 - Settings for chart appearance, display behavior, and CORS/proxy management
 - Social-card-only sharing for either the current top setups or the active filter state
 - PWA install support and a downloadable `index.html` for local use
@@ -45,8 +45,12 @@ Install as an app from Chrome/Edge via the install icon, or from iOS Safari via 
 
 - Scans use Binance's active, USDT-quoted and USDT-margined perpetual contracts directly. They do not depend on Orion's preview, sign-in, or a CORS proxy.
 - Rolling 24h volume is Binance quote volume in USDT. The 5m activity filter uses the number of trades in the latest closed 5m candle. The 15m range is `(highest high / lowest low - 1) * 100` across the latest three closed 5m candles. These are explicit candle-based metrics, not replicas of Orion's calculations.
-- Closed-candle metrics can lag the current market by up to five minutes. The 1h and 4h changes use complete 12- and 48-candle windows; missing longer windows are unavailable, not reported as zero.
-- The first scan checks every market passing the volume/exclusion prefilters with at most six concurrent candle requests and a 90-second overall deadline. Candle data is reused within its closed 5m window, and exchange metadata is cached for ten minutes.
+- Volume bounds, symbol inclusion/exclusion, and the available 24h trade count narrow the market list before candle requests. Binance's bulk ticker endpoint does not support a server-side volume predicate: the app fetches it once and filters locally. A 24h trade count below the requested 5m minimum rules a market out; the app never treats an average 24h rate as current 5m activity.
+- Each scan checks at most 20 markets, ordered by 24h volume or 24h trade count. The optional symbol list accepts up to 20 base assets or USDT pairs; exclusions take priority. 5m activity and 15m range thresholds apply after this selection, so a focused scan can have fewer results even when other markets outside its shortlist would qualify. The coverage notice and setup cards identify this scope.
+- Presets use the same filter pipeline: Default excludes the six configured majors; High Volume Majors uses a 50M USDT minimum; Lower Volume uses the 100K-10M USDT band, not market capitalization; Scalping selects the most-traded matching markets and requires 500 trades in the latest closed 5m candle. A preset is a filter configuration, not a promise of results or trading quality.
+- A cold scan makes at most 23 requests (three bulk/metadata requests and 20 candle requests), with two concurrent candle requests and a 90-second overall deadline. Bulk tickers and server time are cached for one minute; candles are reused within their closed 5m window, and exchange metadata for ten minutes. Immediate repeats with the same market selection need no new requests. Scan completion does not automatically prefetch funding or open interest.
+- All Binance requests, including charts, extras and encoded proxy targets, share a local ceiling of 30 requests per rolling minute. Requests stop rather than queueing another market batch. The budget and provider cooldown survive reloads and are shared across same-origin tabs, using Web Locks where available. If browser storage or locking is unavailable, protection falls back to the current tab. This is a client-side limit, not a guarantee against provider blocks or traffic from other apps/devices sharing an IP.
+- Closed-candle metrics can lag by up to six minutes including the one-minute summary cache. The 1h and 4h changes use complete 12- and 48-candle windows; missing longer windows are unavailable, not reported as zero.
 - Missing market data produces a visible incomplete-scan notice, including on setup social cards. Rate-limit and regional-access responses stop the scan; they are not bypassed through proxies. Retry is user-triggered rather than automatically replaying a full batch.
 - USDC, delivery, inactive, and conflicting base-asset/symbol markets are excluded. Displayed results still obey the selected result limit.
 
