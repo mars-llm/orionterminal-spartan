@@ -3,12 +3,13 @@ const { test, expect } = require('./coverage.fixture');
 test.skip(!!process.env.E2E_BASE_URL, 'Deterministic local chart lifecycle');
 
 async function setupChart(page) {
-  const state = { intervals: [], extras: 0, delay: 0 };
+  const state = { intervals: [], symbols: [], extras: 0, delay: 0 };
   await page.route('https://fapi.binance.com/fapi/v1/**', async route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/klines')) {
       const interval = url.searchParams.get('interval');
       state.intervals.push(interval);
+      state.symbols.push(url.searchParams.get('symbol'));
       if (state.delay) await new Promise(resolve => setTimeout(resolve, state.delay));
       const price = { '1m': 100, '5m': 500, '15m': 1500, '1h': 3600, '4h': 14400, '1d': 86400 }[interval];
       return route.fulfill({ json: [[1710000000000, price, price + 1, price - 1, price, 10]] });
@@ -98,6 +99,36 @@ test('startup: a failed optional font stays non-blocking and is requested only o
   await expect(page.locator('#filtersBtn')).toHaveAttribute('aria-expanded', 'true');
 });
 
+for (const nextSymbol of ['BRAVO/USDT', 'ALPHA/USDT']) {
+  test(`chart: a pending hover cannot survive a rescan replacing its card with ${nextSymbol}`, async ({ page }) => {
+    await page.clock.install();
+    const state = await setupChart(page);
+    await page.clock.pauseAt(new Date(Date.now() + 60000));
+    const card = page.locator('#resultsList .pick-card');
+    await page.evaluate(() => { chartSettings.hoverDelay = 300; });
+    await card.dispatchEvent('mouseenter');
+    await page.clock.runFor(299);
+    await page.evaluate(async symbol => {
+      fetchScreenerWithRetry = async () => [{ ...picks[0], symbol }];
+      await handleScan();
+    }, nextSymbol);
+    await expect(card.locator('.symbol')).toHaveText(nextSymbol);
+    await page.clock.runFor(301);
+    // Check before any new interaction could hide a stale preview.
+    expect(await page.locator('#chartPreview').evaluate(el => el.classList.contains('visible'))).toBe(false);
+    expect(state.symbols).toEqual([]);
+
+    await card.dispatchEvent('mouseenter');
+    await page.clock.runFor(299);
+    expect(state.symbols).toEqual([]);
+    await page.clock.runFor(1);
+    await expect(page.locator('#chartPreviewLoading')).toHaveClass(/hidden/);
+    await expect(page.locator('#chartPreviewSymbol')).toHaveText(nextSymbol);
+    expect(state.symbols).toEqual([nextSymbol.replace('/', '')]);
+    expect(state.extras).toBe(0);
+  });
+}
+
 test('chart: rapid timeframe changes coalesce and returning to fresh data sends no request', async ({ page }) => {
   const state = await setupChart(page);
   await openExpanded(page);
@@ -128,9 +159,9 @@ test('chart: a queued timeframe change cannot reopen a closed chart', async ({ p
     const select = document.getElementById('chartPreviewTimeframeSelect');
     select.value = '5m'; select.dispatchEvent(new Event('change', { bubbles: true }));
     document.getElementById('chartPreviewClose').click();
-    return { timeframe: chartTimeframeTimeout, hover: chartPreviewTimeout };
+    return { timeframe: chartTimeframeTimeout, hover: chartHoverState.phase };
   });
-  expect(pending).toEqual({ timeframe: null, hover: null });
+  expect(pending).toEqual({ timeframe: null, hover: 'idle' });
   await page.waitForTimeout(await page.evaluate(() => chartSettings.hoverDelay + 200));
   await expect(page.locator('#chartPreview')).not.toHaveClass(/visible/);
   expect(state.intervals).toEqual(['1m']);

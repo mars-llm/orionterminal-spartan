@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-uJZ/3X/ghuu45xqGi1OFmerGmKntGrJ4R8P9mGsulsk='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-wsHGExHR6VE8cFQ5xw9kk59gJWMkct6pS9a74KEphgs='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -6996,6 +6996,7 @@
       updateScanCoverageNotice();
       var coverage = lastSuccessfulScanSnapshot && lastSuccessfulScanSnapshot.coverage;
       var limited = !!(coverage && coverage.limited);
+      cancelPendingChartHover();
       resultsList.textContent = '';
 
       if (picks.length === 0) {
@@ -9382,7 +9383,8 @@
     // Chart Preview (Lightweight Charts)
     // =============================================================================
 
-    var chartPreviewTimeout = null;
+    const IDLE_CHART_HOVER = { phase: 'idle' };
+    let chartHoverState = IDLE_CHART_HOVER;
     var chartTimeframeTimeout = null;
     var chartPreviewAbortController = null;
     var chartPreviewRequestId = 0;
@@ -9394,6 +9396,12 @@
     var currentPreviewSource = null;
     var isChartMaximized = false;
     var isPreviewHovered = false;
+
+    function cancelPendingChartHover() {
+      if (chartHoverState.phase !== 'pending') return;
+      clearTimeout(chartHoverState.timer);
+      chartHoverState = IDLE_CHART_HOVER;
+    }
 
     function cancelChartTimeframeRefresh() {
       clearTimeout(chartTimeframeTimeout);
@@ -9922,10 +9930,7 @@
     async function showChartPreview(symbol, cardElement) {
       if (!chartSettings.enabled) return;
       cancelChartTimeframeRefresh();
-      if (chartPreviewTimeout) {
-        clearTimeout(chartPreviewTimeout);
-        chartPreviewTimeout = null;
-      }
+      cancelPendingChartHover();
 
       chartPreviewRequestId += 1;
       var requestId = chartPreviewRequestId;
@@ -10130,10 +10135,7 @@
 
     function closeChartPreview() {
       cancelChartTimeframeRefresh();
-      if (chartPreviewTimeout) {
-        clearTimeout(chartPreviewTimeout);
-        chartPreviewTimeout = null;
-      }
+      cancelPendingChartHover();
       isChartMaximized = false;
       isPreviewHovered = false;
       var preview = document.getElementById('chartPreview');
@@ -10155,18 +10157,20 @@
     function handleCardMouseEnter(symbol, cardElement) {
       if (!chartSettings.enabled || isChartMaximized) return;
 
-      if (chartPreviewTimeout) clearTimeout(chartPreviewTimeout);
-      chartPreviewTimeout = setTimeout(function() {
-        chartPreviewTimeout = null;
-        showChartPreview(symbol, cardElement);
+      cancelPendingChartHover();
+      const pending = { phase: 'pending', symbol, card: cardElement, timer: null };
+      chartHoverState = pending;
+      pending.timer = setTimeout(function() {
+        if (chartHoverState !== pending) return;
+        chartHoverState = IDLE_CHART_HOVER;
+        if (document.getElementById('resultsList').contains(pending.card)) {
+          showChartPreview(pending.symbol, pending.card);
+        }
       }, chartSettings.hoverDelay);
     }
 
     function handleCardMouseLeave() {
-      if (chartPreviewTimeout) {
-        clearTimeout(chartPreviewTimeout);
-        chartPreviewTimeout = null;
-      }
+      cancelPendingChartHover();
       if (isChartMaximized) return;
       var requestId = chartPreviewRequestId;
       setTimeout(function() {

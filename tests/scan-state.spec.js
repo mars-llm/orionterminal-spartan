@@ -98,16 +98,18 @@ test('scan: failed refresh keeps the old capture time and empty refresh clears o
   await expect(page.locator('#resultsList .pick-card')).toHaveCount(2);
   await expect(page.locator('#lastUpdated')).toHaveText(expectedTime);
 
-  await page.evaluate(() => {
+  const hoverPhase = await page.evaluate(() => {
     fetchScreenerWithRetry = async () => [];
+    chartSettings.enabled = true;
+    chartSettings.hoverDelay = 60000;
+    document.querySelector('#resultsList .pick-card').dispatchEvent(new MouseEvent('mouseenter'));
     document.getElementById('chartPreview').classList.add('visible');
     isChartMaximized = true;
     chartPreviewAbortController = new AbortController();
     window.obsoleteChartSignal = chartPreviewAbortController.signal;
-    chartPreviewTimeout = setTimeout(() => {
-      document.getElementById('chartPreview').classList.add('visible');
-    }, 1000);
+    return chartHoverState.phase;
   });
+  expect(hoverPhase).toBe('pending');
   await page.locator('#retryScanBtn').click();
   await expect(page.locator('#resultsList .pick-card')).toHaveCount(0);
   await expect(page.locator('#resultsContainer')).toBeHidden();
@@ -116,8 +118,8 @@ test('scan: failed refresh keeps the old capture time and empty refresh clears o
   await expect(page.locator('#chartPreview')).toBeHidden();
   expect(await page.evaluate(() => ({
     aborted: window.obsoleteChartSignal.aborted,
-    pendingHover: chartPreviewTimeout,
-  }))).toEqual({ aborted: true, pendingHover: null });
+    hover: chartHoverState.phase,
+  }))).toEqual({ aborted: true, hover: 'idle' });
 
   await page.locator('#maxResults').fill('2');
   await page.locator('#maxResults').blur();
