@@ -1,14 +1,13 @@
-const CACHE_NAME = 'spartan-orion-screener-v19';
+const CACHE_NAME = 'spartan-orion-screener-v20';
 const APP_SHELL_URL = './index.html';
 const PRECACHE_ASSETS = [
-  './',
   APP_SHELL_URL,
   './manifest.webmanifest',
   './favicon-16.png',
   './favicon-32.png',
   './icon-192.png',
   './icon-512.png',
-  './social-card.png'
+  './icon-maskable.svg'
 ];
 const APP_SCOPE_URL = new URL(self.registration.scope);
 const APP_SHELL_PATHS = new Set([
@@ -45,9 +44,7 @@ async function handleNavigationRequest(request) {
     }
     return response;
   } catch (error) {
-    const cachedShell =
-      (await readCachedResponse(APP_SHELL_URL)) ||
-      (await readCachedResponse('./'));
+    const cachedShell = await readCachedResponse(APP_SHELL_URL);
     if (cachedShell) return cachedShell;
     throw error;
   }

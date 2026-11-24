@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Spartan Orion</title>
+  <defs>
+    <linearGradient id="beam" x1="0.7" y1="0" x2="0.3" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#82ebdf" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#28bcae" stop-opacity=".08"/>
+    </linearGradient>
+    <linearGradient id="canopy" x2=".75" y2="1">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#adced8"/>
+    </linearGradient>
+  </defs>
+  <path fill="#0f172a" d="M0 0h512v512H0z"/>
+  <path fill="url(#beam)" d="m254 222 52 15-43 135q-58 21-123-19z"/>
+  <g transform="rotate(13 280 204)">
+    <path fill="url(#canopy)" d="M226 189a55 55 0 0 1 110 0c-30 10-80 10-110 0Z"/>
+    <path fill="#c8dbe4" d="M218 193c30 13 94 13 126 0 24 4 50 13 64 23-45 5-88 7-128 7s-86-2-128-7c15-11 40-19 66-23Z"/>
+    <path fill="#74d9d0" d="M163 225c75 7 159 7 234 0-21 15-67 29-117 29s-96-14-117-29Z"/>
+  </g>
+  <g stroke="#a1cbd2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="m148 323 32 22 27-10 25-11 37 19m-89 2 12 32"/>
+  </g>
+  <g fill="#ecfaf9">
+    <circle cx="148" cy="323" r="6"/><circle cx="180" cy="345" r="7"/>
+    <circle cx="207" cy="335" r="6"/><circle cx="232" cy="324" r="7"/>
+    <circle cx="269" cy="343" r="5"/><circle cx="192" cy="377" r="6"/>
+    <path d="m147 172 4 11 11 4-11 4-4 11-4-11-11-4 11-4z"/>
+  </g>
+</svg>
