@@ -300,7 +300,7 @@ test('network: per-row test updates status from idle to passed', async ({ page }
   const row = await addProxyRow(page, 'https://example.com/proxy?url=', true);
 
   const status = row.locator('.proxy-test-status');
-  await expect(status).toContainText('Not tested');
+  await expect(status).toHaveText('Nicht getestet');
 
   await row.getByRole('button', { name: 'Test' }).click();
   try {
@@ -313,6 +313,95 @@ test('network: per-row test updates status from idle to passed', async ({ page }
     await expect(status).toContainText('Passed · 0 tickers ·');
   }
   await expect(page.locator('#saveCorsProxyBtn')).toBeEnabled();
+});
+
+// Hold responses even after abort so an obsolete test can finish after its replacement.
+async function holdProxyTests(page) {
+  await page.evaluate(() => {
+    window.proxyTestCalls = [];
+    fetchJsonOrThrow = (url, signal) => new Promise((resolve, reject) => {
+      window.proxyTestCalls.push({ url, signal, resolve, reject });
+    });
+  });
+}
+
+for (const field of ['URL', 'encoding']) {
+  test(`network: editing ${field} resets a settled or pending proxy test`, async ({ page }) => {
+    await openSettingsTab(page, 'network');
+    await clearProxyRows(page);
+    const url = 'https://proxy.invalid/?target=';
+    const row = await addProxyRow(page, url, true);
+    await holdProxyTests(page);
+    const input = row.getByLabel('Proxy URL');
+    const encoding = row.getByRole('checkbox');
+    const button = row.getByRole('button', { name: 'Test', exact: true });
+    const status = row.locator('.proxy-test-status');
+    const edit = async () => {
+      if (field === 'URL') {
+        await input.focus();
+        const cursor = url.indexOf('target');
+        await input.evaluate((el, index) => el.setSelectionRange(index, index), cursor);
+        await input.pressSequentially('x');
+        await expect(input).toBeFocused();
+        expect(await input.evaluate(el => el.selectionStart)).toBe(cursor + 1);
+      } else {
+        await encoding.focus();
+        await encoding.press('Space');
+        await expect(encoding).toBeFocused();
+      }
+      await expect(status).toHaveText('Nicht getestet');
+      await expect(status).toHaveClass('proxy-test-status');
+      await expect(row).not.toHaveClass(/test-(success|error)/);
+      await expect(button).toBeEnabled();
+    };
+
+    await button.click();
+    await page.evaluate((field) => {
+      if (field === 'URL') proxyTestCalls[0].resolve({ data: { tickers: [] } });
+      else proxyTestCalls[0].reject(new Error('simulated failure'));
+    }, field);
+    await expect(status).toContainText(field === 'URL' ? 'Passed' : 'Failed');
+    await edit();
+    await button.click();
+    const target = await page.evaluate(() => ORION_API);
+    expect(await page.evaluate(() => proxyTestCalls[1].url)).toBe(
+      field === 'URL' ? url.replace('target', 'xtarget') + encodeURIComponent(target) : url + target
+    );
+    await expect(status).toHaveText('Testing...');
+    await edit();
+    expect(await page.evaluate(() => proxyTestCalls.map(call => call.signal.aborted))).toEqual([false, true]);
+    await button.click();
+    await page.evaluate(() => proxyTestCalls[2].resolve({ data: { tickers: [{}, {}] } }));
+    await page.evaluate((field) => {
+      if (field === 'URL') proxyTestCalls[1].resolve({ data: { tickers: [] } });
+      else proxyTestCalls[1].reject(new Error('obsolete failure'));
+    }, field);
+    await expect(status).toContainText('Passed · 2 tickers');
+    await expect(button).toBeEnabled();
+    expect(await page.evaluate(() => proxyTestCalls.length)).toBe(3);
+  });
+}
+
+test('network: editing a queued proxy cancels Test All without testing the changed configuration', async ({ page }) => {
+  await openSettingsTab(page, 'network');
+  await clearProxyRows(page);
+  await addProxyRow(page, 'https://first.invalid/?target=', true);
+  const queued = await addProxyRow(page, 'https://queued.invalid/?target=', true);
+  const first = page.locator('#corsProxyList .proxy-item').first();
+  await holdProxyTests(page);
+  await page.evaluate(() => { window.batchDone = testAllCorsProxies(); });
+  await expect(first.locator('.proxy-test-status')).toHaveText('Testing...');
+  await queued.getByRole('checkbox').click();
+  await expect(queued.getByRole('button', { name: 'Test', exact: true })).toBeEnabled();
+  await expect(first.locator('.proxy-test-status')).toHaveText('Nicht getestet');
+  await expect(page.locator('#testAllCorsProxyBtn')).toBeEnabled();
+  await page.evaluate(async () => {
+    proxyTestCalls[0].resolve({ data: { tickers: [] } });
+    await window.batchDone;
+  });
+  expect(await page.evaluate(() => proxyTestCalls.map(call => call.signal.aborted))).toEqual([true]);
+  await expect(queued.locator('.proxy-test-status')).toHaveText('Nicht getestet');
+  await expect(page.locator('#toast')).not.toContainText('proxies passed');
 });
 
 test('network: test all runs sequentially and reports aggregate result', async ({ page }) => {

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-wsHGExHR6VE8cFQ5xw9kk59gJWMkct6pS9a74KEphgs='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://unpkg.com 'sha256-mtl5PZLusuX6rDtK2Dxt7O317F9f6vh7wj3iM8CL2YA=' 'sha256-OBtkqH5Ha+PPmp0jOP6gLz4umN67J05EFXXVdqosa5U='; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; worker-src 'self';">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spartan Orion Screener — Free Binance Futures Market Scanner</title>
@@ -8661,6 +8661,7 @@
       if (proxy && proxy._testAbort) {
         proxy._testAbort.abort();
         proxy._testAbort = null;
+        proxy._test = null;
       }
     }
 
@@ -8779,6 +8780,39 @@
       }
     }
 
+    function updateCorsProxyTestRow(proxy) {
+      var status = document.getElementById('proxy-status-' + proxy._id);
+      if (!status) return;
+      var item = status.closest('.proxy-item');
+      var button = item.querySelector('.proxy-test-btn');
+      var state = proxy._test ? proxy._test.state : '';
+      var message = proxy._test ? proxy._test.message : 'Nicht getestet';
+      var label = status.lastElementChild;
+      if (label.textContent !== message) label.textContent = message;
+      status.className = state ? 'proxy-test-status ' + state : 'proxy-test-status';
+      item.classList.toggle('test-success', state === 'success');
+      item.classList.toggle('test-error', state === 'error');
+      button.textContent = state === 'testing' ? 'Testing...' : 'Test';
+      button.disabled = isTestingAllCorsProxies || state === 'testing';
+    }
+
+    function updateCorsProxyBatchControls() {
+      (corsProxyDraft || []).forEach(updateCorsProxyTestRow);
+      updateCorsProxyActionButtons();
+    }
+
+    function invalidateCorsProxyTest(proxy) {
+      proxy._test = null;
+      if (isTestingAllCorsProxies) {
+        // The remaining batch was requested for the previous configuration.
+        abortAllCorsProxyDraftTests();
+        updateCorsProxyBatchControls();
+      } else {
+        abortCorsProxyTest(proxy);
+        updateCorsProxyTestRow(proxy);
+      }
+    }
+
     async function testCorsProxy(proxy, options) {
       var opts = options || {};
       if (!proxy) return false;
@@ -8804,7 +8838,7 @@
 
       var requestUrl = normalized.url + (normalized.encode ? encodeURIComponent(ORION_API) : ORION_API);
       proxy._test = { state: 'testing', message: 'Testing...' };
-      if (!opts.skipRender) renderCorsProxySettingsUi();
+      if (!opts.skipRender) updateCorsProxyTestRow(proxy);
 
       var startedAt = Date.now();
       try {
@@ -8832,7 +8866,7 @@
       } finally {
         if (proxy._testAbort === testController) {
           proxy._testAbort = null;
-          if (!opts.skipRender) renderCorsProxySettingsUi();
+          if (!opts.skipRender) updateCorsProxyTestRow(proxy);
         }
       }
     }
@@ -8846,7 +8880,7 @@
 
       var runId = ++corsProxyTestRunId;
       isTestingAllCorsProxies = true;
-      renderCorsProxySettingsUi();
+      updateCorsProxyBatchControls();
       var snapshot = corsProxyDraft.slice();
       var passed = 0;
       var tested = 0;
@@ -8867,7 +8901,7 @@
       } finally {
         if (runId === corsProxyTestRunId) {
           isTestingAllCorsProxies = false;
-          renderCorsProxySettingsUi();
+          updateCorsProxyBatchControls();
         }
       }
 
@@ -8899,8 +8933,6 @@
       corsProxyDraft.forEach(function(proxy, idx) {
         var item = document.createElement('div');
         item.className = 'proxy-item';
-        if (proxy._test && proxy._test.state === 'success') item.classList.add('test-success');
-        if (proxy._test && proxy._test.state === 'error') item.classList.add('test-error');
 
         var top = document.createElement('div');
         top.className = 'proxy-item-top';
@@ -8914,9 +8946,7 @@
 
         var testBtn = document.createElement('button');
         testBtn.type = 'button';
-        testBtn.className = 'btn-secondary btn-small';
-        testBtn.textContent = proxy._test && proxy._test.state === 'testing' ? 'Testing...' : 'Test';
-        testBtn.disabled = isTestingAllCorsProxies || (proxy._test && proxy._test.state === 'testing');
+        testBtn.className = 'btn-secondary btn-small proxy-test-btn';
         testBtn.addEventListener('click', function() {
           testCorsProxy(proxy);
         });
@@ -8970,9 +9000,8 @@
         validationMessage.setAttribute('role', 'status');
         validationMessage.setAttribute('aria-live', 'polite');
         input.addEventListener('input', function() {
-          abortCorsProxyTest(proxy);
-          proxy._test = null;
           proxy.url = this.value;
+          invalidateCorsProxyTest(proxy);
           if (String(this.value || '').trim().length > 0) proxy._touched = true;
           refreshCorsProxyValidation(proxy, { force: false });
           applyProxyValidationToDom(proxy, input, validationMessage);
@@ -9010,9 +9039,8 @@
         encodeInput.id = encodeId;
         encodeInput.checked = !!proxy.encode;
         encodeInput.addEventListener('change', function() {
-          abortCorsProxyTest(proxy);
-          proxy._test = null;
           proxy.encode = this.checked;
+          invalidateCorsProxyTest(proxy);
           renderPreferredProxySelect();
           updateCorsProxyActionButtons();
         });
@@ -9038,14 +9066,7 @@
         var dot = document.createElement('span');
         dot.className = 'proxy-test-dot';
         status.appendChild(dot);
-        var statusText = document.createElement('span');
-        if (proxy._test && proxy._test.message) {
-          status.classList.add(proxy._test.state);
-          statusText.textContent = proxy._test.message;
-        } else {
-          statusText.textContent = 'Not tested';
-        }
-        status.appendChild(statusText);
+        status.appendChild(document.createElement('span'));
         statusField.appendChild(status);
         fields.appendChild(statusField);
 
@@ -9055,6 +9076,7 @@
         item.appendChild(top);
         item.appendChild(fields);
         container.appendChild(item);
+        updateCorsProxyTestRow(proxy);
       });
     }
 
