@@ -40,16 +40,11 @@ jobs:
       - name: Run unit and browser coverage gates
         run: npm test
 
-  deploy:
+  package:
     needs: test
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      artifact_name: ${{ steps.stage.outputs.artifact_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -63,16 +58,33 @@ jobs:
         env:
           ORION_BUILD_COMMIT: ${{ github.sha }}
         run: npm run sync:build-meta
-      - name: Configure Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - name: Stage runtime files
+        id: stage
         run: |
           mkdir -p .pages-dist
           cp index.html service-worker.js manifest.webmanifest build-meta.json favicon-16.png favicon-32.png icon-192.png icon-512.png icon-maskable.svg social-card.png LICENSE .pages-dist/
+          echo "artifact_name=github-pages-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
+          name: ${{ steps.stage.outputs.artifact_name }}
           path: .pages-dist
+
+  deploy:
+    needs: package
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        with:
+          artifact_name: ${{ needs.package.outputs.artifact_name }}
